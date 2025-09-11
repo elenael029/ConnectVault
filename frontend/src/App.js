@@ -1246,7 +1246,7 @@ const Offers = () => {
           <CardContent>
             {offers.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                No offers yet. Create your first offer to get started!
+                No promo links yet. Create your first promotional link to get started!
               </div>
             ) : (
               <div className="space-y-4">
