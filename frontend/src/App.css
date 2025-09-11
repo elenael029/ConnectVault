@@ -114,6 +114,35 @@ body {
 
 .hover\:text-navy-800:hover { color: var(--navy-800); }
 
+/* Custom button styles */
+.btn-navy {
+  background: var(--navy-600);
+  color: white;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.btn-navy:hover {
+  background: var(--navy-500);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.btn-gold {
+  background: var(--gold-500);
+  color: var(--navy-900);
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.btn-gold:hover {
+  background: var(--gold-600);
+  color: var(--navy-900);
+  transform: translateY(-1px);
+}
+
 /* Custom components */
 .gradient-navy {
   background: linear-gradient(135deg, var(--navy-600) 0%, var(--navy-800) 100%);
