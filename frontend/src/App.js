@@ -1241,7 +1241,7 @@ const Offers = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
-            <CardTitle>Your Offers</CardTitle>
+            <CardTitle>Your Promo Links</CardTitle>
           </CardHeader>
           <CardContent>
             {offers.length === 0 ? (
