@@ -1,0 +1,104 @@
+[
+  {
+    "test": "Health Check",
+    "success": true,
+    "message": "Health check passed",
+    "timestamp": "2025-09-11T20:58:43.512278+00:00",
+    "details": {
+      "response": {
+        "status": "ok"
+      },
+      "status_code": 200
+    }
+  },
+  {
+    "test": "User Registration",
+    "success": true,
+    "message": "User registered successfully",
+    "timestamp": "2025-09-11T20:58:43.815278+00:00",
+    "details": {
+      "response": {
+        "message": "Account created successfully. Please log in"
+      },
+      "status_code": 200
+    }
+  },
+  {
+    "test": "Duplicate Registration Prevention",
+    "success": true,
+    "message": "Correctly rejected duplicate registration",
+    "timestamp": "2025-09-11T20:58:43.874282+00:00",
+    "details": {
+      "response": {
+        "detail": "Username or email already exists"
+      },
+      "status_code": 400
+    }
+  },
+  {
+    "test": "User Login",
+    "success": true,
+    "message": "Login successful, JWT token received",
+    "timestamp": "2025-09-11T20:58:44.174237+00:00",
+    "details": {
+      "token_type": "bearer",
+      "token_length": 143,
+      "status_code": 200
+    }
+  },
+  {
+    "test": "Invalid Login Prevention",
+    "success": true,
+    "message": "Correctly rejected invalid credentials",
+    "timestamp": "2025-09-11T20:58:44.466839+00:00",
+    "details": {
+      "response": {
+        "detail": "Invalid username or password"
+      },
+      "status_code": 401
+    }
+  },
+  {
+    "test": "Dashboard Summary",
+    "success": true,
+    "message": "Dashboard summary retrieved successfully",
+    "timestamp": "2025-09-11T20:58:44.529607+00:00",
+    "details": {
+      "response": {
+        "total_contacts": 0,
+        "tasks_due_today": 0,
+        "active_promo_links": 0,
+        "commission_summary": {
+          "total_paid": 0,
+          "total_unpaid": 0
+        }
+      },
+      "status_code": 200,
+      "fields_present": [
+        "total_contacts",
+        "tasks_due_today",
+        "active_promo_links",
+        "commission_summary"
+      ]
+    }
+  },
+  {
+    "test": "Dashboard Summary Without Token",
+    "success": false,
+    "message": "Should have failed with 401, got 403",
+    "timestamp": "2025-09-11T20:58:44.587719+00:00",
+    "details": {
+      "response": "{\"detail\":\"Not authenticated\"}",
+      "status_code": 403
+    }
+  },
+  {
+    "test": "Dashboard Summary With Invalid Token",
+    "success": true,
+    "message": "Correctly rejected request with invalid token",
+    "timestamp": "2025-09-11T20:58:44.642940+00:00",
+    "details": {
+      "status_code": 401
+    }
+  }
+]
