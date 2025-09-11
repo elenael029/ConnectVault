@@ -201,12 +201,14 @@ const Layout = ({ children, title = "ConnectVault" }) => {
               <img 
                 src="https://customer-assets.emergentagent.com/job_connect-vault-crm/artifacts/sgfxttrw_Applogo.png" 
                 alt="ConnectVault" 
-                className="h-10 w-auto cursor-pointer"
+                className="h-12 w-auto cursor-pointer"
                 onClick={() => navigate('/dashboard')}
               />
               <div className="flex flex-col">
-                <h1 className="text-xl font-bold text-navy-900">ConnectVault Dashboard</h1>
-                {title !== "Dashboard" && (
+                <h1 className="text-2xl font-bold text-navy-900">
+                  {title === "ConnectVault Dashboard" ? "ConnectVault Dashboard" : "ConnectVault"}
+                </h1>
+                {title !== "ConnectVault Dashboard" && title !== "ConnectVault" && (
                   <span className="text-sm text-navy-600">{title}</span>
                 )}
               </div>
