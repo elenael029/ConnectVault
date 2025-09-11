@@ -422,10 +422,118 @@ async def update_settings(settings_update: SettingsUpdate, current_user: User = 
     else:
         raise HTTPException(status_code=500, detail="Failed to save settings")
 
-# Email integration endpoints
+# Email integration endpoints (Brevo)
+class TestEmail(BaseModel):
+    to: EmailStr
+    subject: str
+    text: str
+
+class EmailApiKey(BaseModel):
+    apiKey: str
+
+@api_router.get("/email/status")
+async def get_email_status():
+    """Get email service configuration status"""
+    settings = load_settings()
+    api_key = settings.get("email_integration", {}).get("brevo_api_key", "")
+    
+    return {
+        "provider": "brevo",
+        "configured": bool(api_key)
+    }
+
+@api_router.post("/email/key")
+async def save_email_key(email_key: EmailApiKey, current_user: User = Depends(get_current_user)):
+    """Save Brevo API key (admin only for security)"""
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required"
+        )
+    
+    settings = load_settings()
+    if "email_integration" not in settings:
+        settings["email_integration"] = {}
+    
+    # In production, encrypt this key
+    settings["email_integration"]["brevo_api_key"] = email_key.apiKey
+    
+    if save_settings(settings):
+        return {"message": "Email API key saved successfully"}
+    else:
+        raise HTTPException(status_code=500, detail="Failed to save API key")
+
+@api_router.post("/email/test")
+async def send_test_email(test_email: TestEmail, current_user: User = Depends(get_current_user)):
+    """Send test email via Brevo"""
+    settings = load_settings()
+    api_key = settings.get("email_integration", {}).get("brevo_api_key", "")
+    
+    if not api_key:
+        raise HTTPException(
+            status_code=400,
+            detail="Brevo API key not configured. Please configure it in Settings first."
+        )
+    
+    # Prepare Brevo API request
+    headers = {
+        "api-key": api_key,
+        "Content-Type": "application/json"
+    }
+    
+    payload = {
+        "sender": {
+            "name": "ConnectVault CRM",
+            "email": "noreply@connectvault.com"
+        },
+        "to": [
+            {
+                "email": test_email.to,
+                "name": "Test Recipient"
+            }
+        ],
+        "subject": test_email.subject,
+        "textContent": test_email.text
+    }
+    
+    try:
+        response = requests.post(
+            "https://api.brevo.com/v3/smtp/email",
+            headers=headers,
+            json=payload,
+            timeout=30
+        )
+        
+        if response.status_code in [200, 201]:
+            return {"message": "Test email sent successfully", "to": test_email.to}
+        elif response.status_code == 400:
+            error_data = response.json()
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid request: {error_data.get('message', 'Check your API key and email details')}"
+            )
+        elif response.status_code == 401:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid API key. Please check your Brevo API key in Settings."
+            )
+        else:
+            logging.error(f"Brevo API error: {response.status_code} - {response.text}")
+            raise HTTPException(
+                status_code=400,
+                detail="Failed to send email. Please check your API key and try again."
+            )
+    
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Brevo API request failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Email service temporarily unavailable. Please try again later."
+        )
+
 @api_router.post("/email/subscribe")
 async def subscribe_email(subscriber: EmailSubscriber, current_user: User = Depends(get_current_user)):
-    """Add subscriber to MailerLite"""
+    """Add subscriber to MailerLite (legacy endpoint)"""
     settings = load_settings()
     api_key = settings["email_integration"]["mailerlite_api_key"]
     
