@@ -1324,6 +1324,56 @@ const MarketingVault = () => {
       id: '3',
       subject: "Quick tip you can use today",
       body: "Here's one thing I always recommend: focus on ONE clear action at a time. Whether it's building a list, refining your pitch, or getting your offer out—clarity wins. If you need a tool to help keep things organized, here's what I use: [Your Link]."
+    },
+    {
+      id: '4',
+      subject: "Unlock Your Growth Potential",
+      body: "Hi [First Name],\nAre you ready to take your business to the next level? ConnectVault helps you organize leads, track tasks, and stay focused. Start today and see how much easier growth can be.\n[CTA Button: Get Started Now]"
+    },
+    {
+      id: '5',
+      subject: "Stop Losing Leads",
+      body: "Hello [First Name],\nEvery untracked lead is a lost opportunity. With ConnectVault, you'll never let a hot lead slip through the cracks again.\n[CTA Button: Claim Your Spot]"
+    },
+    {
+      id: '6',
+      subject: "Your Marketing Vault Awaits",
+      body: "Hi [First Name],\nWe've preloaded the Marketing Vault with swipes, scripts, and tools to help you sell faster. It's all waiting for you.\n[CTA Button: Access Now]"
+    },
+    {
+      id: '7',
+      subject: "Save Time, Close More",
+      body: "Hello [First Name],\nTired of wasting time on messy spreadsheets? Our system keeps you organized so you can focus on closing sales.\n[CTA Button: Try Free Today]"
+    },
+    {
+      id: '8',
+      subject: "Automate Your Follow-Ups",
+      body: "Hi [First Name],\nConsistency wins deals. Let ConnectVault automate your follow-ups while you focus on building relationships.\n[CTA Button: Activate Now]"
+    },
+    {
+      id: '9',
+      subject: "A CRM Made for Marketers",
+      body: "Hello [First Name],\nMost CRMs are built for corporations. ConnectVault was built for YOU — marketers, affiliates, and entrepreneurs.\n[CTA Button: Start Using It]"
+    },
+    {
+      id: '10',
+      subject: "Never Miss Another Task",
+      body: "Hi [First Name],\nYour to-do list is now your sales assistant. Track tasks, deadlines, and client notes all in one place.\n[CTA Button: Log In]"
+    },
+    {
+      id: '11',
+      subject: "The Easiest Way to Stay Organized",
+      body: "Hey [First Name],\nFinally, a system that doesn't feel overwhelming. ConnectVault keeps things simple and powerful.\n[CTA Button: See How It Works]"
+    },
+    {
+      id: '12',
+      subject: "Build Your Business Faster",
+      body: "Hello [First Name],\nWith preloaded resources and automation, you can launch and grow faster than ever before.\n[CTA Button: Join Today]"
+    },
+    {
+      id: '13',
+      subject: "Ready to Tap Into Your Next Level?",
+      body: "Hi [First Name],\nDon't overcomplicate success. ConnectVault gives you the clarity and tools to stay on track and scale up.\n[CTA Button: Get Started Now]"
     }
   ]);
 
