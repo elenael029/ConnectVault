@@ -45,14 +45,23 @@ const useAuth = () => {
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Initialize token from localStorage on app load
+    const storedToken = localStorage.getItem('token');
+    if (storedToken) {
+      setToken(storedToken);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+    }
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
-    setLoading(false);
   }, [token]);
 
   const login = async (username, password) => {
