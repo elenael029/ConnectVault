@@ -2034,7 +2034,7 @@ function App() {
               } />
               <Route path="/email" element={
                 <ProtectedRoute>
-                  <EmailSubscriber />
+                  <EmailMarketing />
                 </ProtectedRoute>
               } />
               <Route path="/settings" element={
