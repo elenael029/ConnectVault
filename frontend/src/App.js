@@ -1424,7 +1424,7 @@ const MarketingVault = () => {
     <Layout title="Marketing Vault">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <Button variant="outline" onClick={() => navigate('/dashboard')} className="mb-4">
+          <Button variant="outline" onClick={() => navigate('/dashboard')} className="mb-4 btn-gold">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
