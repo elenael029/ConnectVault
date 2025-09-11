@@ -409,7 +409,7 @@ const Layout = ({ children, title = "ConnectVault" }) => {
                 )}
               </div>
               <Button variant="outline" onClick={() => navigate('/settings')} aria-label="Settings">
-                <Settings className="h-4 w-4" />
+                <SettingsIcon className="h-4 w-4" />
               </Button>
               <Button variant="outline" onClick={logout} aria-label="Logout">
                 Logout
