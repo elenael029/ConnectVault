@@ -143,6 +143,47 @@ body {
   transform: translateY(-1px);
 }
 
+/* Dashboard specific button styles */
+.dashboard-btn {
+  height: auto;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: none;
+  min-height: 140px;
+}
+
+.dashboard-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-royal-blue {
+  background: #003366;
+  color: white;
+}
+
+.btn-royal-blue:hover {
+  background: #002952;
+  color: white;
+}
+
+.btn-polished-gold {
+  background: #FFD700;
+  color: #003366;
+}
+
+.btn-polished-gold:hover {
+  background: #e6c200;
+  color: #003366;
+}
+
 /* Custom components */
 .gradient-navy {
   background: linear-gradient(135deg, var(--navy-600) 0%, var(--navy-800) 100%);
