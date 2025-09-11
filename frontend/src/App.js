@@ -940,62 +940,76 @@ const EmailSubscriber = () => {
 const Settings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [settings, setLocalSettings] = useState({
-    branding: { app_name: "ConnectVault", logo_path: "" },
-    quick_access_links: {
-      chatgpt: "https://chatgpt.com/",
-      instagram: "https://instagram.com/",
-      tiktok: "https://tiktok.com/",
-      youtube: "https://youtube.com/",
-      facebook: "https://facebook.com/",
-      pinterest: "https://pinterest.com/"
-    },
-    email_integration: {
-      mailerlite_api_key: "",
-      default_group_id: ""
-    }
-  });
+  const [brevoApiKey, setBrevoApiKey] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchAdminSettings();
+    // Load saved API key from localStorage
+    const saved = localStorage.getItem('brevo-api-key');
+    if (saved) {
+      setBrevoApiKey(saved);
+    }
   }, []);
 
-  const fetchAdminSettings = async () => {
-    try {
-      const response = await axios.get(`${API}/settings/admin`);
-      setLocalSettings(response.data);
-    } catch (error) {
-      if (error.response?.status === 403) {
-        toast({
-          title: "Access Denied",
-          description: "Admin access required",
-          variant: "destructive",
-        });
-        navigate('/dashboard');
-      }
-    }
-  };
-
-  const handleSave = async () => {
-    setLoading(true);
-    try {
-      await axios.put(`${API}/settings`, settings);
-      toast({
-        title: "Success",
-        description: "Settings updated successfully",
-        variant: "default",
-      });
-    } catch (error) {
+  const handleSave = () => {
+    if (!brevoApiKey.trim()) {
       toast({
         title: "Error",
-        description: error.response?.data?.detail || "Failed to save settings",
+        description: "Please enter a valid Brevo API key",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
+      return;
     }
+
+    localStorage.setItem('brevo-api-key', brevoApiKey);
+    toast({
+      title: "Success",
+      description: "Brevo API key saved successfully",
+    });
   };
+
+  return (
+    <Layout title="Settings">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <Button variant="outline" onClick={() => navigate('/dashboard')} className="mb-4 btn-primary-navy">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+          <h2 className="text-3xl font-bold text-primary-navy">Settings</h2>
+          <p className="text-text-secondary">Configure your ConnectVault CRM</p>
+        </div>
+      </div>
+
+      <Card className="premium-card">
+        <CardHeader>
+          <CardTitle className="text-primary-navy">Email Integration (Brevo)</CardTitle>
+          <CardDescription>Configure your Brevo API key for email marketing</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-2">
+              Brevo API Key
+            </label>
+            <Input
+              type="password"
+              value={brevoApiKey}
+              onChange={(e) => setBrevoApiKey(e.target.value)}
+              placeholder="Enter your Brevo API key"
+              className="form-input"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Get your API key from your Brevo dashboard under API & Integration section
+            </p>
+          </div>
+          <Button onClick={handleSave} className="btn-primary-navy" disabled={loading}>
+            {loading ? 'Saving...' : 'Save API Key'}
+          </Button>
+        </CardContent>
+      </Card>
+    </Layout>
+  );
+};
 
   return (
     <Layout title="Settings">
