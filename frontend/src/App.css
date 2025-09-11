@@ -339,7 +339,67 @@ button:focus {
   margin-bottom: 2rem;
 }
 
+/* Premium dashboard styling */
+.dashboard-header {
+  background: linear-gradient(135deg, var(--navy-600) 0%, var(--navy-700) 100%);
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  padding: 2rem;
+  color: white;
+}
+
+.quick-actions-container {
+  background: var(--cream-100);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.action-button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.action-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced card styling */
+.premium-card {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid var(--navy-200);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.premium-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
 /* Responsive design */
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .crm-container {
+    padding: 1rem;
+  }
+  
+  .quick-actions-container {
+    padding: 1rem;
+  }
+  
+  .action-button {
+    padding: 1rem;
+  }
+}
+
 @media (max-width: 640px) {
   .dashboard-grid {
     grid-template-columns: 1fr;
