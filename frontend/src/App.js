@@ -143,6 +143,30 @@ const Layout = ({ children, title = "ConnectVault" }) => {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const [summary, setSummary] = useState(null);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([
+    {
+      id: '1',
+      type: 'task',
+      message: 'Follow up with John Doe',
+      time: '2 hours ago',
+      read: false
+    },
+    {
+      id: '2', 
+      type: 'commission',
+      message: 'New commission logged: $150',
+      time: '1 day ago',
+      read: false
+    },
+    {
+      id: '3',
+      type: 'task',
+      message: 'Weekly commission summary available',
+      time: '3 days ago',
+      read: true
+    }
+  ]);
 
   useEffect(() => {
     fetchDashboardSummary();
@@ -156,6 +180,16 @@ const Layout = ({ children, title = "ConnectVault" }) => {
       console.error('Failed to fetch dashboard summary:', error);
     }
   };
+
+  const markNotificationAsRead = (id) => {
+    setNotifications(prev => 
+      prev.map(notif => 
+        notif.id === id ? { ...notif, read: true } : notif
+      )
+    );
+  };
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-navy-50 to-navy-100">
