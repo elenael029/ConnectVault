@@ -3,9 +3,9 @@
 /* ConnectVault CRM - Updated Color Scheme */
 :root {
   /* Primary Navy */
-  --primary-navy: #0B2A4A;
-  --primary-navy-hover: #1A3B5C;
-  --primary-navy-light: #E8F1FB;
+  --primary-navy: #003366;
+  --primary-navy-hover: #004080;
+  --primary-navy-light: #E6F2FF;
   
   /* Secondary Gold */
   --secondary-gold: #FFD700;
@@ -17,8 +17,7 @@
   --text-primary: #1A202C;
   --text-secondary: #4A5568;
   --text-muted: #718096;
-  --bg-gradient-start: #F7FAFD;
-  --bg-gradient-end: #FFFFFF;
+  --bg-cream: #FAF0DE;
   
   /* Legacy colors for compatibility */
   --navy-50: #f8fafc;
