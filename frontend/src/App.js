@@ -205,32 +205,31 @@ const AuthProvider = ({ children }) => {
   );
 };
 
-// Logo Component
+// ConnectVault Logo Component
 const ConnectVaultLogo = ({ className = "" }) => {
   const { settings } = useSettings();
-  
-  // Check if logo file exists (in a real app, you'd check the server)
-  // For now, we'll use the text logo
-  const hasLogo = false; // settings.branding.logo_path && settings.branding.logo_path.length > 0;
-  
-  if (hasLogo) {
-    return (
-      <img
-        src={`/assets/logo/${settings.branding.logo_path}`}
-        alt={settings.branding.app_name}
-        className={`connectvault-logo ${className}`}
-        onError={(e) => {
-          // Fallback to text logo if image fails to load
-          e.target.style.display = 'none';
-          e.target.parentNode.querySelector('.text-logo-fallback').style.display = 'inline';
-        }}
-      />
-    );
-  }
+  const [logoExists, setLogoExists] = useState(false);
+
+  useEffect(() => {
+    // Check if logo.svg exists
+    const img = new Image();
+    img.onload = () => setLogoExists(true);
+    img.onerror = () => setLogoExists(false);
+    img.src = '/logo.svg';
+  }, []);
   
   return (
-    <div className={`connectvault-text-logo ${className}`}>
-      {settings.branding.app_name}
+    <div className={`flex items-center space-x-3 ${className}`}>
+      {logoExists && (
+        <img 
+          src="/logo.svg" 
+          alt="ConnectVault" 
+          className="connectvault-logo"
+        />
+      )}
+      <div className="connectvault-text-logo">
+        ConnectVault
+      </div>
     </div>
   );
 };
