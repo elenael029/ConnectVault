@@ -50,12 +50,26 @@ const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Initialize token from localStorage on app load
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
-      setToken(storedToken);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
-    }
-    setLoading(false);
+    const initializeAuth = async () => {
+      const storedToken = localStorage.getItem('token');
+      if (storedToken) {
+        setToken(storedToken);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+        
+        // Verify token is still valid by making a test request
+        try {
+          await axios.get(`${API}/dashboard/summary`);
+        } catch (error) {
+          // Token is invalid, clear it
+          localStorage.removeItem('token');
+          setToken(null);
+          delete axios.defaults.headers.common['Authorization'];
+        }
+      }
+      setLoading(false);
+    };
+    
+    initializeAuth();
   }, []);
 
   useEffect(() => {
