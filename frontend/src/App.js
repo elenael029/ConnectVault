@@ -1335,7 +1335,7 @@ const MarketingVault = () => {
         </div>
       </div>
 
-      <Tabs defaultValue="swipes" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="swipes">Swipe Vault</TabsTrigger>
           <TabsTrigger value="hooks">Hook Vault</TabsTrigger>
@@ -1345,26 +1345,76 @@ const MarketingVault = () => {
         <TabsContent value="swipes" className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">Email Swipes</h3>
-            <Button className="bg-navy-600 hover:bg-navy-700">
+            <Button 
+              onClick={() => setShowForms({ ...showForms, swipe: !showForms.swipe })}
+              className="bg-navy-600 hover:bg-navy-700"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Add Swipe
             </Button>
           </div>
-          {swipeVault.map((swipe, index) => (
-            <Card key={index}>
+
+          {showForms.swipe && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Add New Email Swipe</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSwipeSubmit} className="space-y-4">
+                  <Input
+                    placeholder="Email Subject"
+                    value={swipeFormData.subject}
+                    onChange={(e) => setSwipeFormData({...swipeFormData, subject: e.target.value})}
+                    required
+                  />
+                  <Textarea
+                    placeholder="Email Body"
+                    value={swipeFormData.body}
+                    onChange={(e) => setSwipeFormData({...swipeFormData, body: e.target.value})}
+                    required
+                    rows={4}
+                  />
+                  <div className="flex space-x-2">
+                    <Button type="submit" className="bg-navy-600 hover:bg-navy-700">
+                      Add Swipe
+                    </Button>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setShowForms({ ...showForms, swipe: false })}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          )}
+
+          {swipeVault.map((swipe) => (
+            <Card key={swipe.id}>
               <CardContent className="p-4">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <p className="font-medium mb-2">Subject: {swipe.subject}</p>
                     <p className="text-sm text-gray-600">{swipe.body}</p>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => copyToClipboard(`Subject: ${swipe.subject}\n\n${swipe.body}`)}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => copyToClipboard(`Subject: ${swipe.subject}\n\n${swipe.body}`)}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => deleteItem(swipe.id, 'swipe')}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -1374,23 +1424,67 @@ const MarketingVault = () => {
         <TabsContent value="hooks" className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">Marketing Hooks</h3>
-            <Button className="bg-navy-600 hover:bg-navy-700">
+            <Button 
+              onClick={() => setShowForms({ ...showForms, hook: !showForms.hook })}
+              className="bg-navy-600 hover:bg-navy-700"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Add Hook
             </Button>
           </div>
-          {hookVault.map((hook, index) => (
-            <Card key={index}>
+
+          {showForms.hook && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Add New Marketing Hook</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleHookSubmit} className="space-y-4">
+                  <Textarea
+                    placeholder="Enter your marketing hook..."
+                    value={hookFormData.text}
+                    onChange={(e) => setHookFormData({text: e.target.value})}
+                    required
+                    rows={2}
+                  />
+                  <div className="flex space-x-2">
+                    <Button type="submit" className="bg-navy-600 hover:bg-navy-700">
+                      Add Hook
+                    </Button>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setShowForms({ ...showForms, hook: false })}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          )}
+
+          {hookVault.map((hook) => (
+            <Card key={hook.id}>
               <CardContent className="p-4">
                 <div className="flex justify-between items-center">
-                  <p className="flex-1">{hook}</p>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => copyToClipboard(hook)}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
+                  <p className="flex-1">{hook.text}</p>
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => copyToClipboard(hook.text)}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => deleteItem(hook.id, 'hook')}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -1400,23 +1494,67 @@ const MarketingVault = () => {
         <TabsContent value="prompts" className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">ChatGPT Prompts</h3>
-            <Button className="bg-navy-600 hover:bg-navy-700">
+            <Button 
+              onClick={() => setShowForms({ ...showForms, prompt: !showForms.prompt })}
+              className="bg-navy-600 hover:bg-navy-700"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Add Prompt
             </Button>
           </div>
-          {promptVault.map((prompt, index) => (
-            <Card key={index}>
+
+          {showForms.prompt && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Add New ChatGPT Prompt</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handlePromptSubmit} className="space-y-4">
+                  <Textarea
+                    placeholder="Enter your ChatGPT prompt..."
+                    value={promptFormData.text}
+                    onChange={(e) => setPromptFormData({text: e.target.value})}
+                    required
+                    rows={3}
+                  />
+                  <div className="flex space-x-2">
+                    <Button type="submit" className="bg-navy-600 hover:bg-navy-700">
+                      Add Prompt
+                    </Button>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setShowForms({ ...showForms, prompt: false })}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          )}
+
+          {promptVault.map((prompt) => (
+            <Card key={prompt.id}>
               <CardContent className="p-4">
                 <div className="flex justify-between items-center">
-                  <p className="flex-1">{prompt}</p>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => copyToClipboard(prompt)}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
+                  <p className="flex-1">{prompt.text}</p>
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => copyToClipboard(prompt.text)}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => deleteItem(prompt.id, 'prompt')}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
