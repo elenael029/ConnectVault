@@ -1897,7 +1897,27 @@ const MarketingVault = () => {
   const [allContent, setAllContent] = useState([]);
   const [activeTab, setActiveTab] = useState('emails');
   const [loading, setLoading] = useState(true);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingSwipe, setEditingSwipe] = useState(null);
+  const [uploadData, setUploadData] = useState({
+    file: null,
+    pasteText: '',
+    previewItems: [],
+    validCount: 0,
+    duplicateCount: 0,
+    invalidCount: 0
+  });
+  const [editFormData, setEditFormData] = useState({
+    title: '',
+    subject: '',
+    body: '',
+    tags: '',
+    category: '',
+    purpose: ''
+  });
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     loadMarketingVault();
@@ -1928,13 +1948,337 @@ const MarketingVault = () => {
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
-      // You could add a toast here
       console.log('Copied to clipboard');
     });
   };
 
   const getContentByType = (type) => {
     return allContent.filter(item => item.type === type);
+  };
+
+  // Generate hash for deduplication
+  const generateHash = (title, subject) => {
+    return btoa(title.toLowerCase().trim() + '|' + subject.toLowerCase().trim()).replace(/[^a-zA-Z0-9]/g, '');
+  };
+
+  // Parse different file formats
+  const parseImportData = (content, filename = '') => {
+    const results = {
+      items: [],
+      valid: 0,
+      invalid: 0,
+      duplicates: 0
+    };
+
+    try {
+      if (filename.endsWith('.json') || content.trim().startsWith('[') || content.trim().startsWith('{')) {
+        // JSON format
+        const jsonData = JSON.parse(content);
+        const items = Array.isArray(jsonData) ? jsonData : [jsonData];
+        
+        items.forEach(item => {
+          if (item.title && item.subject && item.body) {
+            results.items.push({
+              title: item.title,
+              subject: item.subject,
+              body: item.body,
+              tags: item.tags || '',
+              category: item.category || '',
+              purpose: item.purpose || '',
+              source: item.source || 'import'
+            });
+            results.valid++;
+          } else {
+            results.invalid++;
+          }
+        });
+      } else if (filename.endsWith('.csv') || content.includes(',')) {
+        // CSV format
+        const lines = content.split('\n').filter(line => line.trim());
+        if (lines.length < 2) return results;
+        
+        const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+        const titleIdx = headers.indexOf('title');
+        const subjectIdx = headers.indexOf('subject');
+        const bodyIdx = headers.indexOf('body');
+        const tagsIdx = headers.indexOf('tags');
+        const categoryIdx = headers.indexOf('category');
+        const purposeIdx = headers.indexOf('purpose');
+        const sourceIdx = headers.indexOf('source');
+        
+        if (titleIdx === -1 || subjectIdx === -1 || bodyIdx === -1) {
+          results.invalid = lines.length - 1;
+          return results;
+        }
+        
+        for (let i = 1; i < lines.length; i++) {
+          const values = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+          if (values.length >= 3 && values[titleIdx] && values[subjectIdx] && values[bodyIdx]) {
+            results.items.push({
+              title: values[titleIdx],
+              subject: values[subjectIdx],
+              body: values[bodyIdx],
+              tags: tagsIdx >= 0 ? values[tagsIdx] || '' : '',
+              category: categoryIdx >= 0 ? values[categoryIdx] || '' : '',
+              purpose: purposeIdx >= 0 ? values[purposeIdx] || '' : '',
+              source: sourceIdx >= 0 ? values[sourceIdx] || 'import' : 'import'
+            });
+            results.valid++;
+          } else {
+            results.invalid++;
+          }
+        }
+      } else {
+        // TXT/MD format
+        const blocks = content.split(/\n---\n|\n##/);
+        
+        blocks.forEach(block => {
+          const lines = block.trim().split('\n');
+          const item = { tags: '', category: '', purpose: '', source: 'import' };
+          let bodyStartIndex = -1;
+          
+          lines.forEach((line, index) => {
+            const colonIndex = line.indexOf(':');
+            if (colonIndex > 0) {
+              const key = line.substring(0, colonIndex).trim().toLowerCase();
+              const value = line.substring(colonIndex + 1).trim();
+              
+              if (key === 'title') item.title = value;
+              else if (key === 'subject') item.subject = value;
+              else if (key === 'tags') item.tags = value;
+              else if (key === 'category') item.category = value;
+              else if (key === 'purpose') item.purpose = value;
+              else if (key === 'source') item.source = value;
+              else if (key === 'body') bodyStartIndex = index + 1;
+            }
+          });
+          
+          if (bodyStartIndex >= 0) {
+            item.body = lines.slice(bodyStartIndex).join('\n').trim();
+          }
+          
+          if (item.title && item.subject && item.body) {
+            results.items.push(item);
+            results.valid++;
+          } else {
+            results.invalid++;
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Parse error:', error);
+      results.invalid = 1;
+    }
+
+    // Check for duplicates
+    const existingEmails = getContentByType('email');
+    const existingHashes = existingEmails.map(email => generateHash(email.title, email.subject));
+    
+    results.items = results.items.filter(item => {
+      const hash = generateHash(item.title, item.subject);
+      if (existingHashes.includes(hash)) {
+        results.duplicates++;
+        results.valid--;
+        return false;
+      }
+      existingHashes.push(hash);
+      return true;
+    });
+
+    return results;
+  };
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target.result;
+      const parsed = parseImportData(content, file.name);
+      
+      setUploadData({
+        file,
+        pasteText: '',
+        previewItems: parsed.items,
+        validCount: parsed.valid,
+        duplicateCount: parsed.duplicates,
+        invalidCount: parsed.invalid
+      });
+    };
+    reader.readAsText(file);
+  };
+
+  const handlePasteUpload = (pasteText) => {
+    if (!pasteText.trim()) {
+      setUploadData(prev => ({
+        ...prev,
+        pasteText,
+        previewItems: [],
+        validCount: 0,
+        duplicateCount: 0,
+        invalidCount: 0
+      }));
+      return;
+    }
+
+    const parsed = parseImportData(pasteText);
+    setUploadData({
+      file: null,
+      pasteText,
+      previewItems: parsed.items,
+      validCount: parsed.valid,
+      duplicateCount: parsed.duplicates,
+      invalidCount: parsed.invalid
+    });
+  };
+
+  const handleImportSwipes = () => {
+    if (uploadData.previewItems.length === 0) return;
+
+    const newSwipes = uploadData.previewItems.map((item, index) => ({
+      id: `import-${Date.now()}-${index}`,
+      type: 'email',
+      title: item.title,
+      subject: item.subject,
+      body: item.body,
+      goal: item.purpose || 'Imported swipe',
+      when_to_send: item.category || 'As needed',
+      tags: item.tags,
+      category: item.category,
+      purpose: item.purpose,
+      source: item.source
+    }));
+
+    const updatedContent = [...allContent, ...newSwipes];
+    setAllContent(updatedContent);
+    localStorage.setItem('marketing-vault', JSON.stringify(updatedContent));
+
+    toast({
+      title: "Import Successful",
+      description: `Imported ${uploadData.validCount} swipes${uploadData.duplicateCount > 0 ? `. Skipped ${uploadData.duplicateCount} duplicates` : ''}`,
+    });
+
+    setShowUploadModal(false);
+    setUploadData({
+      file: null,
+      pasteText: '',
+      previewItems: [],
+      validCount: 0,
+      duplicateCount: 0,
+      invalidCount: 0
+    });
+  };
+
+  const handleEditSwipe = (swipe) => {
+    setEditingSwipe(swipe);
+    setEditFormData({
+      title: swipe.title,
+      subject: swipe.subject,
+      body: swipe.body,
+      tags: swipe.tags || '',
+      category: swipe.category || swipe.when_to_send || '',
+      purpose: swipe.purpose || swipe.goal || ''
+    });
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingSwipe) return;
+
+    const updatedContent = allContent.map(item => 
+      item.id === editingSwipe.id 
+        ? {
+            ...item,
+            title: editFormData.title,
+            subject: editFormData.subject,
+            body: editFormData.body,
+            tags: editFormData.tags,
+            category: editFormData.category,
+            purpose: editFormData.purpose,
+            goal: editFormData.purpose || item.goal,
+            when_to_send: editFormData.category || item.when_to_send
+          }
+        : item
+    );
+
+    setAllContent(updatedContent);
+    localStorage.setItem('marketing-vault', JSON.stringify(updatedContent));
+
+    toast({
+      title: "Success",
+      description: "Swipe updated successfully",
+    });
+
+    setShowEditModal(false);
+    setEditingSwipe(null);
+  };
+
+  const handleDeleteSwipe = (swipe) => {
+    if (window.confirm(`Delete "${swipe.title}"? This cannot be undone.`)) {
+      const updatedContent = allContent.filter(item => item.id !== swipe.id);
+      setAllContent(updatedContent);
+      localStorage.setItem('marketing-vault', JSON.stringify(updatedContent));
+
+      toast({
+        title: "Deleted",
+        description: "Swipe deleted successfully",
+      });
+    }
+  };
+
+  const handleExport = (format) => {
+    const emailSwipes = getContentByType('email');
+    const timestamp = new Date().toISOString().split('T')[0];
+    
+    if (format === 'csv') {
+      const headers = ['Title', 'Subject', 'Body', 'Tags', 'Category', 'Purpose', 'Goal', 'When to Send'];
+      const csvContent = [
+        headers.join(','),
+        ...emailSwipes.map(swipe => [
+          `"${swipe.title}"`,
+          `"${swipe.subject}"`,
+          `"${swipe.body.replace(/"/g, '""')}"`,
+          `"${swipe.tags || ''}"`,
+          `"${swipe.category || swipe.when_to_send || ''}"`,
+          `"${swipe.purpose || swipe.goal || ''}"`,
+          `"${swipe.goal || ''}"`,
+          `"${swipe.when_to_send || ''}"`
+        ].join(','))
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `marketing_swipes_${timestamp}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } else if (format === 'json') {
+      const jsonContent = JSON.stringify(emailSwipes.map(swipe => ({
+        title: swipe.title,
+        subject: swipe.subject,
+        body: swipe.body,
+        tags: swipe.tags || '',
+        category: swipe.category || swipe.when_to_send || '',
+        purpose: swipe.purpose || swipe.goal || '',
+        goal: swipe.goal || '',
+        when_to_send: swipe.when_to_send || ''
+      })), null, 2);
+
+      const blob = new Blob([jsonContent], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `marketing_swipes_${timestamp}.json`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }
+
+    toast({
+      title: "Export Successful",
+      description: `Downloaded ${emailSwipes.length} swipes as ${format.toUpperCase()}`,
+    });
   };
 
   const renderEmails = () => {
@@ -1951,16 +2295,37 @@ const MarketingVault = () => {
                   <div className="flex flex-wrap gap-2 mt-2">
                     <Badge variant="outline">{template.goal}</Badge>
                     <Badge variant="secondary">{template.when_to_send}</Badge>
+                    {template.tags && (
+                      <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                        {template.tags}
+                      </Badge>
+                    )}
                   </div>
                 </div>
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => copyToClipboard(template.subject + '\n\n' + template.body)}
-                >
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copy
-                </Button>
+                <div className="flex space-x-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => handleEditSwipe(template)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => copyToClipboard(template.subject + '\n\n' + template.body)}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => handleDeleteSwipe(template)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -1977,6 +2342,7 @@ const MarketingVault = () => {
                 </div>
                 <div className="text-xs text-gray-500">
                   <strong>Goal:</strong> {template.goal} | <strong>When to send:</strong> {template.when_to_send}
+                  {template.source && <span> | <strong>Source:</strong> {template.source}</span>}
                 </div>
               </div>
             </CardContent>
@@ -2060,34 +2426,244 @@ const MarketingVault = () => {
       ) : (
         <div>
           {/* Tabs */}
-          <div className="flex space-x-1 mb-6">
-            <Button
-              variant={activeTab === 'emails' ? 'default' : 'outline'}
-              onClick={() => setActiveTab('emails')}
-              className={activeTab === 'emails' ? 'btn-primary-navy' : ''}
-            >
-              Email Swipes ({getContentByType('email').length})
-            </Button>
-            <Button
-              variant={activeTab === 'hooks' ? 'default' : 'outline'}
-              onClick={() => setActiveTab('hooks')}
-              className={activeTab === 'hooks' ? 'btn-primary-navy' : ''}
-            >
-              Hooks ({getContentByType('hook').length})
-            </Button>
-            <Button
-              variant={activeTab === 'prompts' ? 'default' : 'outline'}
-              onClick={() => setActiveTab('prompts')}
-              className={activeTab === 'prompts' ? 'btn-primary-navy' : ''}
-            >
-              ChatGPT Prompts ({getContentByType('prompt').length})
-            </Button>
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex space-x-1">
+              <Button
+                variant={activeTab === 'emails' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('emails')}
+                className={activeTab === 'emails' ? 'btn-primary-navy' : ''}
+              >
+                Email Swipes ({getContentByType('email').length})
+              </Button>
+              <Button
+                variant={activeTab === 'hooks' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('hooks')}
+                className={activeTab === 'hooks' ? 'btn-primary-navy' : ''}
+              >
+                Hooks ({getContentByType('hook').length})
+              </Button>
+              <Button
+                variant={activeTab === 'prompts' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('prompts')}
+                className={activeTab === 'prompts' ? 'btn-primary-navy' : ''}
+              >
+                ChatGPT Prompts ({getContentByType('prompt').length})
+              </Button>
+            </div>
+
+            {/* Email Swipes Tab Actions */}
+            {activeTab === 'emails' && (
+              <div className="flex space-x-2">
+                <Button 
+                  onClick={() => setShowUploadModal(true)}
+                  className="btn-primary-navy"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Swipes
+                </Button>
+                <div className="relative">
+                  <select
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        handleExport(e.target.value);
+                        e.target.value = '';
+                      }
+                    }}
+                    className="btn-outline-navy appearance-none bg-white border border-gray-300 rounded px-3 py-2 text-sm"
+                  >
+                    <option value="">Export</option>
+                    <option value="csv">Download as CSV</option>
+                    <option value="json">Download as JSON</option>
+                  </select>
+                  <Download className="h-4 w-4 absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none" />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Content */}
           {activeTab === 'emails' && renderEmails()}
           {activeTab === 'hooks' && renderHooks()}
           {activeTab === 'prompts' && renderPrompts()}
+        </div>
+      )}
+
+      {/* Upload Modal */}
+      {showUploadModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto premium-card">
+            <CardHeader>
+              <CardTitle className="text-primary-navy">Upload Email Swipes</CardTitle>
+              <CardDescription>Import email templates from files or paste content</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* File Upload */}
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Upload File</label>
+                <input
+                  type="file"
+                  accept=".csv,.json,.txt,.md"
+                  onChange={handleFileUpload}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
+                <p className="text-xs text-gray-500 mt-1">Supported: CSV, JSON, TXT, MD</p>
+              </div>
+
+              {/* Paste Area */}
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Or Paste Content</label>
+                <Textarea
+                  value={uploadData.pasteText}
+                  onChange={(e) => handlePasteUpload(e.target.value)}
+                  placeholder="Paste your email templates here..."
+                  className="form-input h-32"
+                />
+              </div>
+
+              {/* Helper Text */}
+              <div className="bg-blue-50 p-4 rounded">
+                <h4 className="font-semibold text-sm mb-2">Supported Formats:</h4>
+                <div className="text-xs text-gray-600 space-y-1">
+                  <p><strong>CSV:</strong> Headers: title, subject, body, tags, category, purpose</p>
+                  <p><strong>JSON:</strong> Array of objects with same properties</p>
+                  <p><strong>TXT/MD:</strong> Blocks separated by "---" or "##" with key:value pairs</p>
+                </div>
+              </div>
+
+              {/* Preview */}
+              {uploadData.previewItems.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-sm mb-2">Preview ({uploadData.validCount} valid, {uploadData.duplicateCount} duplicates, {uploadData.invalidCount} invalid)</h4>
+                  <div className="max-h-64 overflow-y-auto border rounded">
+                    <table className="w-full text-xs">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="p-2 text-left">Title</th>
+                          <th className="p-2 text-left">Subject</th>
+                          <th className="p-2 text-left">Tags</th>
+                          <th className="p-2 text-left">Category</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {uploadData.previewItems.slice(0, 10).map((item, index) => (
+                          <tr key={index} className="border-t">
+                            <td className="p-2">{item.title}</td>
+                            <td className="p-2">{item.subject}</td>
+                            <td className="p-2">{item.tags}</td>
+                            <td className="p-2">{item.category}</td>
+                          </tr>
+                        ))}
+                        {uploadData.previewItems.length > 10 && (
+                          <tr className="border-t">
+                            <td colSpan="4" className="p-2 text-center text-gray-500">
+                              ...and {uploadData.previewItems.length - 10} more
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex justify-between">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowUploadModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleImportSwipes}
+                  disabled={uploadData.validCount === 0}
+                  className="btn-primary-navy"
+                >
+                  Import {uploadData.validCount} Swipes
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto premium-card">
+            <CardHeader>
+              <CardTitle className="text-primary-navy">Edit Email Swipe</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Title *</label>
+                <Input
+                  value={editFormData.title}
+                  onChange={(e) => setEditFormData({...editFormData, title: e.target.value})}
+                  className="form-input"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Subject *</label>
+                <Input
+                  value={editFormData.subject}
+                  onChange={(e) => setEditFormData({...editFormData, subject: e.target.value})}
+                  className="form-input"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Body *</label>
+                <Textarea
+                  value={editFormData.body}
+                  onChange={(e) => setEditFormData({...editFormData, body: e.target.value})}
+                  className="form-input h-32"
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-2">Tags</label>
+                  <Input
+                    value={editFormData.tags}
+                    onChange={(e) => setEditFormData({...editFormData, tags: e.target.value})}
+                    placeholder="tag1, tag2"
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-2">Category</label>
+                  <Input
+                    value={editFormData.category}
+                    onChange={(e) => setEditFormData({...editFormData, category: e.target.value})}
+                    placeholder="Launch, Nurture, etc."
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-2">Purpose</label>
+                  <Input
+                    value={editFormData.purpose}
+                    onChange={(e) => setEditFormData({...editFormData, purpose: e.target.value})}
+                    placeholder="Brief description"
+                    className="form-input"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowEditModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleSaveEdit}
+                  className="btn-primary-navy"
+                >
+                  Save Changes
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
     </Layout>
