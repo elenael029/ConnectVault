@@ -1,0 +1,82 @@
+[
+  {
+    "id": "welcome-1",
+    "title": "Welcome Email",
+    "goal": "Welcome new subscribers and set expectations",
+    "when_to_send": "Immediately after signup",
+    "subject": "Welcome to {{company_name}}, {{first_name}}!",
+    "body": "Hi {{first_name}},\n\nWelcome to {{company_name}}! We're thrilled to have you join our community.\n\nHere's what you can expect from us:\n• Weekly tips and insights\n• Exclusive offers just for subscribers\n• First access to our latest products\n\nTo get started, here's a special welcome gift: [LINK]\n\nIf you have any questions, just reply to this email.\n\nBest regards,\n{{sender_name}}\n\nP.S. Make sure to add our email to your contacts so you never miss an update!"
+  },
+  {
+    "id": "nurture-1",
+    "title": "Nurture Email #1 - Value Introduction",
+    "goal": "Provide immediate value and build trust",
+    "when_to_send": "2 days after welcome email",
+    "subject": "Here's your first exclusive tip, {{first_name}}",
+    "body": "Hi {{first_name}},\n\nI hope you're settling in well! As promised, here's your first exclusive tip:\n\n[MAIN TIP/VALUE CONTENT]\n\nThis simple strategy has helped thousands of our subscribers achieve [SPECIFIC RESULT].\n\nTry it out and let me know how it goes - I read every reply!\n\nMore valuable content coming your way soon.\n\nBest,\n{{sender_name}}\n\nP.S. Have a specific question? Just hit reply - I love hearing from our community!"
+  },
+  {
+    "id": "nurture-2",
+    "title": "Nurture Email #2 - Social Proof",
+    "goal": "Build credibility through social proof and testimonials",
+    "when_to_send": "5 days after welcome email",
+    "subject": "{{first_name}}, see what others are saying...",
+    "body": "Hi {{first_name}},\n\nI wanted to share something exciting with you.\n\nJust yesterday, I received this message from {{customer_name}}:\n\n\"[TESTIMONIAL CONTENT]\"\n\nThis is exactly why I'm so passionate about what we do here at {{company_name}}.\n\nResults like this aren't uncommon. Here are a few more quick wins from our community:\n\n• [SUCCESS STORY 1]\n• [SUCCESS STORY 2]\n• [SUCCESS STORY 3]\n\nYour success story could be next!\n\nCheering you on,\n{{sender_name}}"
+  },
+  {
+    "id": "nurture-3",
+    "title": "Nurture Email #3 - Educational Content",
+    "goal": "Provide educational value and position as expert",
+    "when_to_send": "8 days after welcome email",
+    "subject": "The #1 mistake I see people make...",
+    "body": "Hi {{first_name}},\n\nAfter helping thousands of people, I've noticed one mistake that comes up again and again:\n\n[COMMON MISTAKE]\n\nHere's why this happens and how to avoid it:\n\n[EXPLANATION AND SOLUTION]\n\nThe good news? Once you know about this, it's easy to avoid.\n\nHere's a quick checklist to make sure you're on the right track:\n\n✓ [CHECKPOINT 1]\n✓ [CHECKPOINT 2]\n✓ [CHECKPOINT 3]\n\nRemember, small improvements lead to big results over time.\n\nKeep moving forward!\n{{sender_name}}"
+  },
+  {
+    "id": "nurture-4",
+    "title": "Nurture Email #4 - Behind the Scenes",
+    "goal": "Build personal connection and trust",
+    "when_to_send": "12 days after welcome email",
+    "subject": "{{first_name}}, here's my story...",
+    "body": "Hi {{first_name}},\n\nI wanted to take a moment to share my story with you.\n\n[PERSONAL BACKSTORY - STRUGGLE]\n\nThat's when I discovered [SOLUTION/METHOD].\n\nFast forward to today:\n[CURRENT SUCCESS/RESULTS]\n\nI'm sharing this because I know many of you are facing similar challenges.\n\nThe truth is, success isn't about being perfect. It's about:\n\n• Taking consistent action\n• Learning from setbacks\n• Never giving up on your goals\n\nI believe in you, {{first_name}}. You've got this!\n\nYour friend,\n{{sender_name}}\n\nP.S. What's your biggest challenge right now? Hit reply and let me know - I read every email!"
+  },
+  {
+    "id": "reengagement-1",
+    "title": "Re-engagement Email",
+    "goal": "Win back inactive subscribers",
+    "when_to_send": "When subscriber hasn't opened emails in 30+ days",
+    "subject": "{{first_name}}, I miss you...",
+    "body": "Hi {{first_name}},\n\nI noticed you haven't been opening my emails lately.\n\nI get it - inboxes get overwhelming, and priorities change.\n\nBut before you go, I wanted to ask:\n\nWhat would make my emails more valuable to you?\n\n• More practical tips?\n• Behind-the-scenes content?\n• Case studies and examples?\n• Something else entirely?\n\nJust hit reply and let me know, or click here to update your preferences: [PREFERENCES LINK]\n\nIf you're ready to part ways, I understand. You can unsubscribe here: [UNSUBSCRIBE LINK]\n\nNo hard feelings - I only want to send emails you find valuable.\n\nHoping to earn back your attention,\n{{sender_name}}"
+  },
+  {
+    "id": "flash-offer-1",
+    "title": "Flash Offer Email",
+    "goal": "Create urgency for limited-time offers",
+    "when_to_send": "During promotional campaigns",
+    "subject": "⏰ 24 hours left: {{offer_name}} ({{discount}}% off)",
+    "body": "Hi {{first_name}},\n\nQuick reminder - you have less than 24 hours to grab {{offer_name}} at {{discount}}% off.\n\nHere's what you get:\n\n✅ [BENEFIT 1]\n✅ [BENEFIT 2]\n✅ [BENEFIT 3]\n✅ [BONUS]\n\nRegular price: ${{regular_price}}\nYour price: ${{sale_price}} (Save ${{savings}}!)\n\n[GET IT NOW BUTTON]\n\nThis offer expires at midnight tonight.\n\nAfter that, it goes back to full price.\n\nDon't wait - grab your copy now!\n\n{{sender_name}}\n\nP.S. Have questions? Just reply to this email - I'm here to help!"
+  },
+  {
+    "id": "testimonial-ask-1",
+    "title": "Testimonial Request Email",
+    "goal": "Request testimonials from satisfied customers",
+    "when_to_send": "After positive customer interaction or milestone",
+    "subject": "Quick favor, {{first_name}}?",
+    "body": "Hi {{first_name}},\n\nI hope you're loving [PRODUCT/SERVICE]!\n\nI have a quick favor to ask.\n\nWould you mind sharing a brief testimonial about your experience?\n\nIt would mean the world to me and help other people discover how [PRODUCT/SERVICE] can help them too.\n\nJust reply to this email with:\n\n• What challenge were you facing?\n• How has [PRODUCT/SERVICE] helped?\n• What would you tell someone considering it?\n\nI'll take care of the rest!\n\nIf you're happy to share, I might feature your testimonial on our website and in future emails (with your permission, of course).\n\nThanks so much for considering it!\n\n{{sender_name}}\n\nP.S. If you're not completely satisfied, please let me know how I can make it right!"
+  },
+  {
+    "id": "abandoned-lead-1",
+    "title": "Abandoned Lead Follow-up",
+    "goal": "Re-engage leads who didn't complete signup/purchase",
+    "when_to_send": "When someone starts but doesn't complete a process",
+    "subject": "Did you forget something, {{first_name}}?",
+    "body": "Hi {{first_name}},\n\nI noticed you were checking out [PRODUCT/SERVICE] earlier but didn't complete your order.\n\nNo worries - it happens to the best of us!\n\nI wanted to make sure you didn't run into any technical issues.\n\nYour cart is still saved with:\n[CART CONTENTS]\n\nTotal: ${{total}}\n\n[COMPLETE ORDER BUTTON]\n\nIf you have any questions or concerns, just reply to this email.\n\nI'm here to help!\n\nAlso, if you're on the fence, here's what recent customers are saying:\n\n\"[TESTIMONIAL]\"\n\n- {{customer_name}}\n\nReady to join them?\n\n{{sender_name}}\n\nP.S. This cart will expire in 24 hours, so don't wait too long!"
+  },
+  {
+    "id": "thankyou-referral-1",
+    "title": "Thank You & Referral Email",
+    "goal": "Thank customers and encourage referrals",
+    "when_to_send": "After purchase completion or milestone achievement",
+    "subject": "Thank you, {{first_name}}! + A special request...",
+    "body": "Hi {{first_name}},\n\nThank you so much for your recent purchase of [PRODUCT/SERVICE]!\n\nI'm genuinely excited for you to dive in and see the results.\n\nIf you have any questions as you get started, just reply to this email. I'm here to help!\n\nNow, I have a small favor to ask...\n\nIf you know anyone who might benefit from [PRODUCT/SERVICE], would you mind sharing it with them?\n\nAs a thank you, I'll give you [REFERRAL REWARD] for each person who purchases using your link:\n\n[REFERRAL LINK]\n\nYour friends get [FRIEND BENEFIT], and you get [YOUR BENEFIT].\n\nEveryone wins! \n\nThanks again for your trust and support.\n\n{{sender_name}}\n\nP.S. Don't forget to join our private community where you can ask questions and share wins: [COMMUNITY LINK]"
+  }
+]
