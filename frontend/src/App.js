@@ -1657,7 +1657,8 @@ const PromoLinks = () => {
 };
 
 const MarketingVault = () => {
-  const [templates, setTemplates] = useState([]);
+  const [allContent, setAllContent] = useState([]);
+  const [activeTab, setActiveTab] = useState('emails');
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -1667,7 +1668,7 @@ const MarketingVault = () => {
 
   const loadMarketingVault = async () => {
     try {
-      // Check if we have templates in localStorage
+      // Check if we have content in localStorage
       let stored = localStorage.getItem('marketing-vault');
       
       if (!stored) {
@@ -1675,14 +1676,14 @@ const MarketingVault = () => {
         const response = await fetch('/marketing_vault.json');
         const seedData = await response.json();
         localStorage.setItem('marketing-vault', JSON.stringify(seedData));
-        setTemplates(seedData);
+        setAllContent(seedData);
       } else {
-        setTemplates(JSON.parse(stored));
+        setAllContent(JSON.parse(stored));
       }
     } catch (error) {
       console.error('Error loading marketing vault:', error);
       // Fallback to empty array if can't load seed data
-      setTemplates([]);
+      setAllContent([]);
     } finally {
       setLoading(false);
     }
@@ -1695,6 +1696,115 @@ const MarketingVault = () => {
     });
   };
 
+  const getContentByType = (type) => {
+    return allContent.filter(item => item.type === type);
+  };
+
+  const renderEmails = () => {
+    const emails = getContentByType('email');
+    
+    return (
+      <div className="space-y-6">
+        {emails.map((template) => (
+          <Card key={template.id} className="premium-card">
+            <CardHeader>
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="text-primary-navy">{template.title}</CardTitle>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <Badge variant="outline">{template.goal}</Badge>
+                    <Badge variant="secondary">{template.when_to_send}</Badge>
+                  </div>
+                </div>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => copyToClipboard(template.subject + '\n\n' + template.body)}
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-1">Subject Line:</h4>
+                  <p className="text-sm bg-gray-50 p-2 rounded border">{template.subject}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-1">Email Body:</h4>
+                  <div className="text-sm bg-gray-50 p-4 rounded border whitespace-pre-wrap max-h-64 overflow-y-auto">
+                    {template.body}
+                  </div>
+                </div>
+                <div className="text-xs text-gray-500">
+                  <strong>Goal:</strong> {template.goal} | <strong>When to send:</strong> {template.when_to_send}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  };
+
+  const renderHooks = () => {
+    const hooks = getContentByType('hook');
+    
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {hooks.map((hook) => (
+          <Card key={hook.id} className="premium-card">
+            <CardContent className="p-4">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <p className="font-medium text-primary-navy mb-2">{hook.title}</p>
+                  <Badge variant="outline" className="text-xs">{hook.category}</Badge>
+                </div>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => copyToClipboard(hook.title)}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  };
+
+  const renderPrompts = () => {
+    const prompts = getContentByType('prompt');
+    
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {prompts.map((prompt) => (
+          <Card key={prompt.id} className="premium-card">
+            <CardContent className="p-4">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <p className="font-medium text-primary-navy mb-2">{prompt.title}</p>
+                  <Badge variant="outline" className="text-xs">{prompt.category}</Badge>
+                </div>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => copyToClipboard(prompt.title)}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <Layout title="Marketing Vault">
       <div className="flex justify-between items-center mb-8">
@@ -1704,54 +1814,43 @@ const MarketingVault = () => {
             Back to Dashboard
           </Button>
           <h2 className="text-3xl font-bold text-primary-navy">Marketing Vault</h2>
-          <p className="text-text-secondary">Your collection of email templates and marketing content</p>
+          <p className="text-text-secondary">Your collection of email templates, hooks, and ChatGPT prompts</p>
         </div>
       </div>
 
       {loading ? (
-        <div className="text-center py-8">Loading templates...</div>
+        <div className="text-center py-8">Loading content...</div>
       ) : (
-        <div className="space-y-6">
-          {templates.map((template) => (
-            <Card key={template.id} className="premium-card">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-primary-navy">{template.title}</CardTitle>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      <Badge variant="outline">{template.goal}</Badge>
-                      <Badge variant="secondary">{template.when_to_send}</Badge>
-                    </div>
-                  </div>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => copyToClipboard(template.subject + '\n\n' + template.body)}
-                  >
-                    <Copy className="h-4 w-4 mr-2" />
-                    Copy
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold text-sm text-gray-700 mb-1">Subject Line:</h4>
-                    <p className="text-sm bg-gray-50 p-2 rounded border">{template.subject}</p>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-sm text-gray-700 mb-1">Email Body:</h4>
-                    <div className="text-sm bg-gray-50 p-4 rounded border whitespace-pre-wrap max-h-64 overflow-y-auto">
-                      {template.body}
-                    </div>
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    <strong>Goal:</strong> {template.goal} | <strong>When to send:</strong> {template.when_to_send}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        <div>
+          {/* Tabs */}
+          <div className="flex space-x-1 mb-6">
+            <Button
+              variant={activeTab === 'emails' ? 'default' : 'outline'}
+              onClick={() => setActiveTab('emails')}
+              className={activeTab === 'emails' ? 'btn-primary-navy' : ''}
+            >
+              Email Swipes ({getContentByType('email').length})
+            </Button>
+            <Button
+              variant={activeTab === 'hooks' ? 'default' : 'outline'}
+              onClick={() => setActiveTab('hooks')}
+              className={activeTab === 'hooks' ? 'btn-primary-navy' : ''}
+            >
+              Hooks ({getContentByType('hook').length})
+            </Button>
+            <Button
+              variant={activeTab === 'prompts' ? 'default' : 'outline'}
+              onClick={() => setActiveTab('prompts')}
+              className={activeTab === 'prompts' ? 'btn-primary-navy' : ''}
+            >
+              ChatGPT Prompts ({getContentByType('prompt').length})
+            </Button>
+          </div>
+
+          {/* Content */}
+          {activeTab === 'emails' && renderEmails()}
+          {activeTab === 'hooks' && renderHooks()}
+          {activeTab === 'prompts' && renderPrompts()}
         </div>
       )}
     </Layout>
