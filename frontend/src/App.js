@@ -552,7 +552,7 @@ const Dashboard = () => {
         <CardContent className="px-8 pb-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Button 
-              className="dashboard-tile dashboard-tile-navy"
+              className="dashboard-tile-navy"
               onClick={() => navigate('/contacts')}
               aria-label="Go to Contacts"
             >
@@ -560,7 +560,7 @@ const Dashboard = () => {
               <span className="text-lg font-semibold">Contacts</span>
             </Button>
             <Button 
-              className="dashboard-tile dashboard-tile-gold"
+              className="dashboard-tile-gold"
               onClick={() => navigate('/promo-links')}
               aria-label="Go to Promo Links"
             >
@@ -568,7 +568,7 @@ const Dashboard = () => {
               <span className="text-lg font-semibold">Promo Links</span>
             </Button>
             <Button 
-              className="dashboard-tile dashboard-tile-navy"
+              className="dashboard-tile-navy"
               onClick={() => navigate('/tasks')}
               aria-label="Go to Tasks"
             >
@@ -576,7 +576,7 @@ const Dashboard = () => {
               <span className="text-lg font-semibold">Tasks</span>
             </Button>
             <Button 
-              className="dashboard-tile dashboard-tile-gold"
+              className="dashboard-tile-gold"
               onClick={() => navigate('/marketing-vault')}
               aria-label="Go to Marketing Vault"
             >
