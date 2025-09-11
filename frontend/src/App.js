@@ -207,12 +207,69 @@ const Layout = ({ children, title = "ConnectVault" }) => {
               <h1 className="text-xl font-bold text-navy-900">{title}</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="outline" className="relative">
-                <Bell className="h-4 w-4" />
-                <Badge className="absolute -top-2 -right-2 bg-gold-500 text-navy-900 h-5 w-5 rounded-full text-xs flex items-center justify-center">
-                  {summary?.tasks_due_today || 0}
-                </Badge>
-              </Button>
+              <div className="relative">
+                <Button 
+                  variant="outline" 
+                  className="relative"
+                  onClick={() => setShowNotifications(!showNotifications)}
+                >
+                  <Bell className="h-4 w-4" />
+                  {unreadCount > 0 && (
+                    <Badge className="absolute -top-2 -right-2 bg-gold-500 text-navy-900 h-5 w-5 rounded-full text-xs flex items-center justify-center">
+                      {unreadCount}
+                    </Badge>
+                  )}
+                </Button>
+                
+                {showNotifications && (
+                  <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                    <div className="p-4 border-b border-gray-200">
+                      <h3 className="font-semibold text-navy-900">Notifications</h3>
+                    </div>
+                    <div className="max-h-64 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-4 text-center text-gray-500">
+                          No notifications
+                        </div>
+                      ) : (
+                        notifications.map((notification) => (
+                          <div
+                            key={notification.id}
+                            className={`p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${
+                              !notification.read ? 'bg-blue-50' : ''
+                            }`}
+                            onClick={() => markNotificationAsRead(notification.id)}
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-gray-900">
+                                  {notification.message}
+                                </p>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {notification.time}
+                                </p>
+                              </div>
+                              {!notification.read && (
+                                <div className="w-2 h-2 bg-blue-500 rounded-full ml-2 mt-1"></div>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                    <div className="p-3 border-t border-gray-200">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowNotifications(false)}
+                        className="w-full"
+                      >
+                        Close
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
               <Button variant="outline" onClick={logout}>
                 Logout
               </Button>
