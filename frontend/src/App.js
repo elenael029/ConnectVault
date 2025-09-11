@@ -728,6 +728,152 @@ const Contacts = () => {
 const Tasks = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [tasks, setTasks] = useState({
+    pending: [],
+    in_progress: [],
+    done: []
+  });
+  const [showTaskForm, setShowTaskForm] = useState(false);
+  const [taskFormData, setTaskFormData] = useState({
+    title: '',
+    description: '',
+    due_date: '',
+    status: 'pending'
+  });
+
+  const handleTaskSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const newTask = {
+        id: Date.now().toString(),
+        ...taskFormData,
+        created_at: new Date().toISOString()
+      };
+      
+      setTasks(prev => ({
+        ...prev,
+        [taskFormData.status]: [...prev[taskFormData.status], newTask]
+      }));
+      
+      setTaskFormData({
+        title: '',
+        description: '',
+        due_date: '',
+        status: 'pending'
+      });
+      setShowTaskForm(false);
+      
+      toast({
+        title: "Success",
+        description: "Task added successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add task",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const moveTask = (taskId, fromStatus, toStatus) => {
+    const taskToMove = tasks[fromStatus].find(task => task.id === taskId);
+    if (taskToMove) {
+      setTasks(prev => ({
+        ...prev,
+        [fromStatus]: prev[fromStatus].filter(task => task.id !== taskId),
+        [toStatus]: [...prev[toStatus], { ...taskToMove, status: toStatus }]
+      }));
+      
+      toast({
+        title: "Task Updated",
+        description: `Task moved to ${toStatus.replace('_', ' ')}`,
+      });
+    }
+  };
+
+  const deleteTask = (taskId, status) => {
+    setTasks(prev => ({
+      ...prev,
+      [status]: prev[status].filter(task => task.id !== taskId)
+    }));
+    
+    toast({
+      title: "Task Deleted",
+      description: "Task removed successfully",
+    });
+  };
+
+  const renderTaskColumn = (status, title, tasks) => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-sm font-medium text-gray-600">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {tasks.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            No {title.toLowerCase()} tasks
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {tasks.map((task) => (
+              <div key={task.id} className="border rounded-lg p-3 bg-white shadow-sm">
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="font-medium text-sm">{task.title}</h4>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => deleteTask(task.id, status)}
+                    className="h-6 w-6 p-0"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+                {task.description && (
+                  <p className="text-xs text-gray-600 mb-2">{task.description}</p>
+                )}
+                {task.due_date && (
+                  <p className="text-xs text-gray-500 mb-2">Due: {new Date(task.due_date).toLocaleDateString()}</p>
+                )}
+                <div className="flex space-x-1">
+                  {status !== 'pending' && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => moveTask(task.id, status, 'pending')}
+                      className="text-xs h-6"
+                    >
+                      ← Pending
+                    </Button>
+                  )}
+                  {status !== 'in_progress' && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => moveTask(task.id, status, 'in_progress')}
+                      className="text-xs h-6"
+                    >
+                      In Progress
+                    </Button>
+                  )}
+                  {status !== 'done' && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => moveTask(task.id, status, 'done')}
+                      className="text-xs h-6"
+                    >
+                      Done →
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
 
   return (
     <Layout title="Tasks">
@@ -740,45 +886,68 @@ const Tasks = () => {
           <h2 className="text-3xl font-bold text-navy-900">Tasks</h2>
           <p className="text-navy-600">Manage your tasks and follow-ups</p>
         </div>
-        <Button className="bg-navy-600 hover:bg-navy-700">
+        <Button onClick={() => setShowTaskForm(!showTaskForm)} className="bg-navy-600 hover:bg-navy-700">
           <Plus className="h-4 w-4 mr-2" />
           Add Task
         </Button>
       </div>
 
+      {/* Add Task Form */}
+      {showTaskForm && (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Add New Task</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleTaskSubmit} className="space-y-4">
+              <Input
+                placeholder="Task Title"
+                value={taskFormData.title}
+                onChange={(e) => setTaskFormData({...taskFormData, title: e.target.value})}
+                required
+              />
+              <Textarea
+                placeholder="Task description (optional)"
+                value={taskFormData.description}
+                onChange={(e) => setTaskFormData({...taskFormData, description: e.target.value})}
+              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Input
+                  type="date"
+                  value={taskFormData.due_date}
+                  onChange={(e) => setTaskFormData({...taskFormData, due_date: e.target.value})}
+                />
+                <Select
+                  value={taskFormData.status}
+                  onValueChange={(value) => setTaskFormData({...taskFormData, status: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="done">Done</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex space-x-2">
+                <Button type="submit" className="bg-navy-600 hover:bg-navy-700">
+                  Add Task
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setShowTaskForm(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-gray-600">Pending</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8 text-gray-500">
-              No pending tasks
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-gray-600">In Progress</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8 text-gray-500">
-              No tasks in progress
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-gray-600">Done</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8 text-gray-500">
-              No completed tasks
-            </div>
-          </CardContent>
-        </Card>
+        {renderTaskColumn('pending', 'Pending', tasks.pending)}
+        {renderTaskColumn('in_progress', 'In Progress', tasks.in_progress)}
+        {renderTaskColumn('done', 'Done', tasks.done)}
       </div>
     </Layout>
   );
