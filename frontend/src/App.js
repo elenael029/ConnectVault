@@ -1573,13 +1573,13 @@ const ResetPassword = () => {
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  const { token, loading } = useAuth();
+  const { token, user, loading } = useAuth();
   
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
   
-  return token ? children : <Navigate to="/login" />;
+  return (token && user) ? children : <Navigate to="/login" />;
 };
 
 // Public Route Component
