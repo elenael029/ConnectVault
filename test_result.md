@@ -125,7 +125,7 @@ frontend:
     implemented: true
     working: false
     file: "/app/frontend/src/App.js"
-    stuck_count: 2
+    stuck_count: 3
     priority: "high"
     needs_retesting: true
     status_history:
@@ -135,6 +135,12 @@ frontend:
       - working: false
         agent: "user"
         comment: "Users repeatedly redirected to login page despite successful login"
+      - working: false
+        agent: "main"
+        comment: "Fixed login function to use React Router navigate, updated AuthProvider to set user state, modified ProtectedRoute logic"
+      - working: false
+        agent: "troubleshoot"
+        comment: "Confirmed backend API working correctly, frontend authentication logic appears correct, but login still not redirecting to dashboard"
 
   - task: "ConnectVault logo display"
     implemented: true
