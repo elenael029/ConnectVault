@@ -552,15 +552,15 @@ const Dashboard = () => {
   }
 
   return (
-    <Layout title="Dashboard">
+    <Layout title="ConnectVault Dashboard">
       <div className="mb-8">
-        <h2 className="text-3xl font-bold text-navy-900 mb-2">Dashboard</h2>
+        <h2 className="text-3xl font-bold text-navy-900 mb-2">ConnectVault Dashboard</h2>
         <p className="text-navy-600">Welcome back! Here's your CRM overview.</p>
       </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card className="border-navy-200 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/contacts')}>
+        <Card className="premium-card cursor-pointer" onClick={() => navigate('/contacts')}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -574,7 +574,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-navy-200 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/tasks')}>
+        <Card className="premium-card cursor-pointer" onClick={() => navigate('/tasks')}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -588,21 +588,21 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-navy-200 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/offers')}>
+        <Card className="premium-card cursor-pointer" onClick={() => navigate('/offers')}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-navy-600">Active Offers</p>
+                <p className="text-sm font-medium text-navy-600">Active Promo Links</p>
                 <p className="text-3xl font-bold text-navy-900">{summary?.active_offers || 0}</p>
               </div>
-              <div className="p-3 bg-navy-100 rounded-full">
-                <Target className="h-6 w-6 text-navy-600" />
+              <div className="p-3 bg-gold-100 rounded-full">
+                <Target className="h-6 w-6 text-gold-700" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-navy-200 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/offers')}>
+        <Card className="premium-card cursor-pointer" onClick={() => navigate('/offers')}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -625,40 +625,40 @@ const Dashboard = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-cream-100 rounded-xl p-8">
-        <Card className="border-navy-200 bg-white shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-navy-900 text-2xl">Quick Actions</CardTitle>
-            <CardDescription className="text-navy-600">Get started with your CRM tasks</CardDescription>
+      <div className="quick-actions-container">
+        <Card className="premium-card bg-white shadow-xl">
+          <CardHeader className="text-center">
+            <CardTitle className="text-navy-900 text-3xl font-bold">Quick Actions</CardTitle>
+            <CardDescription className="text-navy-600 text-lg">Get started with your CRM tasks</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-8 pb-8">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <Button 
-                className="btn-navy h-auto py-6 px-6 flex flex-col items-center space-y-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                className="dashboard-btn btn-royal-blue"
                 onClick={() => navigate('/contacts')}
               >
-                <Users className="h-8 w-8" />
+                <Users className="h-8 w-8 mb-3" />
                 <span className="text-lg font-semibold">Contacts</span>
               </Button>
               <Button 
-                className="btn-gold h-auto py-6 px-6 flex flex-col items-center space-y-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                className="dashboard-btn btn-polished-gold"
                 onClick={() => navigate('/offers')}
               >
-                <Target className="h-8 w-8" />
-                <span className="text-lg font-semibold">Offers</span>
+                <Target className="h-8 w-8 mb-3" />
+                <span className="text-lg font-semibold">Promo Links</span>
               </Button>
               <Button 
-                className="btn-navy h-auto py-6 px-6 flex flex-col items-center space-y-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                className="dashboard-btn btn-royal-blue"
                 onClick={() => navigate('/tasks')}
               >
-                <Calendar className="h-8 w-8" />
+                <Calendar className="h-8 w-8 mb-3" />
                 <span className="text-lg font-semibold">Tasks</span>
               </Button>
               <Button 
-                className="btn-gold h-auto py-6 px-6 flex flex-col items-center space-y-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                className="dashboard-btn btn-polished-gold"
                 onClick={() => navigate('/marketing-vault')}
               >
-                <Mail className="h-8 w-8" />
+                <Mail className="h-8 w-8 mb-3" />
                 <span className="text-lg font-semibold">Marketing Vault</span>
               </Button>
             </div>
