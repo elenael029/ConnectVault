@@ -6,7 +6,27 @@ import { Input } from './components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card';
 import { Alert, AlertDescription } from './components/ui/alert';
 import { Badge } from './components/ui/badge';
-import { Bell, Users, Calendar, DollarSign, Target } from 'lucide-react';
+import { Textarea } from './components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
+import { 
+  Bell, 
+  Users, 
+  Calendar, 
+  DollarSign, 
+  Target, 
+  ArrowLeft, 
+  Plus, 
+  Copy, 
+  Download,
+  Edit,
+  Trash2,
+  Mail,
+  Phone,
+  MessageSquare
+} from 'lucide-react';
+import { useToast } from './hooks/use-toast';
+import { Toaster } from './components/ui/toaster';
 import './App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -31,7 +51,6 @@ const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      // You could verify token here by calling a /me endpoint
     }
     setLoading(false);
   }, [token]);
@@ -116,6 +135,72 @@ const AuthProvider = ({ children }) => {
     }}>
       {children}
     </AuthContext.Provider>
+  );
+};
+
+// Layout Component with Navigation
+const Layout = ({ children, title = "ConnectVault" }) => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const [summary, setSummary] = useState(null);
+
+  useEffect(() => {
+    fetchDashboardSummary();
+  }, []);
+
+  const fetchDashboardSummary = async () => {
+    try {
+      const response = await axios.get(`${API}/dashboard/summary`);
+      setSummary(response.data);
+    } catch (error) {
+      console.error('Failed to fetch dashboard summary:', error);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-navy-50 to-navy-100">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b border-navy-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-4">
+              <img 
+                src="https://customer-assets.emergentagent.com/job_connect-vault-crm/artifacts/sgfxttrw_Applogo.png" 
+                alt="ConnectVault" 
+                className="h-8 w-auto cursor-pointer"
+                onClick={() => navigate('/dashboard')}
+              />
+              <h1 className="text-xl font-bold text-navy-900">{title}</h1>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Button variant="outline" className="relative">
+                <Bell className="h-4 w-4" />
+                <Badge className="absolute -top-2 -right-2 bg-gold-500 text-navy-900 h-5 w-5 rounded-full text-xs flex items-center justify-center">
+                  {summary?.tasks_due_today || 0}
+                </Badge>
+              </Button>
+              <Button variant="outline" onClick={logout}>
+                Logout
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {children}
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-navy-200 mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <p className="text-center text-sm text-navy-600">
+            Powered by Offer On Tap
+          </p>
+        </div>
+      </footer>
+    </div>
   );
 };
 
@@ -270,50 +355,42 @@ const Register = () => {
                 <AlertDescription className="text-green-800">{success}</AlertDescription>
               </Alert>
             )}
-            <div>
-              <Input
-                type="text"
-                name="full_name"
-                placeholder="Full Name"
-                value={formData.full_name}
-                onChange={handleChange}
-                required
-                className="border-navy-200 focus:border-navy-400"
-              />
-            </div>
-            <div>
-              <Input
-                type="text"
-                name="username"
-                placeholder="Username"
-                value={formData.username}
-                onChange={handleChange}
-                required
-                className="border-navy-200 focus:border-navy-400"
-              />
-            </div>
-            <div>
-              <Input
-                type="email"
-                name="email"
-                placeholder="Email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="border-navy-200 focus:border-navy-400"
-              />
-            </div>
-            <div>
-              <Input
-                type="password"
-                name="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="border-navy-200 focus:border-navy-400"
-              />
-            </div>
+            <Input
+              type="text"
+              name="full_name"
+              placeholder="Full Name"
+              value={formData.full_name}
+              onChange={handleChange}
+              required
+              className="border-navy-200 focus:border-navy-400"
+            />
+            <Input
+              type="text"
+              name="username"
+              placeholder="Username"
+              value={formData.username}
+              onChange={handleChange}
+              required
+              className="border-navy-200 focus:border-navy-400"
+            />
+            <Input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="border-navy-200 focus:border-navy-400"
+            />
+            <Input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              className="border-navy-200 focus:border-navy-400"
+            />
             <Button 
               type="submit" 
               className="w-full bg-navy-600 hover:bg-navy-700 text-white"
@@ -333,6 +410,575 @@ const Register = () => {
         </CardContent>
       </Card>
     </div>
+  );
+};
+
+// Dashboard Component
+const Dashboard = () => {
+  const [summary, setSummary] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchDashboardSummary();
+  }, []);
+
+  const fetchDashboardSummary = async () => {
+    try {
+      const response = await axios.get(`${API}/dashboard/summary`);
+      setSummary(response.data);
+    } catch (error) {
+      console.error('Failed to fetch dashboard summary:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load dashboard data",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-navy-200 rounded w-1/3"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-32 bg-white rounded-lg shadow"></div>
+            ))}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout title="Dashboard">
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold text-navy-900 mb-2">Dashboard</h2>
+        <p className="text-navy-600">Welcome back! Here's your CRM overview.</p>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <Card className="border-navy-200 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/contacts')}>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-navy-600">Total Contacts</p>
+                <p className="text-3xl font-bold text-navy-900">{summary?.total_contacts || 0}</p>
+              </div>
+              <div className="p-3 bg-navy-100 rounded-full">
+                <Users className="h-6 w-6 text-navy-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-navy-200 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/tasks')}>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-navy-600">Tasks Due Today</p>
+                <p className="text-3xl font-bold text-navy-900">{summary?.tasks_due_today || 0}</p>
+              </div>
+              <div className="p-3 bg-gold-100 rounded-full">
+                <Calendar className="h-6 w-6 text-gold-700" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-navy-200 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/offers')}>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-navy-600">Active Offers</p>
+                <p className="text-3xl font-bold text-navy-900">{summary?.active_offers || 0}</p>
+              </div>
+              <div className="p-3 bg-navy-100 rounded-full">
+                <Target className="h-6 w-6 text-navy-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-navy-200 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/offers')}>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-navy-600">Commission Summary</p>
+                <div className="space-y-1">
+                  <p className="text-lg font-semibold text-green-600">
+                    Paid: ${summary?.commission_summary?.total_paid?.toFixed(2) || '0.00'}
+                  </p>
+                  <p className="text-lg font-semibold text-red-600">
+                    Unpaid: ${summary?.commission_summary?.total_unpaid?.toFixed(2) || '0.00'}
+                  </p>
+                </div>
+              </div>
+              <div className="p-3 bg-gold-100 rounded-full">
+                <DollarSign className="h-6 w-6 text-gold-700" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Quick Actions */}
+      <Card className="border-navy-200">
+        <CardHeader>
+          <CardTitle className="text-navy-900">Quick Actions</CardTitle>
+          <CardDescription>Get started with your CRM tasks</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Button 
+              className="bg-navy-600 hover:bg-navy-700 text-white h-auto py-4 px-6 flex flex-col items-center space-y-2"
+              onClick={() => navigate('/contacts')}
+            >
+              <Users className="h-6 w-6" />
+              <span>Contacts</span>
+            </Button>
+            <Button 
+              className="bg-gold-600 hover:bg-gold-700 text-white h-auto py-4 px-6 flex flex-col items-center space-y-2"
+              onClick={() => navigate('/offers')}
+            >
+              <Target className="h-6 w-6" />
+              <span>Offers</span>
+            </Button>
+            <Button 
+              className="bg-navy-600 hover:bg-navy-700 text-white h-auto py-4 px-6 flex flex-col items-center space-y-2"
+              onClick={() => navigate('/tasks')}
+            >
+              <Calendar className="h-6 w-6" />
+              <span>Tasks</span>
+            </Button>
+            <Button 
+              className="bg-gold-600 hover:bg-gold-700 text-white h-auto py-4 px-6 flex flex-col items-center space-y-2"
+              onClick={() => navigate('/marketing-vault')}
+            >
+              <Mail className="h-6 w-6" />
+              <span>Marketing Vault</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </Layout>
+  );
+};
+
+// Contacts Component
+const Contacts = () => {
+  const [contacts, setContacts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    platform: '',
+    notes: ''
+  });
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchContacts();
+  }, []);
+
+  const fetchContacts = async () => {
+    try {
+      // Stub for now - will implement endpoints later
+      setContacts([]);
+      setLoading(false);
+    } catch (error) {
+      console.error('Failed to fetch contacts:', error);
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      // Stub for now
+      toast({
+        title: "Success",
+        description: "Contact added successfully",
+      });
+      setShowForm(false);
+      setFormData({ name: '', email: '', platform: '', notes: '' });
+      fetchContacts();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add contact",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <Layout title="Contacts">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <Button variant="outline" onClick={() => navigate('/dashboard')} className="mb-4">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+          <h2 className="text-3xl font-bold text-navy-900">Contacts</h2>
+          <p className="text-navy-600">Manage your contacts and outreach</p>
+        </div>
+        <Button onClick={() => setShowForm(!showForm)} className="bg-navy-600 hover:bg-navy-700">
+          <Plus className="h-4 w-4 mr-2" />
+          Add Contact
+        </Button>
+      </div>
+
+      {showForm && (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Add New Contact</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Input
+                  placeholder="Name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  required
+                />
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  required
+                />
+              </div>
+              <Input
+                placeholder="Platform (e.g., Instagram, LinkedIn)"
+                value={formData.platform}
+                onChange={(e) => setFormData({...formData, platform: e.target.value})}
+                required
+              />
+              <Textarea
+                placeholder="Notes"
+                value={formData.notes}
+                onChange={(e) => setFormData({...formData, notes: e.target.value})}
+              />
+              <div className="flex space-x-2">
+                <Button type="submit" className="bg-navy-600 hover:bg-navy-700">
+                  Add Contact
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Your Contacts</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="text-center py-8">Loading contacts...</div>
+          ) : contacts.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              No contacts yet. Add your first contact to get started!
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {contacts.map((contact, index) => (
+                <div key={index} className="border rounded-lg p-4">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-semibold">{contact.name}</h3>
+                      <p className="text-sm text-gray-600">{contact.email}</p>
+                      <p className="text-sm text-gray-600">{contact.platform}</p>
+                      {contact.notes && <p className="text-sm mt-2">{contact.notes}</p>}
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button size="sm" variant="outline">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" variant="outline">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </Layout>
+  );
+};
+
+// Tasks Component
+const Tasks = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  return (
+    <Layout title="Tasks">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <Button variant="outline" onClick={() => navigate('/dashboard')} className="mb-4">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+          <h2 className="text-3xl font-bold text-navy-900">Tasks</h2>
+          <p className="text-navy-600">Manage your tasks and follow-ups</p>
+        </div>
+        <Button className="bg-navy-600 hover:bg-navy-700">
+          <Plus className="h-4 w-4 mr-2" />
+          Add Task
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-gray-600">Pending</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8 text-gray-500">
+              No pending tasks
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-gray-600">In Progress</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8 text-gray-500">
+              No tasks in progress
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-gray-600">Done</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8 text-gray-500">
+              No completed tasks
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </Layout>
+  );
+};
+
+// Offers Component
+const Offers = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  return (
+    <Layout title="Offers & Commissions">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <Button variant="outline" onClick={() => navigate('/dashboard')} className="mb-4">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+          <h2 className="text-3xl font-bold text-navy-900">Offers & Commissions</h2>
+          <p className="text-navy-600">Manage your offers and track commissions</p>
+        </div>
+        <Button className="bg-navy-600 hover:bg-navy-700">
+          <Plus className="h-4 w-4 mr-2" />
+          Add Offer
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Offers</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8 text-gray-500">
+              No offers yet. Create your first offer to get started!
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Commission Tracking</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8 text-gray-500">
+              No commissions recorded yet.
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </Layout>
+  );
+};
+
+// Marketing Vault Component
+const MarketingVault = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied!",
+      description: "Content copied to clipboard",
+    });
+  };
+
+  const swipeVault = [
+    {
+      subject: "Excited to connect with you 🚀",
+      body: "Hey [Name], thanks for checking this out. I'm all about helping you keep things simple, actionable, and effective. Keep an eye out—I'll be sharing resources that can help you get real traction. Talk soon!"
+    },
+    {
+      subject: "Found something worth sharing 👇",
+      body: "I don't usually recommend just anything, but this stood out. If you're serious about growing online, check this out: [Your Link]. It's straightforward, no fluff, and can help you move forward faster."
+    },
+    {
+      subject: "Quick tip you can use today",
+      body: "Here's one thing I always recommend: focus on ONE clear action at a time. Whether it's building a list, refining your pitch, or getting your offer out—clarity wins. If you need a tool to help keep things organized, here's what I use: [Your Link]."
+    }
+  ];
+
+  const hookVault = [
+    "What if one small change could double your sales?",
+    "Most marketers get this wrong… here's the fix 👇",
+    "Stop wasting hours on busy work — try this instead.",
+    "The secret I wish I knew when I started marketing online.",
+    "Want consistent leads without paid ads? Read this."
+  ];
+
+  const promptVault = [
+    "Write a 3-part email sequence for promoting [Offer] to affiliate marketers.",
+    "Generate 5 social media captions with hooks to drive traffic to [Link].",
+    "Rewrite this sales email in a casual, friendly tone.",
+    "Create 10 TikTok hooks for digital marketing offers.",
+    "Draft a product description for [Offer] that emphasizes simplicity and results."
+  ];
+
+  return (
+    <Layout title="Marketing Vault">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <Button variant="outline" onClick={() => navigate('/dashboard')} className="mb-4">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+          <h2 className="text-3xl font-bold text-navy-900">Marketing Vault</h2>
+          <p className="text-navy-600">Your collection of swipes, hooks, and prompts</p>
+        </div>
+      </div>
+
+      <Tabs defaultValue="swipes" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="swipes">Swipe Vault</TabsTrigger>
+          <TabsTrigger value="hooks">Hook Vault</TabsTrigger>
+          <TabsTrigger value="prompts">Prompt Vault</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="swipes" className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">Email Swipes</h3>
+            <Button className="bg-navy-600 hover:bg-navy-700">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Swipe
+            </Button>
+          </div>
+          {swipeVault.map((swipe, index) => (
+            <Card key={index}>
+              <CardContent className="p-4">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <p className="font-medium mb-2">Subject: {swipe.subject}</p>
+                    <p className="text-sm text-gray-600">{swipe.body}</p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => copyToClipboard(`Subject: ${swipe.subject}\n\n${swipe.body}`)}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+
+        <TabsContent value="hooks" className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">Marketing Hooks</h3>
+            <Button className="bg-navy-600 hover:bg-navy-700">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Hook
+            </Button>
+          </div>
+          {hookVault.map((hook, index) => (
+            <Card key={index}>
+              <CardContent className="p-4">
+                <div className="flex justify-between items-center">
+                  <p className="flex-1">{hook}</p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => copyToClipboard(hook)}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+
+        <TabsContent value="prompts" className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">ChatGPT Prompts</h3>
+            <Button className="bg-navy-600 hover:bg-navy-700">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Prompt
+            </Button>
+          </div>
+          {promptVault.map((prompt, index) => (
+            <Card key={index}>
+              <CardContent className="p-4">
+                <div className="flex justify-between items-center">
+                  <p className="flex-1">{prompt}</p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => copyToClipboard(prompt)}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+      </Tabs>
+    </Layout>
   );
 };
 
@@ -366,6 +1012,11 @@ const ForgotPassword = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-navy-50 to-navy-100 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
+          <img 
+            src="https://customer-assets.emergentagent.com/job_connect-vault-crm/artifacts/sgfxttrw_Applogo.png" 
+            alt="ConnectVault Logo" 
+            className="max-h-24 mx-auto mb-4 object-contain"
+          />
           <CardTitle className="text-2xl font-bold text-navy-900">Reset Password</CardTitle>
           <CardDescription>Enter your email or username</CardDescription>
         </CardHeader>
@@ -385,16 +1036,14 @@ const ForgotPassword = () => {
                 </AlertDescription>
               </Alert>
             )}
-            <div>
-              <Input
-                type="text"
-                placeholder="Email or Username"
-                value={emailOrUsername}
-                onChange={(e) => setEmailOrUsername(e.target.value)}
-                required
-                className="border-navy-200 focus:border-navy-400"
-              />
-            </div>
+            <Input
+              type="text"
+              placeholder="Email or Username"
+              value={emailOrUsername}
+              onChange={(e) => setEmailOrUsername(e.target.value)}
+              required
+              className="border-navy-200 focus:border-navy-400"
+            />
             <Button 
               type="submit" 
               className="w-full bg-navy-600 hover:bg-navy-700 text-white"
@@ -425,7 +1074,6 @@ const ResetPassword = () => {
   const [loading, setLoading] = useState(false);
   const { resetPassword } = useAuth();
   
-  // Get token from URL
   const urlParams = new URLSearchParams(window.location.search);
   const token = urlParams.get('token');
 
@@ -482,6 +1130,11 @@ const ResetPassword = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-navy-50 to-navy-100 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
+          <img 
+            src="https://customer-assets.emergentagent.com/job_connect-vault-crm/artifacts/sgfxttrw_Applogo.png" 
+            alt="ConnectVault Logo" 
+            className="max-h-24 mx-auto mb-4 object-contain"
+          />
           <CardTitle className="text-2xl font-bold text-navy-900">Set New Password</CardTitle>
           <CardDescription>Enter your new password</CardDescription>
         </CardHeader>
@@ -497,28 +1150,24 @@ const ResetPassword = () => {
                 <AlertDescription className="text-green-800">{success}</AlertDescription>
               </Alert>
             )}
-            <div>
-              <Input
-                type="password"
-                name="newPassword"
-                placeholder="New Password"
-                value={formData.newPassword}
-                onChange={handleChange}
-                required
-                className="border-navy-200 focus:border-navy-400"
-              />
-            </div>
-            <div>
-              <Input
-                type="password"
-                name="confirmPassword"
-                placeholder="Confirm New Password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-                className="border-navy-200 focus:border-navy-400"
-              />
-            </div>
+            <Input
+              type="password"
+              name="newPassword"
+              placeholder="New Password"
+              value={formData.newPassword}
+              onChange={handleChange}
+              required
+              className="border-navy-200 focus:border-navy-400"
+            />
+            <Input
+              type="password"
+              name="confirmPassword"
+              placeholder="Confirm New Password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              className="border-navy-200 focus:border-navy-400"
+            />
             <Button 
               type="submit" 
               className="w-full bg-navy-600 hover:bg-navy-700 text-white"
@@ -538,184 +1187,6 @@ const ResetPassword = () => {
   );
 };
 
-// Dashboard Component
-const Dashboard = () => {
-  const [summary, setSummary] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const { logout } = useAuth();
-
-  useEffect(() => {
-    fetchDashboardSummary();
-  }, []);
-
-  const fetchDashboardSummary = async () => {
-    try {
-      const response = await axios.get(`${API}/dashboard/summary`);
-      setSummary(response.data);
-    } catch (error) {
-      console.error('Failed to fetch dashboard summary:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-navy-50 to-navy-100">
-        <div className="p-8">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-navy-200 rounded w-1/3"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-32 bg-white rounded-lg shadow"></div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-navy-50 to-navy-100">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-navy-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <img 
-                src="https://customer-assets.emergentagent.com/job_connect-vault-crm/artifacts/sgfxttrw_Applogo.png" 
-                alt="ConnectVault" 
-                className="h-8 w-auto cursor-pointer"
-                onClick={() => window.location.href = '/dashboard'}
-              />
-              <h1 className="text-xl font-bold text-navy-900">ConnectVault</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" className="relative">
-                <Bell className="h-4 w-4" />
-                <Badge className="absolute -top-2 -right-2 bg-gold-500 text-navy-900 h-5 w-5 rounded-full text-xs flex items-center justify-center">
-                  {summary?.tasks_due_today || 0}
-                </Badge>
-              </Button>
-              <Button variant="outline" onClick={logout}>
-                Logout
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-navy-900 mb-2">Dashboard</h2>
-          <p className="text-navy-600">Welcome back! Here's your CRM overview.</p>
-        </div>
-
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="border-navy-200 hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-navy-600">Total Contacts</p>
-                  <p className="text-3xl font-bold text-navy-900">{summary?.total_contacts || 0}</p>
-                </div>
-                <div className="p-3 bg-navy-100 rounded-full">
-                  <Users className="h-6 w-6 text-navy-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-navy-200 hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-navy-600">Tasks Due Today</p>
-                  <p className="text-3xl font-bold text-navy-900">{summary?.tasks_due_today || 0}</p>
-                </div>
-                <div className="p-3 bg-gold-100 rounded-full">
-                  <Calendar className="h-6 w-6 text-gold-700" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-navy-200 hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-navy-600">Active Offers</p>
-                  <p className="text-3xl font-bold text-navy-900">{summary?.active_offers || 0}</p>
-                </div>
-                <div className="p-3 bg-navy-100 rounded-full">
-                  <Target className="h-6 w-6 text-navy-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-navy-200 hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-navy-600">Commission Summary</p>
-                  <div className="space-y-1">
-                    <p className="text-lg font-semibold text-green-600">
-                      Paid: ${summary?.commission_summary?.total_paid?.toFixed(2) || '0.00'}
-                    </p>
-                    <p className="text-lg font-semibold text-red-600">
-                      Unpaid: ${summary?.commission_summary?.total_unpaid?.toFixed(2) || '0.00'}
-                    </p>
-                  </div>
-                </div>
-                <div className="p-3 bg-gold-100 rounded-full">
-                  <DollarSign className="h-6 w-6 text-gold-700" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Quick Actions */}
-        <Card className="border-navy-200">
-          <CardHeader>
-            <CardTitle className="text-navy-900">Quick Actions</CardTitle>
-            <CardDescription>Get started with your CRM tasks</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button className="bg-navy-600 hover:bg-navy-700 text-white h-auto py-4 px-6 flex flex-col items-center space-y-2">
-                <Users className="h-6 w-6" />
-                <span>Add Contact</span>
-              </Button>
-              <Button className="bg-gold-600 hover:bg-gold-700 text-white h-auto py-4 px-6 flex flex-col items-center space-y-2">
-                <Target className="h-6 w-6" />
-                <span>Create Offer</span>
-              </Button>
-              <Button className="bg-navy-600 hover:bg-navy-700 text-white h-auto py-4 px-6 flex flex-col items-center space-y-2">
-                <Calendar className="h-6 w-6" />
-                <span>Add Task</span>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </main>
-
-      {/* Footer */}
-      <footer className="bg-white border-t border-navy-200 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <p className="text-center text-sm text-navy-600">
-            Powered by Offer On Tap
-          </p>
-        </div>
-      </footer>
-    </div>
-  );
-};
-
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { token, loading } = useAuth();
@@ -727,7 +1198,7 @@ const ProtectedRoute = ({ children }) => {
   return token ? children : <Navigate to="/login" />;
 };
 
-// Public Route Component (redirect to dashboard if logged in)
+// Public Route Component
 const PublicRoute = ({ children }) => {
   const { token, loading } = useAuth();
   
@@ -771,7 +1242,28 @@ function App() {
                 <Dashboard />
               </ProtectedRoute>
             } />
+            <Route path="/contacts" element={
+              <ProtectedRoute>
+                <Contacts />
+              </ProtectedRoute>
+            } />
+            <Route path="/tasks" element={
+              <ProtectedRoute>
+                <Tasks />
+              </ProtectedRoute>
+            } />
+            <Route path="/offers" element={
+              <ProtectedRoute>
+                <Offers />
+              </ProtectedRoute>
+            } />
+            <Route path="/marketing-vault" element={
+              <ProtectedRoute>
+                <MarketingVault />
+              </ProtectedRoute>
+            } />
           </Routes>
+          <Toaster />
         </div>
       </BrowserRouter>
     </AuthProvider>
