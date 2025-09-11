@@ -633,7 +633,7 @@ const Login = () => {
       <Card className="w-full max-w-md premium-card">
         <CardHeader className="text-center">
           <ConnectVaultLogo className="mx-auto mb-4" />
-          <CardTitle className="text-2xl font-bold text-primary-navy">Login to {settings.branding.app_name}</CardTitle>
+          <CardTitle className="text-2xl font-bold text-primary-navy">Login to your CRM</CardTitle>
           <CardDescription>Access your CRM dashboard</CardDescription>
         </CardHeader>
         <CardContent>
