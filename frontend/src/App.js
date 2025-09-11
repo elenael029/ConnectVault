@@ -20,7 +20,7 @@ import {
   Edit,
   Trash2,
   Mail,
-  Settings,
+  Settings as SettingsIcon,
   ExternalLink
 } from 'lucide-react';
 import { useToast } from './hooks/use-toast';
