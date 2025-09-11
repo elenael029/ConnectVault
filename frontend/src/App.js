@@ -1139,11 +1139,11 @@ const Offers = () => {
           <p className="text-navy-600">Manage your offers and track commissions</p>
         </div>
         <div className="flex space-x-2">
-          <Button onClick={() => setShowOfferForm(!showOfferForm)} className="bg-navy-600 hover:bg-navy-700">
+          <Button onClick={() => setShowOfferForm(!showOfferForm)} className="btn-gold">
             <Plus className="h-4 w-4 mr-2" />
             Add Offer
           </Button>
-          <Button onClick={() => setShowCommissionForm(!showCommissionForm)} className="bg-gold-600 hover:bg-gold-700">
+          <Button onClick={() => setShowCommissionForm(!showCommissionForm)} className="btn-gold">
             <Plus className="h-4 w-4 mr-2" />
             Log Commission
           </Button>
