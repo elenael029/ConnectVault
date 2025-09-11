@@ -1312,46 +1312,216 @@ const Tasks = () => (
   </Layout>
 );
 
-const PromoLinks = () => (
-  <Layout title="Promo Links & Commissions">
-    <div className="flex justify-between items-center mb-8">
-      <div>
-        <Button variant="outline" onClick={() => window.history.back()} className="mb-4 btn-secondary-gold">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Dashboard
+const PromoLinks = () => {
+  const [promoLinks, setPromoLinks] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState({
+    name: '',
+    destination_url: '',
+    notes: '',
+    active: true
+  });
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchPromoLinks();
+  }, []);
+
+  const fetchPromoLinks = async () => {
+    try {
+      // For now, use localStorage to store promo links
+      const stored = localStorage.getItem('promo-links');
+      if (stored) {
+        setPromoLinks(JSON.parse(stored));
+      }
+    } catch (error) {
+      console.error('Error fetching promo links:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Basic URL validation
+    try {
+      new URL(formData.destination_url);
+    } catch {
+      toast({
+        title: "Invalid URL",
+        description: "Please enter a valid URL",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.name.trim()) {
+      toast({
+        title: "Missing Name",
+        description: "Please enter a name for the promo link",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newLink = {
+      id: Date.now().toString(),
+      ...formData,
+      created_at: new Date().toISOString()
+    };
+
+    const updatedLinks = [...promoLinks, newLink];
+    setPromoLinks(updatedLinks);
+    localStorage.setItem('promo-links', JSON.stringify(updatedLinks));
+
+    toast({
+      title: "Success",
+      description: "Promo link added successfully",
+    });
+
+    setFormData({ name: '', destination_url: '', notes: '', active: true });
+    setShowForm(false);
+  };
+
+  const toggleActive = (id) => {
+    const updatedLinks = promoLinks.map(link => 
+      link.id === id ? { ...link, active: !link.active } : link
+    );
+    setPromoLinks(updatedLinks);
+    localStorage.setItem('promo-links', JSON.stringify(updatedLinks));
+  };
+
+  return (
+    <Layout title="Promo Links">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <Button variant="outline" onClick={() => navigate('/dashboard')} className="mb-4 btn-secondary-gold">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+          <h2 className="text-3xl font-bold text-primary-navy">Promo Links</h2>
+          <p className="text-text-secondary">Manage your promotional links</p>
+        </div>
+        <Button onClick={() => setShowForm(true)} className="btn-secondary-gold">
+          <Plus className="h-4 w-4 mr-2" />
+          Add Promo Link
         </Button>
-        <h2 className="text-3xl font-bold text-primary-navy">Promo Links & Commissions</h2>
-        <p className="text-text-secondary">Manage your promotional links and track commissions</p>
       </div>
-      <Button className="btn-secondary-gold">
-        <Plus className="h-4 w-4 mr-2" />
-        Add Promo Link
-      </Button>
-    </div>
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+      {showForm && (
+        <Card className="premium-card mb-6">
+          <CardHeader>
+            <CardTitle className="text-primary-navy">Add New Promo Link</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Name *</label>
+                <Input
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  placeholder="e.g., Summer Sale Campaign"
+                  required
+                  className="form-input"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Destination URL *</label>
+                <Input
+                  type="url"
+                  value={formData.destination_url}
+                  onChange={(e) => setFormData({...formData, destination_url: e.target.value})}
+                  placeholder="https://example.com/offer"
+                  required
+                  className="form-input"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Notes</label>
+                <Textarea
+                  value={formData.notes}
+                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                  placeholder="Optional notes about this promo link"
+                  className="form-input"
+                  rows="3"
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="active"
+                  checked={formData.active}
+                  onChange={(e) => setFormData({...formData, active: e.target.checked})}
+                  className="rounded"
+                />
+                <label htmlFor="active" className="text-sm font-medium text-text-primary">Active</label>
+              </div>
+              <div className="flex space-x-4">
+                <Button type="submit" className="btn-secondary-gold">
+                  Add Link
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
       <Card className="premium-card">
         <CardHeader>
           <CardTitle className="text-primary-navy">Your Promo Links</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-gray-500">
-            No promo links yet. Create your first promotional link to get started!
-          </div>
+          {loading ? (
+            <div className="text-center py-8">Loading...</div>
+          ) : promoLinks.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              No promo links yet. Add your first promotional link to get started!
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {promoLinks.map((link) => (
+                <div key={link.id} className="border rounded-lg p-4 flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <h3 className="font-semibold text-lg">{link.name}</h3>
+                      <Badge variant={link.active ? "default" : "secondary"}>
+                        {link.active ? "Active" : "Inactive"}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-blue-600 mb-2">
+                      <a href={link.destination_url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                        {link.destination_url}
+                      </a>
+                    </p>
+                    {link.notes && <p className="text-sm text-gray-600">{link.notes}</p>}
+                    <p className="text-xs text-gray-400 mt-2">
+                      Created: {new Date(link.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => toggleActive(link.id)}
+                    >
+                      {link.active ? "Deactivate" : "Activate"}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
-      <Card className="premium-card">
-        <CardHeader>
-          <CardTitle className="text-primary-navy">Commission Tracking</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8 text-gray-500">
-            No commissions recorded yet.
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  </Layout>
-);
+    </Layout>
+  );
+};
 
 const MarketingVault = () => (
   <Layout title="Marketing Vault">
