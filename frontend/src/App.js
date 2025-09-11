@@ -625,44 +625,46 @@ const Dashboard = () => {
       </div>
 
       {/* Quick Actions */}
-      <Card className="border-navy-200">
-        <CardHeader>
-          <CardTitle className="text-navy-900">Quick Actions</CardTitle>
-          <CardDescription>Get started with your CRM tasks</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Button 
-              className="bg-navy-600 hover:bg-navy-700 text-white h-auto py-4 px-6 flex flex-col items-center space-y-2"
-              onClick={() => navigate('/contacts')}
-            >
-              <Users className="h-6 w-6" />
-              <span>Contacts</span>
-            </Button>
-            <Button 
-              className="bg-gold-600 hover:bg-gold-700 text-white h-auto py-4 px-6 flex flex-col items-center space-y-2"
-              onClick={() => navigate('/offers')}
-            >
-              <Target className="h-6 w-6" />
-              <span>Offers</span>
-            </Button>
-            <Button 
-              className="bg-navy-600 hover:bg-navy-700 text-white h-auto py-4 px-6 flex flex-col items-center space-y-2"
-              onClick={() => navigate('/tasks')}
-            >
-              <Calendar className="h-6 w-6" />
-              <span>Tasks</span>
-            </Button>
-            <Button 
-              className="bg-gold-600 hover:bg-gold-700 text-white h-auto py-4 px-6 flex flex-col items-center space-y-2"
-              onClick={() => navigate('/marketing-vault')}
-            >
-              <Mail className="h-6 w-6" />
-              <span>Marketing Vault</span>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="bg-cream-100 rounded-xl p-8">
+        <Card className="border-navy-200 bg-white shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-navy-900 text-2xl">Quick Actions</CardTitle>
+            <CardDescription className="text-navy-600">Get started with your CRM tasks</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <Button 
+                className="btn-navy h-auto py-6 px-6 flex flex-col items-center space-y-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                onClick={() => navigate('/contacts')}
+              >
+                <Users className="h-8 w-8" />
+                <span className="text-lg font-semibold">Contacts</span>
+              </Button>
+              <Button 
+                className="btn-gold h-auto py-6 px-6 flex flex-col items-center space-y-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                onClick={() => navigate('/offers')}
+              >
+                <Target className="h-8 w-8" />
+                <span className="text-lg font-semibold">Offers</span>
+              </Button>
+              <Button 
+                className="btn-navy h-auto py-6 px-6 flex flex-col items-center space-y-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                onClick={() => navigate('/tasks')}
+              >
+                <Calendar className="h-8 w-8" />
+                <span className="text-lg font-semibold">Tasks</span>
+              </Button>
+              <Button 
+                className="btn-gold h-auto py-6 px-6 flex flex-col items-center space-y-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                onClick={() => navigate('/marketing-vault')}
+              >
+                <Mail className="h-8 w-8" />
+                <span className="text-lg font-semibold">Marketing Vault</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </Layout>
   );
 };
