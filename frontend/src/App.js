@@ -1137,8 +1137,8 @@ const Offers = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
-          <h2 className="text-3xl font-bold text-navy-900">Offers & Commissions</h2>
-          <p className="text-navy-600">Manage your offers and track commissions</p>
+          <h2 className="text-3xl font-bold text-navy-900">Promo Links & Commissions</h2>
+          <p className="text-navy-600">Manage your promotional links and track commissions</p>
         </div>
         <div className="flex space-x-2">
           <Button onClick={() => setShowOfferForm(!showOfferForm)} className="btn-gold">
