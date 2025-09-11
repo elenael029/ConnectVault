@@ -171,7 +171,7 @@
     "body": "Since you grabbed {{product_name}}, you might love {{upsell_offer}} — it helps you {{extra_outcome}} faster. Special upgrade link: {{link}}."
   },
   {
-    "id": "reactivation-1",
+    "id": "reactivation-email-1",
     "type": "email",
     "title": "Reactivation",
     "goal": "Re-engage inactive users",
