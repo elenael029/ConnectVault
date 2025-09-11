@@ -145,28 +145,55 @@ body {
   transform: translateY(-4px) !important;
 }
 
+/* Dashboard Tile Styles */
 .dashboard-tile-navy {
-  background-color: var(--primary-navy) !important;
+  background: var(--primary-navy) !important;
   color: white !important;
-  box-shadow: 0 4px 6px -1px rgba(11, 42, 74, 0.15) !important;
+  border: none !important;
+  height: auto !important;
+  padding: 2rem 1.5rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 2px 4px rgba(0, 51, 102, 0.15) !important;
+  min-height: 140px !important;
+  text-align: center !important;
 }
 
 .dashboard-tile-navy:hover {
-  background-color: var(--primary-navy-hover) !important;
+  background: var(--primary-navy-hover) !important;
   color: white !important;
-  box-shadow: 0 12px 20px -5px rgba(11, 42, 74, 0.25) !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 16px rgba(0, 51, 102, 0.25) !important;
 }
 
 .dashboard-tile-gold {
-  background-color: var(--secondary-gold) !important;
+  background: var(--secondary-gold) !important;
   color: var(--primary-navy) !important;
-  box-shadow: 0 4px 6px -1px rgba(255, 215, 0, 0.15) !important;
+  border: none !important;
+  height: auto !important;
+  padding: 2rem 1.5rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 2px 4px rgba(255, 215, 0, 0.15) !important;
+  min-height: 140px !important;
+  text-align: center !important;
 }
 
 .dashboard-tile-gold:hover {
-  background-color: var(--secondary-gold-hover) !important;
+  background: var(--secondary-gold-hover) !important;
   color: var(--primary-navy) !important;
-  box-shadow: 0 12px 20px -5px rgba(255, 215, 0, 0.25) !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 16px rgba(255, 215, 0, 0.25) !important;
 }
 
 /* Quick Access Strip */
