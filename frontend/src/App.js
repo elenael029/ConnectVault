@@ -87,6 +87,9 @@ const AuthProvider = ({ children }) => {
       setToken(access_token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
       
+      // Force page refresh to ensure state updates properly
+      window.location.href = '/dashboard';
+      
       return { success: true };
     } catch (error) {
       return { 
