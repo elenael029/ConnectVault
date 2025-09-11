@@ -74,6 +74,13 @@ body {
 .bg-gold-800 { background-color: var(--gold-800); }
 .bg-gold-900 { background-color: var(--gold-900); }
 
+.bg-cream-50 { background-color: var(--cream-50); }
+.bg-cream-100 { background-color: var(--cream-100); }
+.bg-cream-200 { background-color: var(--cream-200); }
+.bg-cream-300 { background-color: var(--cream-300); }
+.bg-cream-400 { background-color: var(--cream-400); }
+.bg-cream-500 { background-color: var(--cream-500); }
+
 .text-navy-50 { color: var(--navy-50); }
 .text-navy-100 { color: var(--navy-100); }
 .text-navy-200 { color: var(--navy-200); }
