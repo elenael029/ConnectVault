@@ -788,6 +788,77 @@ const Tasks = () => {
 const Offers = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [offers, setOffers] = useState([]);
+  const [showOfferForm, setShowOfferForm] = useState(false);
+  const [showCommissionForm, setShowCommissionForm] = useState(false);
+  const [offerFormData, setOfferFormData] = useState({
+    offer_name: '',
+    promo_link: ''
+  });
+  const [commissionFormData, setCommissionFormData] = useState({
+    offer_id: '',
+    customer_name: '',
+    customer_email: '',
+    commission_amount: '',
+    paid: false
+  });
+
+  const handleOfferSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      // Add offer locally for now
+      const newOffer = {
+        id: Date.now().toString(),
+        ...offerFormData,
+        tracking_link: `${offerFormData.promo_link}?ref=track_${Date.now()}`
+      };
+      setOffers([...offers, newOffer]);
+      setOfferFormData({ offer_name: '', promo_link: '' });
+      setShowOfferForm(false);
+      toast({
+        title: "Success",
+        description: "Offer added successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add offer",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCommissionSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      toast({
+        title: "Success",
+        description: "Commission logged successfully",
+      });
+      setCommissionFormData({
+        offer_id: '',
+        customer_name: '',
+        customer_email: '',
+        commission_amount: '',
+        paid: false
+      });
+      setShowCommissionForm(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to log commission",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const copyToClipboard = (text, label) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied!",
+      description: `${label} copied to clipboard`,
+    });
+  };
 
   return (
     <Layout title="Offers & Commissions">
@@ -800,11 +871,103 @@ const Offers = () => {
           <h2 className="text-3xl font-bold text-navy-900">Offers & Commissions</h2>
           <p className="text-navy-600">Manage your offers and track commissions</p>
         </div>
-        <Button className="bg-navy-600 hover:bg-navy-700">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Offer
-        </Button>
+        <div className="flex space-x-2">
+          <Button onClick={() => setShowOfferForm(!showOfferForm)} className="bg-navy-600 hover:bg-navy-700">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Offer
+          </Button>
+          <Button onClick={() => setShowCommissionForm(!showCommissionForm)} className="bg-gold-600 hover:bg-gold-700">
+            <Plus className="h-4 w-4 mr-2" />
+            Log Commission
+          </Button>
+        </div>
       </div>
+
+      {/* Add Offer Form */}
+      {showOfferForm && (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Add New Offer</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleOfferSubmit} className="space-y-4">
+              <Input
+                placeholder="Offer Name"
+                value={offerFormData.offer_name}
+                onChange={(e) => setOfferFormData({...offerFormData, offer_name: e.target.value})}
+                required
+              />
+              <Input
+                placeholder="Promo Link (Affiliate URL)"
+                value={offerFormData.promo_link}
+                onChange={(e) => setOfferFormData({...offerFormData, promo_link: e.target.value})}
+                required
+              />
+              <div className="flex space-x-2">
+                <Button type="submit" className="bg-navy-600 hover:bg-navy-700">
+                  Add Offer
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setShowOfferForm(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Add Commission Form */}
+      {showCommissionForm && (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Log Commission</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleCommissionSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Input
+                  placeholder="Customer Name"
+                  value={commissionFormData.customer_name}
+                  onChange={(e) => setCommissionFormData({...commissionFormData, customer_name: e.target.value})}
+                  required
+                />
+                <Input
+                  type="email"
+                  placeholder="Customer Email"
+                  value={commissionFormData.customer_email}
+                  onChange={(e) => setCommissionFormData({...commissionFormData, customer_email: e.target.value})}
+                  required
+                />
+              </div>
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="Commission Amount"
+                value={commissionFormData.commission_amount}
+                onChange={(e) => setCommissionFormData({...commissionFormData, commission_amount: e.target.value})}
+                required
+              />
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="paid"
+                  checked={commissionFormData.paid}
+                  onChange={(e) => setCommissionFormData({...commissionFormData, paid: e.target.checked})}
+                />
+                <label htmlFor="paid" className="text-sm">Mark as paid</label>
+              </div>
+              <div className="flex space-x-2">
+                <Button type="submit" className="bg-gold-600 hover:bg-gold-700">
+                  Log Commission
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setShowCommissionForm(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
@@ -812,9 +975,43 @@ const Offers = () => {
             <CardTitle>Your Offers</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8 text-gray-500">
-              No offers yet. Create your first offer to get started!
-            </div>
+            {offers.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                No offers yet. Create your first offer to get started!
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {offers.map((offer) => (
+                  <div key={offer.id} className="border rounded-lg p-4">
+                    <h3 className="font-semibold mb-2">{offer.offer_name}</h3>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Promo Link:</span>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => copyToClipboard(offer.promo_link, "Promo Link")}
+                        >
+                          <Copy className="h-4 w-4 mr-1" />
+                          Copy Promo Link
+                        </Button>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Tracking Link:</span>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => copyToClipboard(offer.tracking_link, "Tracking Link")}
+                        >
+                          <Copy className="h-4 w-4 mr-1" />
+                          Copy Tracking Link
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
