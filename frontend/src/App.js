@@ -1584,13 +1584,13 @@ const ProtectedRoute = ({ children }) => {
 
 // Public Route Component
 const PublicRoute = ({ children }) => {
-  const { token, loading } = useAuth();
+  const { token, user, loading } = useAuth();
   
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
   
-  return token ? <Navigate to="/dashboard" /> : children;
+  return (token && user) ? <Navigate to="/dashboard" /> : children;
 };
 
 // Main App Component
