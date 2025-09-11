@@ -19,10 +19,17 @@
   --gold-300: #fde68a;
   --gold-400: #fcd34d;
   --gold-500: #FFD700;
-  --gold-600: #d97706;
-  --gold-700: #b45309;
-  --gold-800: #92400e;
-  --gold-900: #78350f;
+  --gold-600: #e6c200;
+  --gold-700: #b8a000;
+  --gold-800: #8a7700;
+  --gold-900: #5c4f00;
+  
+  --cream-50: #fefefe;
+  --cream-100: #FAF0DE;
+  --cream-200: #f5e6c8;
+  --cream-300: #f0dcb2;
+  --cream-400: #ebd29c;
+  --cream-500: #e6c885;
 }
 
 /* Global styles */
