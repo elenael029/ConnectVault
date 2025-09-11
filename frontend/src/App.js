@@ -722,14 +722,14 @@ const Contacts = () => {
     <Layout title="Contacts">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <Button variant="outline" onClick={() => navigate('/dashboard')} className="mb-4">
+          <Button variant="outline" onClick={() => navigate('/dashboard')} className="mb-4 btn-navy">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
           <h2 className="text-3xl font-bold text-navy-900">Contacts</h2>
           <p className="text-navy-600">Manage your contacts and outreach</p>
         </div>
-        <Button onClick={() => setShowForm(!showForm)} className="bg-navy-600 hover:bg-navy-700">
+        <Button onClick={() => setShowForm(!showForm)} className="btn-navy">
           <Plus className="h-4 w-4 mr-2" />
           Add Contact
         </Button>
