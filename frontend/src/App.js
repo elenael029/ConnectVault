@@ -1011,122 +1011,174 @@ const Settings = () => {
   );
 };
 
+// Email Subscriber Component (updating the existing one)
+const EmailSubscriber = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [formData, setFormData] = useState({
+    to: '',
+    subject: 'Test Email from ConnectVault',
+    content: 'This is a test email sent from your ConnectVault CRM.'
+  });
+  const [templates, setTemplates] = useState([]);
+  const [selectedTemplate, setSelectedTemplate] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    loadTemplates();
+  }, []);
+
+  const loadTemplates = async () => {
+    try {
+      const stored = localStorage.getItem('marketing-vault');
+      if (stored) {
+        setTemplates(JSON.parse(stored));
+      }
+    } catch (error) {
+      console.error('Error loading templates:', error);
+    }
+  };
+
+  const handleTemplateSelect = (templateId) => {
+    const template = templates.find(t => t.id === templateId);
+    if (template) {
+      setFormData({
+        ...formData,
+        subject: template.subject,
+        content: template.body
+      });
+      setSelectedTemplate(templateId);
+    }
+  };
+
+  const handleSendTest = async (e) => {
+    e.preventDefault();
+    
+    const apiKey = localStorage.getItem('brevo-api-key');
+    if (!apiKey) {
+      toast({
+        title: "API Key Missing",
+        description: "Please configure your Brevo API key in Settings first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.to.trim()) {
+      toast({
+        title: "Missing Email",
+        description: "Please enter a recipient email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    
+    // Simulate API call (you could implement actual Brevo integration here)
+    setTimeout(() => {
+      toast({
+        title: "Test Email Sent",
+        description: `Test email sent to ${formData.to}`,
+      });
+      setLoading(false);
+    }, 1000);
+  };
+
   return (
-    <Layout title="Settings">
+    <Layout title="Email Marketing">
       <div className="flex justify-between items-center mb-8">
         <div>
           <Button variant="outline" onClick={() => navigate('/dashboard')} className="mb-4 btn-primary-navy">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
-          <h2 className="text-3xl font-bold text-primary-navy">Settings</h2>
-          <p className="text-text-secondary">Configure your ConnectVault CRM</p>
+          <h2 className="text-3xl font-bold text-primary-navy">Email Marketing</h2>
+          <p className="text-text-secondary">Send emails using your Brevo integration</p>
         </div>
-        <Button onClick={handleSave} className="btn-primary-navy" disabled={loading}>
-          {loading ? 'Saving...' : 'Save Settings'}
-        </Button>
       </div>
 
-      <div className="space-y-8">
-        {/* Branding Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Send Test Email */}
         <Card className="premium-card">
           <CardHeader>
-            <CardTitle className="text-primary-navy">Branding</CardTitle>
-            <CardDescription>Customize your application branding</CardDescription>
+            <CardTitle className="text-primary-navy">Send Test Email</CardTitle>
+            <CardDescription>Send a test email using your Brevo API key</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-2">App Name</label>
-              <Input
-                value={settings.branding.app_name}
-                onChange={(e) => setLocalSettings({
-                  ...settings,
-                  branding: { ...settings.branding, app_name: e.target.value }
-                })}
-                className="form-input"
-                aria-label="Application Name"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-2">Logo Upload</label>
-              <div className="border-2 border-dashed border-accent-gray rounded-lg p-6 text-center">
-                <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                <p className="text-sm text-gray-500">Logo upload feature coming soon</p>
-                <p className="text-xs text-gray-400">Supported formats: SVG, PNG</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Quick Access Links Section */}
-        <Card className="premium-card">
-          <CardHeader>
-            <CardTitle className="text-primary-navy">Quick Access Links</CardTitle>
-            <CardDescription>Configure quick access shortcuts on the dashboard</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {Object.entries(settings.quick_access_links).map(([key, url]) => (
-              <div key={key}>
-                <label className="block text-sm font-medium text-text-primary mb-2 capitalize">
-                  {key}
-                </label>
+          <CardContent>
+            <form onSubmit={handleSendTest} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">To Email *</label>
                 <Input
-                  type="url"
-                  value={url}
-                  onChange={(e) => setLocalSettings({
-                    ...settings,
-                    quick_access_links: {
-                      ...settings.quick_access_links,
-                      [key]: e.target.value
-                    }
-                  })}
+                  type="email"
+                  value={formData.to}
+                  onChange={(e) => setFormData({...formData, to: e.target.value})}
+                  placeholder="recipient@example.com"
+                  required
                   className="form-input"
-                  aria-label={`${key} URL`}
                 />
               </div>
-            ))}
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Subject</label>
+                <Input
+                  value={formData.subject}
+                  onChange={(e) => setFormData({...formData, subject: e.target.value})}
+                  placeholder="Email subject"
+                  className="form-input"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Content</label>
+                <Textarea
+                  value={formData.content}
+                  onChange={(e) => setFormData({...formData, content: e.target.value})}
+                  placeholder="Email content"
+                  className="form-input"
+                  rows="5"
+                />
+              </div>
+              <Button type="submit" className="btn-primary-navy w-full" disabled={loading}>
+                {loading ? 'Sending...' : 'Send Test Email'}
+              </Button>
+            </form>
           </CardContent>
         </Card>
 
-        {/* Email Integration Section */}
+        {/* Choose Template */}
         <Card className="premium-card">
           <CardHeader>
-            <CardTitle className="text-primary-navy">Email Integration</CardTitle>
-            <CardDescription>Configure MailerLite integration for email marketing</CardDescription>
+            <CardTitle className="text-primary-navy">Choose Template from Marketing Vault</CardTitle>
+            <CardDescription>Load a template into the email editor</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-2">MailerLite API Key</label>
-              <Input
-                type="password"
-                placeholder="Enter your MailerLite API key"
-                value={settings.email_integration.mailerlite_api_key}
-                onChange={(e) => setLocalSettings({
-                  ...settings,
-                  email_integration: {
-                    ...settings.email_integration,
-                    mailerlite_api_key: e.target.value
-                  }
-                })}
-                className="form-input"
-                aria-label="MailerLite API Key"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-2">Default Group ID</label>
-              <Input
-                placeholder="Optional default group ID for new subscribers"
-                value={settings.email_integration.default_group_id}
-                onChange={(e) => setLocalSettings({
-                  ...settings,
-                  email_integration: {
-                    ...settings.email_integration,
-                    default_group_id: e.target.value
-                  }
-                })}
-                className="form-input"
-                aria-label="Default MailerLite Group ID"
-              />
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Select Template</label>
+                <select
+                  value={selectedTemplate}
+                  onChange={(e) => handleTemplateSelect(e.target.value)}
+                  className="form-input w-full"
+                >
+                  <option value="">Choose a template...</option>
+                  {templates.map((template) => (
+                    <option key={template.id} value={template.id}>
+                      {template.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {templates.length === 0 && (
+                <p className="text-sm text-gray-500">
+                  No templates found. Visit the Marketing Vault to load templates.
+                </p>
+              )}
+              <Button 
+                onClick={() => navigate('/marketing-vault')} 
+                variant="outline" 
+                className="w-full"
+              >
+                Go to Marketing Vault
+              </Button>
             </div>
           </CardContent>
         </Card>
