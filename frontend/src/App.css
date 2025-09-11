@@ -174,17 +174,17 @@ body {
   background: white;
   border: 1px solid var(--accent-gray);
   border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 2px 4px rgba(11, 42, 74, 0.05);
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 51, 102, 0.05);
   margin-bottom: 2rem;
 }
 
 .quick-access-btn {
-  background: var(--accent-gray) !important;
-  color: var(--text-secondary) !important;
-  border: none !important;
+  background: var(--bg-cream) !important;
+  color: var(--primary-navy) !important;
+  border: 1px solid var(--accent-gray) !important;
   padding: 0.5rem 1rem !important;
-  border-radius: 8px !important;
+  border-radius: 20px !important;
   font-size: 0.875rem !important;
   font-weight: 500 !important;
   transition: all 0.2s ease !important;
@@ -192,12 +192,14 @@ body {
   display: inline-flex !important;
   align-items: center !important;
   gap: 0.5rem !important;
+  box-shadow: 0 1px 3px rgba(0, 51, 102, 0.1) !important;
 }
 
 .quick-access-btn:hover {
   background: var(--primary-navy) !important;
   color: white !important;
   transform: translateY(-1px) !important;
+  box-shadow: 0 2px 6px rgba(0, 51, 102, 0.15) !important;
 }
 
 /* Cards & Components */
