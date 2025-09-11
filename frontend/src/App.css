@@ -60,25 +60,31 @@ body {
 .connectvault-header {
   background: white;
   border-bottom: 2px solid var(--accent-gray);
-  box-shadow: 0 2px 8px rgba(11, 42, 74, 0.08);
+  box-shadow: 0 2px 4px rgba(0, 51, 102, 0.08);
 }
 
 .connectvault-logo {
-  height: 32px;
+  height: 30px;
   width: auto;
   object-fit: contain;
 }
 
 .connectvault-text-logo {
-  font-size: 1.5rem;
+  font-size: 1.375rem;
   font-weight: 700;
   color: var(--primary-navy);
   text-decoration: none;
 }
 
-/* Dashboard Gradient Background */
-.dashboard-gradient-bg {
-  background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+@media (max-width: 768px) {
+  .connectvault-text-logo {
+    font-size: 1.125rem;
+  }
+}
+
+/* Dashboard Background */
+.dashboard-bg {
+  background: var(--bg-cream);
   min-height: calc(100vh - 80px);
 }
 
