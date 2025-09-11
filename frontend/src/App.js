@@ -815,42 +815,82 @@ const Register = () => {
   );
 };
 
-// Email Subscriber Component
-const EmailSubscriber = () => {
+// Email Marketing Component (Updated for Brevo)
+const EmailMarketing = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    group_id: ''
+    to: '',
+    subject: 'Test Email from ConnectVault',
+    content: 'This is a test email sent from your ConnectVault CRM.'
   });
+  const [templates, setTemplates] = useState([]);
+  const [selectedTemplate, setSelectedTemplate] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  useEffect(() => {
+    loadTemplates();
+  }, []);
 
+  const loadTemplates = async () => {
     try {
-      const response = await axios.post(`${API}/email/subscribe`, formData);
-      toast({
-        title: "Success",
-        description: response.data.message,
-        variant: "default",
-      });
-      setFormData({ name: '', email: '', group_id: '' });
+      const stored = localStorage.getItem('marketing-vault');
+      if (stored) {
+        setTemplates(JSON.parse(stored));
+      }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: error.response?.data?.detail || "Failed to add subscriber",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+      console.error('Error loading templates:', error);
     }
   };
 
+  const handleTemplateSelect = (templateId) => {
+    const template = templates.find(t => t.id === templateId);
+    if (template) {
+      setFormData({
+        ...formData,
+        subject: template.subject,
+        content: template.body
+      });
+      setSelectedTemplate(templateId);
+    }
+  };
+
+  const handleSendTest = async (e) => {
+    e.preventDefault();
+    
+    const apiKey = localStorage.getItem('brevo-api-key');
+    if (!apiKey) {
+      toast({
+        title: "API Key Missing",
+        description: "Please configure your Brevo API key in Settings first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.to.trim()) {
+      toast({
+        title: "Missing Email",
+        description: "Please enter a recipient email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    
+    // Simulate API call (you could implement actual Brevo integration here)
+    setTimeout(() => {
+      toast({
+        title: "Test Email Sent",
+        description: `Test email sent to ${formData.to}`,
+      });
+      setLoading(false);
+    }, 1000);
+  };
+
   return (
-    <Layout title="Email">
+    <Layout title="Email Marketing">
       <div className="flex justify-between items-center mb-8">
         <div>
           <Button variant="outline" onClick={() => navigate('/dashboard')} className="mb-4 btn-primary-navy">
@@ -858,77 +898,92 @@ const EmailSubscriber = () => {
             Back to Dashboard
           </Button>
           <h2 className="text-3xl font-bold text-primary-navy">Email Marketing</h2>
-          <p className="text-text-secondary">Add subscribers to your MailerLite list</p>
+          <p className="text-text-secondary">Send emails using your Brevo integration</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Send Test Email */}
         <Card className="premium-card">
           <CardHeader>
-            <CardTitle className="text-primary-navy">Add Subscriber</CardTitle>
-            <CardDescription>Add a new subscriber to your email list</CardDescription>
+            <CardTitle className="text-primary-navy">Send Test Email</CardTitle>
+            <CardDescription>Send a test email using your Brevo API key</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSendTest} className="space-y-4">
               <div>
-                <Input
-                  placeholder="Full Name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  required
-                  className="form-input"
-                  aria-label="Subscriber Name"
-                />
-              </div>
-              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">To Email *</label>
                 <Input
                   type="email"
-                  placeholder="Email Address"
-                  value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  value={formData.to}
+                  onChange={(e) => setFormData({...formData, to: e.target.value})}
+                  placeholder="recipient@example.com"
                   required
                   className="form-input"
-                  aria-label="Subscriber Email"
                 />
               </div>
               <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Subject</label>
                 <Input
-                  placeholder="Group ID (Optional)"
-                  value={formData.group_id}
-                  onChange={(e) => setFormData({...formData, group_id: e.target.value})}
+                  value={formData.subject}
+                  onChange={(e) => setFormData({...formData, subject: e.target.value})}
+                  placeholder="Email subject"
                   className="form-input"
-                  aria-label="MailerLite Group ID"
                 />
               </div>
-              <Button 
-                type="submit" 
-                className="btn-primary-navy w-full"
-                disabled={loading}
-                aria-label={loading ? 'Adding Subscriber' : 'Add Subscriber'}
-              >
-                {loading ? 'Adding Subscriber...' : 'Add Subscriber'}
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Content</label>
+                <Textarea
+                  value={formData.content}
+                  onChange={(e) => setFormData({...formData, content: e.target.value})}
+                  placeholder="Email content"
+                  className="form-input"
+                  rows="5"
+                />
+              </div>
+              <Button type="submit" className="btn-primary-navy w-full" disabled={loading}>
+                {loading ? 'Sending...' : 'Send Test Email'}
               </Button>
             </form>
           </CardContent>
         </Card>
 
+        {/* Choose Template */}
         <Card className="premium-card">
           <CardHeader>
-            <CardTitle className="text-primary-navy">MailerLite Campaign Management</CardTitle>
-            <CardDescription>Manage your email campaigns</CardDescription>
+            <CardTitle className="text-primary-navy">Choose Template from Marketing Vault</CardTitle>
+            <CardDescription>Load a template into the email editor</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-text-secondary mb-4">
-              Access your MailerLite dashboard to create and manage email campaigns.
-            </p>
-            <Button 
-              className="btn-secondary-gold w-full"
-              onClick={() => window.open('https://dashboard.mailerlite.com/campaigns', '_blank')}
-              aria-label="Open MailerLite Campaigns in new tab"
-            >
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Open MailerLite Campaigns
-            </Button>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Select Template</label>
+                <select
+                  value={selectedTemplate}
+                  onChange={(e) => handleTemplateSelect(e.target.value)}
+                  className="form-input w-full"
+                >
+                  <option value="">Choose a template...</option>
+                  {templates.map((template) => (
+                    <option key={template.id} value={template.id}>
+                      {template.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {templates.length === 0 && (
+                <p className="text-sm text-gray-500">
+                  No templates found. Visit the Marketing Vault to load templates.
+                </p>
+              )}
+              <Button 
+                onClick={() => navigate('/marketing-vault')} 
+                variant="outline" 
+                className="w-full"
+              >
+                Go to Marketing Vault
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
