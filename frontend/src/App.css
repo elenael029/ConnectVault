@@ -390,10 +390,11 @@ button:focus {
 }
 
 .quick-actions-container {
-  background: var(--cream-100);
-  border-radius: 16px;
-  padding: 2rem;
+  background: #FAF0DE;
+  border-radius: 20px;
+  padding: 2.5rem;
   margin-bottom: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .action-button {
@@ -419,7 +420,23 @@ button:focus {
 
 .premium-card:hover {
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+}
+
+/* Professional dashboard layout */
+.dashboard-summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.dashboard-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 /* Responsive design */
