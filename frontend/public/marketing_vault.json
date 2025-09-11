@@ -1,6 +1,7 @@
 [
   {
     "id": "welcome-1",
+    "type": "email",
     "title": "Welcome Email",
     "goal": "Welcome new subscribers and set expectations",
     "when_to_send": "Immediately after signup",
@@ -9,6 +10,7 @@
   },
   {
     "id": "nurture-1",
+    "type": "email",
     "title": "Nurture Email #1 - Value Introduction",
     "goal": "Provide immediate value and build trust",
     "when_to_send": "2 days after welcome email",
@@ -17,6 +19,7 @@
   },
   {
     "id": "nurture-2",
+    "type": "email",
     "title": "Nurture Email #2 - Social Proof",
     "goal": "Build credibility through social proof and testimonials",
     "when_to_send": "5 days after welcome email",
@@ -25,6 +28,7 @@
   },
   {
     "id": "nurture-3",
+    "type": "email",
     "title": "Nurture Email #3 - Educational Content",
     "goal": "Provide educational value and position as expert",
     "when_to_send": "8 days after welcome email",
@@ -33,6 +37,7 @@
   },
   {
     "id": "nurture-4",
+    "type": "email",
     "title": "Nurture Email #4 - Behind the Scenes",
     "goal": "Build personal connection and trust",
     "when_to_send": "12 days after welcome email",
@@ -41,6 +46,7 @@
   },
   {
     "id": "reengagement-1",
+    "type": "email",
     "title": "Re-engagement Email",
     "goal": "Win back inactive subscribers",
     "when_to_send": "When subscriber hasn't opened emails in 30+ days",
@@ -49,6 +55,7 @@
   },
   {
     "id": "flash-offer-1",
+    "type": "email",
     "title": "Flash Offer Email",
     "goal": "Create urgency for limited-time offers",
     "when_to_send": "During promotional campaigns",
@@ -57,6 +64,7 @@
   },
   {
     "id": "testimonial-ask-1",
+    "type": "email",
     "title": "Testimonial Request Email",
     "goal": "Request testimonials from satisfied customers",
     "when_to_send": "After positive customer interaction or milestone",
@@ -65,6 +73,7 @@
   },
   {
     "id": "abandoned-lead-1",
+    "type": "email",
     "title": "Abandoned Lead Follow-up",
     "goal": "Re-engage leads who didn't complete signup/purchase",
     "when_to_send": "When someone starts but doesn't complete a process",
@@ -73,10 +82,221 @@
   },
   {
     "id": "thankyou-referral-1",
+    "type": "email",
     "title": "Thank You & Referral Email",
     "goal": "Thank customers and encourage referrals",
     "when_to_send": "After purchase completion or milestone achievement",
     "subject": "Thank you, {{first_name}}! + A special request...",
     "body": "Hi {{first_name}},\n\nThank you so much for your recent purchase of [PRODUCT/SERVICE]!\n\nI'm genuinely excited for you to dive in and see the results.\n\nIf you have any questions as you get started, just reply to this email. I'm here to help!\n\nNow, I have a small favor to ask...\n\nIf you know anyone who might benefit from [PRODUCT/SERVICE], would you mind sharing it with them?\n\nAs a thank you, I'll give you [REFERRAL REWARD] for each person who purchases using your link:\n\n[REFERRAL LINK]\n\nYour friends get [FRIEND BENEFIT], and you get [YOUR BENEFIT].\n\nEveryone wins! \n\nThanks again for your trust and support.\n\n{{sender_name}}\n\nP.S. Don't forget to join our private community where you can ask questions and share wins: [COMMUNITY LINK]"
+  },
+  {
+    "id": "welcome-offer-1",
+    "type": "email",
+    "title": "Welcome With Offer",
+    "goal": "Welcome new subscribers with immediate offer",
+    "when_to_send": "Immediately after signup",
+    "subject": "Welcome! Here's something special for you",
+    "body": "Hi {{first_name}}, welcome aboard! To kick things off, here's {{bonus_offer}} you can grab today. Start strong here: {{link}}."
+  },
+  {
+    "id": "problem-agitate-solve-1",
+    "type": "email",
+    "title": "Problem-Agitate-Solve",
+    "goal": "Address pain points and present solution",
+    "when_to_send": "When targeting specific problems",
+    "subject": "Tired of {{pain_point}}? Try this.",
+    "body": "Struggling with {{pain_point}}? You're not alone. That's exactly why {{product_name}} exists. See how it works here: {{link}}."
+  },
+  {
+    "id": "scarcity-alert-1",
+    "type": "email",
+    "title": "Scarcity Alert",
+    "goal": "Create urgency through scarcity",
+    "when_to_send": "Near end of limited offer",
+    "subject": "Only 48 hours left to join {{product_name}}",
+    "body": "Hi {{first_name}}, quick note: doors close in 48 hours. If {{outcome}} matters to you this month, grab your spot now: {{checkout_link}}."
+  },
+  {
+    "id": "social-proof-push-1",
+    "type": "email",
+    "title": "Social Proof Push",
+    "goal": "Leverage customer success stories",
+    "when_to_send": "When highlighting results",
+    "subject": "How {{customer_name}} hit {{result}}",
+    "body": "{{customer_name}} used {{product_name}} and achieved {{result}} in just {{timeframe}}. You can too. Here's the breakdown: {{case_link}}."
+  },
+  {
+    "id": "bonus-reminder-1",
+    "type": "email",
+    "title": "Bonus Reminder",
+    "goal": "Remind about expiring bonuses",
+    "when_to_send": "Before bonus expires",
+    "subject": "Bonus disappears tomorrow!",
+    "body": "Don't forget, {{bonus_detail}} goes away tomorrow. Secure it here before it's gone: {{link}}."
+  },
+  {
+    "id": "cart-abandonment-1",
+    "type": "email",
+    "title": "Cart Abandonment",
+    "goal": "Recover abandoned carts",
+    "when_to_send": "After cart abandonment",
+    "subject": "Did you forget this?",
+    "body": "Hey {{first_name}}, looks like you didn't finish checking out {{product_name}}. Here's your cart: {{checkout_link}}. Finish now and keep your bonus!"
+  },
+  {
+    "id": "urgency-countdown-1",
+    "type": "email",
+    "title": "Urgency Countdown",
+    "goal": "Create urgency with limited spots",
+    "when_to_send": "When spots are limited",
+    "subject": "Only 3 spots left…",
+    "body": "Hi {{first_name}}, this isn't a gimmick — only 3 seats left in {{program_name}}. Act before they're gone: {{link}}."
+  },
+  {
+    "id": "thank-you-purchase-1",
+    "type": "email",
+    "title": "Thank You for Purchase",
+    "goal": "Onboard new customers",
+    "when_to_send": "After purchase completion",
+    "subject": "You're in! What's next →",
+    "body": "Welcome aboard, {{first_name}}! Here's your access link: {{login_link}}. Step 1: Start your quick setup. Step 2: Join our community. Step 3: Celebrate!"
+  },
+  {
+    "id": "upsell-cross-sell-1",
+    "type": "email",
+    "title": "Upsell / Cross-Sell",
+    "goal": "Offer additional products to existing customers",
+    "when_to_send": "After initial purchase",
+    "subject": "Want to take this further?",
+    "body": "Since you grabbed {{product_name}}, you might love {{upsell_offer}} — it helps you {{extra_outcome}} faster. Special upgrade link: {{link}}."
+  },
+  {
+    "id": "reactivation-1",
+    "type": "email",
+    "title": "Reactivation",
+    "goal": "Re-engage inactive users",
+    "when_to_send": "When user hasn't logged in recently",
+    "subject": "Haven't seen you in a while…",
+    "body": "Hi {{first_name}}, we noticed you haven't logged in lately. Want to pick up where you left off? Here's a quick-start resource to help: {{link}}."
+  },
+  {
+    "id": "hook-1",
+    "type": "hook",
+    "title": "What nobody tells you about {{topic}}…",
+    "category": "Curiosity Gap"
+  },
+  {
+    "id": "hook-2",
+    "type": "hook",
+    "title": "The 3-minute trick that doubled my leads.",
+    "category": "Quick Win"
+  },
+  {
+    "id": "hook-3",
+    "type": "hook",
+    "title": "Stop wasting time on {{common_mistake}}.",
+    "category": "Mistake Prevention"
+  },
+  {
+    "id": "hook-4",
+    "type": "hook",
+    "title": "Here's why 90% of {{audience}} fail at {{goal}}.",
+    "category": "Problem Awareness"
+  },
+  {
+    "id": "hook-5",
+    "type": "hook",
+    "title": "Imagine hitting {{desired_result}} in 30 days…",
+    "category": "Outcome Visualization"
+  },
+  {
+    "id": "hook-6",
+    "type": "hook",
+    "title": "The hidden cost of {{problem}} nobody talks about.",
+    "category": "Hidden Truth"
+  },
+  {
+    "id": "hook-7",
+    "type": "hook",
+    "title": "One change that boosted my sales overnight.",
+    "category": "Quick Result"
+  },
+  {
+    "id": "hook-8",
+    "type": "hook",
+    "title": "How I turned {{pain_point}} into {{success_result}}.",
+    "category": "Transformation"
+  },
+  {
+    "id": "hook-9",
+    "type": "hook",
+    "title": "The shortcut to {{goal}} that actually works.",
+    "category": "Shortcut"
+  },
+  {
+    "id": "hook-10",
+    "type": "hook",
+    "title": "Proof: {{customer_name}} went from {{struggle}} to {{result}}.",
+    "category": "Social Proof"
+  },
+  {
+    "id": "prompt-1",
+    "type": "prompt",
+    "title": "Write 5 headlines for {{offer}} that highlight {{benefit}}.",
+    "category": "Headlines"
+  },
+  {
+    "id": "prompt-2",
+    "type": "prompt",
+    "title": "Draft a 3-email sequence for {{audience}} who abandoned checkout.",
+    "category": "Email Sequence"
+  },
+  {
+    "id": "prompt-3",
+    "type": "prompt",
+    "title": "Create 10 social media captions to promote {{product_name}}.",
+    "category": "Social Media"
+  },
+  {
+    "id": "prompt-4",
+    "type": "prompt",
+    "title": "Summarize {{blog_topic}} into a LinkedIn post.",
+    "category": "Content Repurposing"
+  },
+  {
+    "id": "prompt-5",
+    "type": "prompt",
+    "title": "Generate 3 TikTok script ideas to hook {{audience}} fast.",
+    "category": "Video Scripts"
+  },
+  {
+    "id": "prompt-6",
+    "type": "prompt",
+    "title": "Write a Facebook ad for {{offer}} with urgency.",
+    "category": "Ads"
+  },
+  {
+    "id": "prompt-7",
+    "type": "prompt",
+    "title": "Make a step-by-step email funnel for {{goal}}.",
+    "category": "Email Funnel"
+  },
+  {
+    "id": "prompt-8",
+    "type": "prompt",
+    "title": "Rewrite this email to sound more casual: {{paste_text}}.",
+    "category": "Tone Adjustment"
+  },
+  {
+    "id": "prompt-9",
+    "type": "prompt",
+    "title": "Generate 10 subject lines for a flash sale ending in 48 hours.",
+    "category": "Subject Lines"
+  },
+  {
+    "id": "prompt-10",
+    "type": "prompt",
+    "title": "Write a short welcome message for new subscribers of {{brand}}.",
+    "category": "Welcome Messages"
   }
 ]
