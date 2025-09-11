@@ -102,9 +102,13 @@ const AuthProvider = ({ children }) => {
         
         try {
           await axios.get(`${API}/dashboard/summary`);
+          // Token is valid, set user as authenticated
+          setUser({ authenticated: true });
         } catch (error) {
+          // Token is invalid, clear it
           localStorage.removeItem('token');
           setToken(null);
+          setUser(null);
           delete axios.defaults.headers.common['Authorization'];
         }
       }
