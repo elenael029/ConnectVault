@@ -101,3 +101,77 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Fix the critical authentication issue where users are redirected to login page despite successful backend API calls. Ensure ConnectVault logo displays correctly on login screen and dashboard header. Maintain cream/navy/gold theme consistency. Make sure ConnectVault name shows only once. Quick Access buttons should open in new tabs."
+
+backend:
+  - task: "Authentication API endpoints"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Login and register endpoints working, JWT token generation confirmed"
+
+frontend:
+  - task: "Frontend authentication flow"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/App.js"
+    stuck_count: 2
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Issue identified: login function uses window.location.href instead of React Router navigation, user state not set after token validation"
+      - working: false
+        agent: "user"
+        comment: "Users repeatedly redirected to login page despite successful login"
+
+  - task: "ConnectVault logo display"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Logo component exists and references /logo.svg file correctly"
+
+  - task: "Quick Access buttons new tab behavior"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Quick Access buttons have target='_blank' but need verification they work without popup blocking"
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Frontend authentication flow"
+    - "Quick Access buttons new tab behavior"
+  stuck_tasks:
+    - "Frontend authentication flow"
+  test_all: false
+  test_priority: "stuck_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Identified root cause of authentication issue: AuthProvider login function uses window.location.href instead of React Router navigate, and user state is never set after successful token validation. Will fix these issues first before testing."
