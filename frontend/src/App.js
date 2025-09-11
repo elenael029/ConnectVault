@@ -212,6 +212,7 @@ const ConnectVaultLogo = ({ className = "" }) => {
 
   useEffect(() => {
     // Check if logo.svg exists
+    // eslint-disable-next-line no-undef
     const img = new Image();
     img.onload = () => setLogoExists(true);
     img.onerror = () => setLogoExists(false);
