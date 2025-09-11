@@ -1203,6 +1203,52 @@ const Offers = () => {
 const MarketingVault = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState('swipes');
+  const [showForms, setShowForms] = useState({
+    swipe: false,
+    hook: false,
+    prompt: false
+  });
+
+  // State for all vaults
+  const [swipeVault, setSwipeVault] = useState([
+    {
+      id: '1',
+      subject: "Excited to connect with you 🚀",
+      body: "Hey [Name], thanks for checking this out. I'm all about helping you keep things simple, actionable, and effective. Keep an eye out—I'll be sharing resources that can help you get real traction. Talk soon!"
+    },
+    {
+      id: '2',
+      subject: "Found something worth sharing 👇",
+      body: "I don't usually recommend just anything, but this stood out. If you're serious about growing online, check this out: [Your Link]. It's straightforward, no fluff, and can help you move forward faster."
+    },
+    {
+      id: '3',
+      subject: "Quick tip you can use today",
+      body: "Here's one thing I always recommend: focus on ONE clear action at a time. Whether it's building a list, refining your pitch, or getting your offer out—clarity wins. If you need a tool to help keep things organized, here's what I use: [Your Link]."
+    }
+  ]);
+
+  const [hookVault, setHookVault] = useState([
+    { id: '1', text: "What if one small change could double your sales?" },
+    { id: '2', text: "Most marketers get this wrong… here's the fix 👇" },
+    { id: '3', text: "Stop wasting hours on busy work — try this instead." },
+    { id: '4', text: "The secret I wish I knew when I started marketing online." },
+    { id: '5', text: "Want consistent leads without paid ads? Read this." }
+  ]);
+
+  const [promptVault, setPromptVault] = useState([
+    { id: '1', text: "Write a 3-part email sequence for promoting [Offer] to affiliate marketers." },
+    { id: '2', text: "Generate 5 social media captions with hooks to drive traffic to [Link]." },
+    { id: '3', text: "Rewrite this sales email in a casual, friendly tone." },
+    { id: '4', text: "Create 10 TikTok hooks for digital marketing offers." },
+    { id: '5', text: "Draft a product description for [Offer] that emphasizes simplicity and results." }
+  ]);
+
+  // Form states
+  const [swipeFormData, setSwipeFormData] = useState({ subject: '', body: '' });
+  const [hookFormData, setHookFormData] = useState({ text: '' });
+  const [promptFormData, setPromptFormData] = useState({ text: '' });
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
@@ -1212,36 +1258,69 @@ const MarketingVault = () => {
     });
   };
 
-  const swipeVault = [
-    {
-      subject: "Excited to connect with you 🚀",
-      body: "Hey [Name], thanks for checking this out. I'm all about helping you keep things simple, actionable, and effective. Keep an eye out—I'll be sharing resources that can help you get real traction. Talk soon!"
-    },
-    {
-      subject: "Found something worth sharing 👇",
-      body: "I don't usually recommend just anything, but this stood out. If you're serious about growing online, check this out: [Your Link]. It's straightforward, no fluff, and can help you move forward faster."
-    },
-    {
-      subject: "Quick tip you can use today",
-      body: "Here's one thing I always recommend: focus on ONE clear action at a time. Whether it's building a list, refining your pitch, or getting your offer out—clarity wins. If you need a tool to help keep things organized, here's what I use: [Your Link]."
+  const handleSwipeSubmit = (e) => {
+    e.preventDefault();
+    const newSwipe = {
+      id: Date.now().toString(),
+      subject: swipeFormData.subject,
+      body: swipeFormData.body
+    };
+    setSwipeVault([...swipeVault, newSwipe]);
+    setSwipeFormData({ subject: '', body: '' });
+    setShowForms({ ...showForms, swipe: false });
+    toast({
+      title: "Success",
+      description: "Swipe added successfully",
+    });
+  };
+
+  const handleHookSubmit = (e) => {
+    e.preventDefault();
+    const newHook = {
+      id: Date.now().toString(),
+      text: hookFormData.text
+    };
+    setHookVault([...hookVault, newHook]);
+    setHookFormData({ text: '' });
+    setShowForms({ ...showForms, hook: false });
+    toast({
+      title: "Success",
+      description: "Hook added successfully",
+    });
+  };
+
+  const handlePromptSubmit = (e) => {
+    e.preventDefault();
+    const newPrompt = {
+      id: Date.now().toString(),
+      text: promptFormData.text
+    };
+    setPromptVault([...promptVault, newPrompt]);
+    setPromptFormData({ text: '' });
+    setShowForms({ ...showForms, prompt: false });
+    toast({
+      title: "Success",
+      description: "Prompt added successfully",
+    });
+  };
+
+  const deleteItem = (id, type) => {
+    switch(type) {
+      case 'swipe':
+        setSwipeVault(swipeVault.filter(item => item.id !== id));
+        break;
+      case 'hook':
+        setHookVault(hookVault.filter(item => item.id !== id));
+        break;
+      case 'prompt':
+        setPromptVault(promptVault.filter(item => item.id !== id));
+        break;
     }
-  ];
-
-  const hookVault = [
-    "What if one small change could double your sales?",
-    "Most marketers get this wrong… here's the fix 👇",
-    "Stop wasting hours on busy work — try this instead.",
-    "The secret I wish I knew when I started marketing online.",
-    "Want consistent leads without paid ads? Read this."
-  ];
-
-  const promptVault = [
-    "Write a 3-part email sequence for promoting [Offer] to affiliate marketers.",
-    "Generate 5 social media captions with hooks to drive traffic to [Link].",
-    "Rewrite this sales email in a casual, friendly tone.",
-    "Create 10 TikTok hooks for digital marketing offers.",
-    "Draft a product description for [Offer] that emphasizes simplicity and results."
-  ];
+    toast({
+      title: "Deleted",
+      description: "Item removed successfully",
+    });
+  };
 
   return (
     <Layout title="Marketing Vault">
