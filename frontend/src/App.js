@@ -251,12 +251,12 @@ const ConnectVaultLogo = ({ className = "" }) => {
 // Quick Access Strip Component
 const QuickAccessStrip = () => {
   const quickLinks = [
-    { key: 'chatgpt', label: 'ChatGPT', url: 'https://chat.openai.com/' },
-    { key: 'instagram', label: 'Instagram', url: 'https://instagram.com/' },
-    { key: 'tiktok', label: 'TikTok', url: 'https://www.tiktok.com/' },
-    { key: 'youtube', label: 'YouTube', url: 'https://youtube.com/' },
-    { key: 'facebook', label: 'Facebook', url: 'https://facebook.com/' },
-    { key: 'pinterest', label: 'Pinterest', url: 'https://pinterest.com/' }
+    { key: 'chatgpt', label: 'ChatGPT', url: 'https://chat.openai.com' },
+    { key: 'instagram', label: 'Instagram', url: 'https://instagram.com' },
+    { key: 'tiktok', label: 'TikTok', url: 'https://tiktok.com' },
+    { key: 'youtube', label: 'YouTube', url: 'https://youtube.com' },
+    { key: 'facebook', label: 'Facebook', url: 'https://facebook.com' },
+    { key: 'pinterest', label: 'Pinterest', url: 'https://pinterest.com' }
   ];
 
   return (
