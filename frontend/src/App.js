@@ -1709,25 +1709,107 @@ const PromoLinks = () => {
   );
 };
 
-const MarketingVault = () => (
-  <Layout title="Marketing Vault">
-    <div className="flex justify-between items-center mb-8">
-      <div>
-        <Button variant="outline" onClick={() => window.history.back()} className="mb-4 btn-secondary-gold">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Dashboard
-        </Button>
-        <h2 className="text-3xl font-bold text-primary-navy">Marketing Vault</h2>
-        <p className="text-text-secondary">Your collection of swipes, hooks, and prompts</p>
+const MarketingVault = () => {
+  const [templates, setTemplates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    loadMarketingVault();
+  }, []);
+
+  const loadMarketingVault = async () => {
+    try {
+      // Check if we have templates in localStorage
+      let stored = localStorage.getItem('marketing-vault');
+      
+      if (!stored) {
+        // Load seed data for first time
+        const response = await fetch('/marketing_vault.json');
+        const seedData = await response.json();
+        localStorage.setItem('marketing-vault', JSON.stringify(seedData));
+        setTemplates(seedData);
+      } else {
+        setTemplates(JSON.parse(stored));
+      }
+    } catch (error) {
+      console.error('Error loading marketing vault:', error);
+      // Fallback to empty array if can't load seed data
+      setTemplates([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      // You could add a toast here
+      console.log('Copied to clipboard');
+    });
+  };
+
+  return (
+    <Layout title="Marketing Vault">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <Button variant="outline" onClick={() => navigate('/dashboard')} className="mb-4 btn-secondary-gold">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+          <h2 className="text-3xl font-bold text-primary-navy">Marketing Vault</h2>
+          <p className="text-text-secondary">Your collection of email templates and marketing content</p>
+        </div>
       </div>
-    </div>
-    <Card className="premium-card">
-      <CardContent className="text-center py-8">
-        <p className="text-gray-500">Marketing Vault coming soon with preloaded templates!</p>
-      </CardContent>
-    </Card>
-  </Layout>
-);
+
+      {loading ? (
+        <div className="text-center py-8">Loading templates...</div>
+      ) : (
+        <div className="space-y-6">
+          {templates.map((template) => (
+            <Card key={template.id} className="premium-card">
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-primary-navy">{template.title}</CardTitle>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      <Badge variant="outline">{template.goal}</Badge>
+                      <Badge variant="secondary">{template.when_to_send}</Badge>
+                    </div>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => copyToClipboard(template.subject + '\n\n' + template.body)}
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold text-sm text-gray-700 mb-1">Subject Line:</h4>
+                    <p className="text-sm bg-gray-50 p-2 rounded border">{template.subject}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-sm text-gray-700 mb-1">Email Body:</h4>
+                    <div className="text-sm bg-gray-50 p-4 rounded border whitespace-pre-wrap max-h-64 overflow-y-auto">
+                      {template.body}
+                    </div>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    <strong>Goal:</strong> {template.goal} | <strong>When to send:</strong> {template.when_to_send}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </Layout>
+  );
+};
 
 // Forgot Password Component
 const ForgotPassword = () => {
