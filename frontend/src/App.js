@@ -659,28 +659,28 @@ const Dashboard = () => {
           <CardContent className="px-8 pb-8">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <Button 
-                className="dashboard-btn btn-royal-blue"
+                className="dashboard-btn-navy"
                 onClick={() => navigate('/contacts')}
               >
                 <Users className="h-8 w-8 mb-3" />
                 <span className="text-lg font-semibold">Contacts</span>
               </Button>
               <Button 
-                className="dashboard-btn btn-polished-gold"
+                className="dashboard-btn-gold"
                 onClick={() => navigate('/offers')}
               >
                 <Target className="h-8 w-8 mb-3" />
                 <span className="text-lg font-semibold">Promo Links</span>
               </Button>
               <Button 
-                className="dashboard-btn btn-royal-blue"
+                className="dashboard-btn-navy"
                 onClick={() => navigate('/tasks')}
               >
                 <Calendar className="h-8 w-8 mb-3" />
                 <span className="text-lg font-semibold">Tasks</span>
               </Button>
               <Button 
-                className="dashboard-btn btn-polished-gold"
+                className="dashboard-btn-gold"
                 onClick={() => navigate('/marketing-vault')}
               >
                 <Mail className="h-8 w-8 mb-3" />
