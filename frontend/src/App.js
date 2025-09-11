@@ -325,13 +325,12 @@ const Layout = ({ children, title = "ConnectVault" }) => {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="min-h-screen dashboard-gradient-bg">
+    <div className="min-h-screen dashboard-bg">
       {/* Header */}
       <header className="connectvault-header">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <ConnectVaultLogo />
+            <ConnectVaultLogo />
               <div className="flex flex-col">
                 <h1 className="text-lg font-bold text-primary-navy">
                   {settings.branding.app_name}
