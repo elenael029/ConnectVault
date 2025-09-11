@@ -1445,7 +1445,7 @@ const MarketingVault = () => {
             <h3 className="text-lg font-semibold">Email Swipes</h3>
             <Button 
               onClick={() => setShowForms({ ...showForms, swipe: !showForms.swipe })}
-              className="bg-navy-600 hover:bg-navy-700"
+              className="btn-gold"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Swipe
