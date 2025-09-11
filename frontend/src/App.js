@@ -836,7 +836,10 @@ const EmailMarketing = () => {
     try {
       const stored = localStorage.getItem('marketing-vault');
       if (stored) {
-        setTemplates(JSON.parse(stored));
+        const allContent = JSON.parse(stored);
+        // Filter to only email templates
+        const emailTemplates = allContent.filter(item => item.type === 'email');
+        setTemplates(emailTemplates);
       }
     } catch (error) {
       console.error('Error loading templates:', error);
@@ -879,14 +882,49 @@ const EmailMarketing = () => {
 
     setLoading(true);
     
-    // Simulate API call (you could implement actual Brevo integration here)
-    setTimeout(() => {
-      toast({
-        title: "Test Email Sent",
-        description: `Test email sent to ${formData.to}`,
+    try {
+      // Make actual Brevo API call
+      const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'api-key': apiKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          sender: {
+            name: "ConnectVault CRM",
+            email: "noreply@connectvault.com"
+          },
+          to: [
+            {
+              email: formData.to,
+              name: "Test Recipient"
+            }
+          ],
+          subject: formData.subject,
+          textContent: formData.content
+        })
       });
+
+      if (response.ok) {
+        toast({
+          title: "Test Email Sent",
+          description: `Test email sent successfully to ${formData.to}`,
+        });
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to send email');
+      }
+    } catch (error) {
+      console.error('Brevo API error:', error);
+      toast({
+        title: "Error Sending Email",
+        description: error.message || "Failed to send test email. Please check your API key and try again.",
+        variant: "destructive",
+      });
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
