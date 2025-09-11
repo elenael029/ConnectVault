@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './com
 import { Alert, AlertDescription } from './components/ui/alert';
 import { Badge } from './components/ui/badge';
 import { Textarea } from './components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
 import { 
   Bell, 
@@ -18,15 +17,11 @@ import {
   ArrowLeft, 
   Plus, 
   Copy, 
-  Download,
   Edit,
   Trash2,
   Mail,
-  Phone,
-  MessageSquare,
   Settings,
-  ExternalLink,
-  Upload
+  ExternalLink
 } from 'lucide-react';
 import { useToast } from './hooks/use-toast';
 import { Toaster } from './components/ui/toaster';
