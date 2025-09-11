@@ -1524,7 +1524,7 @@ const MarketingVault = () => {
             <h3 className="text-lg font-semibold">Marketing Hooks</h3>
             <Button 
               onClick={() => setShowForms({ ...showForms, hook: !showForms.hook })}
-              className="bg-navy-600 hover:bg-navy-700"
+              className="btn-gold"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Hook
