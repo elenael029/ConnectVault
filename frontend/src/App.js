@@ -1115,16 +1115,16 @@ const Settings = () => {
 // Contacts Component (updated)
 const Contacts = () => {
   const [contacts, setContacts] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     platform: '',
     notes: ''
   });
-  const navigate = useNavigate();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchContacts();
@@ -1132,31 +1132,174 @@ const Contacts = () => {
 
   const fetchContacts = async () => {
     try {
-      setContacts([]);
-      setLoading(false);
+      const stored = localStorage.getItem('contacts');
+      if (stored) {
+        setContacts(JSON.parse(stored));
+      }
     } catch (error) {
-      console.error('Failed to fetch contacts:', error);
+      console.error('Error fetching contacts:', error);
+    } finally {
       setLoading(false);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
+    
+    if (!formData.name.trim() || !formData.email.trim()) {
       toast({
-        title: "Success",
-        description: "Contact added successfully",
-      });
-      setShowForm(false);
-      setFormData({ name: '', email: '', platform: '', notes: '' });
-      fetchContacts();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add contact",
+        title: "Missing Fields",
+        description: "Please enter both name and email",
         variant: "destructive",
       });
+      return;
     }
+
+    const newContact = {
+      id: Date.now().toString(),
+      ...formData,
+      created_at: new Date().toISOString()
+    };
+
+    const updatedContacts = [...contacts, newContact];
+    setContacts(updatedContacts);
+    localStorage.setItem('contacts', JSON.stringify(updatedContacts));
+
+    toast({
+      title: "Success",
+      description: "Contact added successfully",
+    });
+
+    setFormData({ name: '', email: '', platform: '', notes: '' });
+    setShowForm(false);
+  };
+
+  const handleCSVImport = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const csv = e.target.result;
+        const lines = csv.split('\n');
+        const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+        
+        // Expected headers: name, email, platform, notes
+        const expectedHeaders = ['name', 'email', 'platform', 'notes'];
+        const hasValidHeaders = expectedHeaders.every(header => 
+          headers.includes(header)
+        );
+
+        if (!hasValidHeaders) {
+          toast({
+            title: "Invalid CSV Format",
+            description: "CSV must have columns: Name, Email, Platform, Notes",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const newContacts = [];
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+          
+          const values = line.split(',').map(v => v.trim());
+          const contact = {
+            id: Date.now().toString() + i,
+            name: values[headers.indexOf('name')] || '',
+            email: values[headers.indexOf('email')] || '',
+            platform: values[headers.indexOf('platform')] || '',
+            notes: values[headers.indexOf('notes')] || '',
+            created_at: new Date().toISOString()
+          };
+          
+          if (contact.name && contact.email) {
+            newContacts.push(contact);
+          }
+        }
+
+        if (newContacts.length > 0) {
+          const updatedContacts = [...contacts, ...newContacts];
+          setContacts(updatedContacts);
+          localStorage.setItem('contacts', JSON.stringify(updatedContacts));
+          
+          toast({
+            title: "Import Successful",
+            description: `Imported ${newContacts.length} contacts`,
+          });
+        } else {
+          toast({
+            title: "No Valid Contacts",
+            description: "No valid contacts found in CSV file",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        toast({
+          title: "Import Error",
+          description: "Failed to parse CSV file",
+          variant: "destructive",
+        });
+      }
+    };
+    reader.readAsText(file);
+    
+    // Reset file input
+    event.target.value = '';
+  };
+
+  const handleCSVExport = () => {
+    if (contacts.length === 0) {
+      toast({
+        title: "No Contacts",
+        description: "No contacts to export",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const headers = ['Name', 'Email', 'Platform', 'Notes'];
+    const csvContent = [
+      headers.join(','),
+      ...contacts.map(contact => [
+        contact.name,
+        contact.email,
+        contact.platform,
+        contact.notes
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `contacts-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+
+    toast({
+      title: "Export Successful",
+      description: `Exported ${contacts.length} contacts`,
+    });
+  };
+
+  const downloadSampleCSV = () => {
+    const sampleData = [
+      ['Name', 'Email', 'Platform', 'Notes'],
+      ['John Doe', 'john@example.com', 'Instagram', 'Interested in product demo'],
+      ['Jane Smith', 'jane@example.com', 'LinkedIn', 'Follow up next week']
+    ];
+    
+    const csvContent = sampleData.map(row => row.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'contacts-sample-template.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   return (
@@ -1170,49 +1313,101 @@ const Contacts = () => {
           <h2 className="text-3xl font-bold text-primary-navy">Contacts</h2>
           <p className="text-text-secondary">Manage your contacts and outreach</p>
         </div>
-        <Button onClick={() => setShowForm(!showForm)} className="btn-primary-navy">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Contact
-        </Button>
+        <div className="flex space-x-2">
+          <Button onClick={() => setShowForm(true)} className="btn-primary-navy">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Contact
+          </Button>
+        </div>
       </div>
 
+      {/* CSV Import/Export Section */}
+      <Card className="premium-card mb-6">
+        <CardHeader>
+          <CardTitle className="text-primary-navy">Import/Export Contacts</CardTitle>
+          <CardDescription>Import contacts from CSV or export your current contacts</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-4">
+            <div>
+              <input
+                type="file"
+                accept=".csv"
+                onChange={handleCSVImport}
+                className="hidden"
+                id="csv-import"
+              />
+              <Button
+                onClick={() => document.getElementById('csv-import').click()}
+                variant="outline"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Import CSV
+              </Button>
+            </div>
+            <Button onClick={handleCSVExport} variant="outline">
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV
+            </Button>
+            <Button onClick={downloadSampleCSV} variant="outline">
+              <FileText className="h-4 w-4 mr-2" />
+              Download Sample CSV
+            </Button>
+          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            CSV format: Name, Email, Platform, Notes (headers required)
+          </p>
+        </CardContent>
+      </Card>
+
       {showForm && (
-        <Card className="mb-8 premium-card">
+        <Card className="premium-card mb-6">
           <CardHeader>
             <CardTitle className="text-primary-navy">Add New Contact</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Name *</label>
                 <Input
-                  placeholder="Name"
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  required
-                  className="form-input"
-                />
-                <Input
-                  type="email"
-                  placeholder="Email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  placeholder="Contact name"
                   required
                   className="form-input"
                 />
               </div>
-              <Input
-                placeholder="Platform (e.g., Instagram, LinkedIn)"
-                value={formData.platform}
-                onChange={(e) => setFormData({...formData, platform: e.target.value})}
-                required
-                className="form-input"
-              />
-              <Textarea
-                placeholder="Notes"
-                value={formData.notes}
-                onChange={(e) => setFormData({...formData, notes: e.target.value})}
-              />
-              <div className="flex space-x-2">
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Email *</label>
+                <Input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  placeholder="contact@example.com"
+                  required
+                  className="form-input"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Platform</label>
+                <Input
+                  value={formData.platform}
+                  onChange={(e) => setFormData({...formData, platform: e.target.value})}
+                  placeholder="Instagram, LinkedIn, etc."
+                  className="form-input"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Notes</label>
+                <Textarea
+                  value={formData.notes}
+                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                  placeholder="Notes about this contact"
+                  className="form-input"
+                  rows="3"
+                />
+              </div>
+              <div className="flex space-x-4">
                 <Button type="submit" className="btn-primary-navy">
                   Add Contact
                 </Button>
@@ -1227,33 +1422,34 @@ const Contacts = () => {
 
       <Card className="premium-card">
         <CardHeader>
-          <CardTitle className="text-primary-navy">Your Contacts</CardTitle>
+          <CardTitle className="text-primary-navy">Your Contacts ({contacts.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-8">Loading contacts...</div>
+            <div className="text-center py-8">Loading...</div>
           ) : contacts.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              No contacts yet. Add your first contact to get started!
+              No contacts yet. Add your first contact or import from CSV to get started!
             </div>
           ) : (
             <div className="space-y-4">
-              {contacts.map((contact, index) => (
-                <div key={index} className="border rounded-lg p-4">
+              {contacts.map((contact) => (
+                <div key={contact.id} className="border rounded-lg p-4">
                   <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-semibold">{contact.name}</h3>
-                      <p className="text-sm text-gray-600">{contact.email}</p>
-                      <p className="text-sm text-gray-600">{contact.platform}</p>
-                      {contact.notes && <p className="text-sm mt-2">{contact.notes}</p>}
-                    </div>
-                    <div className="flex space-x-2">
-                      <Button size="sm" variant="outline">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg">{contact.name}</h3>
+                      <p className="text-blue-600 text-sm">{contact.email}</p>
+                      {contact.platform && (
+                        <Badge variant="outline" className="mt-1">
+                          {contact.platform}
+                        </Badge>
+                      )}
+                      {contact.notes && (
+                        <p className="text-sm text-gray-600 mt-2">{contact.notes}</p>
+                      )}
+                      <p className="text-xs text-gray-400 mt-2">
+                        Added: {new Date(contact.created_at).toLocaleDateString()}
+                      </p>
                     </div>
                   </div>
                 </div>
