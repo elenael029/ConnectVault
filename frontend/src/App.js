@@ -1279,38 +1279,224 @@ const Contacts = () => {
 };
 
 // Simplified placeholder components for other pages (Tasks, PromoLinks, MarketingVault, etc.)
-const Tasks = () => (
-  <Layout title="Tasks">
-    <div className="flex justify-between items-center mb-8">
-      <div>
-        <Button variant="outline" onClick={() => window.history.back()} className="mb-4 btn-primary-navy">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Dashboard
+const Tasks = () => {
+  const [tasks, setTasks] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState({
+    title: '',
+    due_date: '',
+    notes: '',
+    priority: 'medium',
+    assignee: ''
+  });
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  const fetchTasks = async () => {
+    try {
+      const stored = localStorage.getItem('tasks');
+      if (stored) {
+        setTasks(JSON.parse(stored));
+      }
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!formData.title.trim()) {
+      toast({
+        title: "Missing Title",
+        description: "Please enter a task title",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newTask = {
+      id: Date.now().toString(),
+      ...formData,
+      status: 'pending',
+      created_at: new Date().toISOString()
+    };
+
+    const updatedTasks = [...tasks, newTask];
+    setTasks(updatedTasks);
+    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+
+    toast({
+      title: "Success",
+      description: "Task added successfully",
+    });
+
+    setFormData({ title: '', due_date: '', notes: '', priority: 'medium', assignee: '' });
+    setShowModal(false);
+  };
+
+  const moveTask = (taskId, newStatus) => {
+    const updatedTasks = tasks.map(task => 
+      task.id === taskId ? { ...task, status: newStatus } : task
+    );
+    setTasks(updatedTasks);
+    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+  };
+
+  const getTasksByStatus = (status) => {
+    return tasks.filter(task => task.status === status);
+  };
+
+  return (
+    <Layout title="Tasks">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <Button variant="outline" onClick={() => navigate('/dashboard')} className="mb-4 btn-primary-navy">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+          <h2 className="text-3xl font-bold text-primary-navy">Tasks</h2>
+          <p className="text-text-secondary">Manage your tasks and follow-ups</p>
+        </div>
+        <Button onClick={() => setShowModal(true)} className="btn-primary-navy">
+          <Plus className="h-4 w-4 mr-2" />
+          Add Task
         </Button>
-        <h2 className="text-3xl font-bold text-primary-navy">Tasks</h2>
-        <p className="text-text-secondary">Manage your tasks and follow-ups</p>
       </div>
-      <Button className="btn-primary-navy">
-        <Plus className="h-4 w-4 mr-2" />
-        Add Task
-      </Button>
-    </div>
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {['Pending', 'In Progress', 'Done'].map((status) => (
-        <Card key={status} className="premium-card">
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-gray-600">{status}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8 text-gray-500">
-              No {status.toLowerCase()} tasks
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  </Layout>
-);
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md premium-card">
+            <CardHeader>
+              <CardTitle className="text-primary-navy">Add New Task</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-2">Title *</label>
+                  <Input
+                    value={formData.title}
+                    onChange={(e) => setFormData({...formData, title: e.target.value})}
+                    placeholder="Task title"
+                    required
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-2">Due Date</label>
+                  <Input
+                    type="date"
+                    value={formData.due_date}
+                    onChange={(e) => setFormData({...formData, due_date: e.target.value})}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-2">Priority</label>
+                  <select
+                    value={formData.priority}
+                    onChange={(e) => setFormData({...formData, priority: e.target.value})}
+                    className="form-input w-full"
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-2">Assignee (Optional)</label>
+                  <Input
+                    value={formData.assignee}
+                    onChange={(e) => setFormData({...formData, assignee: e.target.value})}
+                    placeholder="Assigned to"
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-2">Notes</label>
+                  <Textarea
+                    value={formData.notes}
+                    onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                    placeholder="Task notes"
+                    className="form-input"
+                    rows="3"
+                  />
+                </div>
+                <div className="flex space-x-4">
+                  <Button type="submit" className="btn-primary-navy">
+                    Add Task
+                  </Button>
+                  <Button type="button" variant="outline" onClick={() => setShowModal(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {['pending', 'in_progress', 'done'].map((status) => (
+          <Card key={status} className="premium-card">
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-gray-600 capitalize">
+                {status.replace('_', ' ')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {getTasksByStatus(status).map((task) => (
+                  <div key={task.id} className="p-3 bg-gray-50 rounded-lg">
+                    <h4 className="font-medium">{task.title}</h4>
+                    {task.due_date && (
+                      <p className="text-xs text-gray-500">Due: {new Date(task.due_date).toLocaleDateString()}</p>
+                    )}
+                    {task.priority && (
+                      <Badge variant={task.priority === 'high' ? 'destructive' : task.priority === 'medium' ? 'default' : 'secondary'} className="mt-1">
+                        {task.priority}
+                      </Badge>
+                    )}
+                    <div className="flex space-x-1 mt-2">
+                      {status !== 'pending' && (
+                        <Button size="sm" variant="outline" onClick={() => moveTask(task.id, 'pending')}>
+                          ← Pending
+                        </Button>
+                      )}
+                      {status !== 'in_progress' && (
+                        <Button size="sm" variant="outline" onClick={() => moveTask(task.id, 'in_progress')}>
+                          → Progress
+                        </Button>
+                      )}
+                      {status !== 'done' && (
+                        <Button size="sm" variant="outline" onClick={() => moveTask(task.id, 'done')}>
+                          ✓ Done
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {getTasksByStatus(status).length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    No {status.replace('_', ' ')} tasks
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </Layout>
+  );
+};
 
 const PromoLinks = () => {
   const [promoLinks, setPromoLinks] = useState([]);
