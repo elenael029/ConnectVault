@@ -224,19 +224,19 @@ const ConnectVaultLogo = ({ className = "" }) => {
   const [logoExists, setLogoExists] = useState(false);
 
   useEffect(() => {
-    // Check if logo.svg exists
+    // Check if logo.png exists
     // eslint-disable-next-line no-undef
     const img = new Image();
     img.onload = () => setLogoExists(true);
     img.onerror = () => setLogoExists(false);
-    img.src = '/logo.svg';
+    img.src = '/logo.png';
   }, []);
   
   return (
     <div className={`flex items-center space-x-3 ${className}`}>
       {logoExists && (
         <img 
-          src="/logo.svg" 
+          src="/logo.png" 
           alt="ConnectVault" 
           className="connectvault-logo"
         />
