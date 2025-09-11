@@ -331,15 +331,6 @@ const Layout = ({ children, title = "ConnectVault" }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <ConnectVaultLogo />
-              <div className="flex flex-col">
-                <h1 className="text-lg font-bold text-primary-navy">
-                  {settings.branding.app_name}
-                </h1>
-                {title !== "Dashboard" && title !== settings.branding.app_name && (
-                  <span className="text-sm text-gray-600">{title}</span>
-                )}
-              </div>
-            </div>
             <div className="flex items-center space-x-4">
               <div className="relative">
                 <Button 
