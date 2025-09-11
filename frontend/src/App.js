@@ -237,21 +237,19 @@ const ConnectVaultLogo = ({ className = "" }) => {
 
 // Quick Access Strip Component
 const QuickAccessStrip = () => {
-  const { settings } = useSettings();
-  
   const quickLinks = [
-    { key: 'chatgpt', label: 'ChatGPT', url: settings.quick_access_links.chatgpt },
-    { key: 'instagram', label: 'Instagram', url: settings.quick_access_links.instagram },
-    { key: 'tiktok', label: 'TikTok', url: settings.quick_access_links.tiktok },
-    { key: 'youtube', label: 'YouTube', url: settings.quick_access_links.youtube },
-    { key: 'facebook', label: 'Facebook', url: settings.quick_access_links.facebook },
-    { key: 'pinterest', label: 'Pinterest', url: settings.quick_access_links.pinterest }
+    { key: 'chatgpt', label: 'ChatGPT', url: 'https://chat.openai.com/' },
+    { key: 'instagram', label: 'Instagram', url: 'https://instagram.com/' },
+    { key: 'tiktok', label: 'TikTok', url: 'https://www.tiktok.com/' },
+    { key: 'youtube', label: 'YouTube', url: 'https://youtube.com/' },
+    { key: 'facebook', label: 'Facebook', url: 'https://facebook.com/' },
+    { key: 'pinterest', label: 'Pinterest', url: 'https://pinterest.com/' }
   ];
 
   return (
     <div className="quick-access-strip">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-gray-700">Quick Access</h3>
+      <div className="flex items-center justify-between flex-wrap">
+        <h3 className="text-sm font-semibold text-gray-700 mb-2 md:mb-0">Quick Access</h3>
         <div className="flex flex-wrap gap-2">
           {quickLinks.map((link) => (
             <a
