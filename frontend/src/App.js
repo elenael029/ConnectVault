@@ -21,7 +21,10 @@ import {
   Trash2,
   Mail,
   Settings as SettingsIcon,
-  ExternalLink
+  ExternalLink,
+  Upload,
+  Download,
+  FileText
 } from 'lucide-react';
 import { useToast } from './hooks/use-toast';
 import { Toaster } from './components/ui/toaster';
