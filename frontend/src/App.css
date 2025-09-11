@@ -1,38 +1,43 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-/* Custom colors for ConnectVault branding */
+/* ConnectVault CRM - Updated Color Scheme */
 :root {
+  /* Primary Navy */
+  --primary-navy: #0B2A4A;
+  --primary-navy-hover: #1A3B5C;
+  --primary-navy-light: #E8F1FB;
+  
+  /* Secondary Gold */
+  --secondary-gold: #FFD700;
+  --secondary-gold-hover: #E6C200;
+  --secondary-gold-light: #FFFDF0;
+  
+  /* Accent & Neutrals */
+  --accent-gray: #E9EDF2;
+  --text-primary: #1A202C;
+  --text-secondary: #4A5568;
+  --text-muted: #718096;
+  --bg-gradient-start: #F7FAFD;
+  --bg-gradient-end: #FFFFFF;
+  
+  /* Legacy colors for compatibility */
   --navy-50: #f8fafc;
   --navy-100: #f1f5f9;
   --navy-200: #e2e8f0;
   --navy-300: #cbd5e1;
   --navy-400: #94a3b8;
   --navy-500: #64748b;
-  --navy-600: #003366;
-  --navy-700: #002952;
+  --navy-600: #0B2A4A;
+  --navy-700: #1A3B5C;
   --navy-800: #001f3d;
   --navy-900: #001529;
   
-  --gold-50: #fffef7;
-  --gold-100: #fffbeb;
-  --gold-200: #fef3c7;
-  --gold-300: #fde68a;
-  --gold-400: #fcd34d;
   --gold-500: #FFD700;
-  --gold-600: #e6c200;
-  --gold-700: #b8a000;
-  --gold-800: #8a7700;
-  --gold-900: #5c4f00;
-  
-  --cream-50: #fefefe;
+  --gold-600: #E6C200;
   --cream-100: #FAF0DE;
-  --cream-200: #f5e6c8;
-  --cream-300: #f0dcb2;
-  --cream-400: #ebd29c;
-  --cream-500: #e6c885;
 }
 
-/* Global styles */
+/* Global Styles */
 * {
   margin: 0;
   padding: 0;
@@ -43,167 +48,269 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: var(--navy-50);
-  color: var(--navy-900);
+  background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+  color: var(--text-primary);
+  min-height: 100vh;
 }
 
 .App {
   min-height: 100vh;
 }
 
-/* Force button styles to override Tailwind */
+/* ConnectVault Header Branding */
+.connectvault-header {
+  background: white;
+  border-bottom: 2px solid var(--accent-gray);
+  box-shadow: 0 2px 8px rgba(11, 42, 74, 0.08);
+}
+
+.connectvault-logo {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+}
+
+.connectvault-text-logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+  text-decoration: none;
+}
+
+/* Dashboard Gradient Background */
+.dashboard-gradient-bg {
+  background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+  min-height: calc(100vh - 80px);
+}
+
+/* Primary Navy Buttons */
+.btn-primary-navy {
+  background-color: var(--primary-navy) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 12px !important;
+  padding: 1rem 1.5rem !important;
+  font-weight: 600 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 4px 6px -1px rgba(11, 42, 74, 0.15) !important;
+}
+
+.btn-primary-navy:hover {
+  background-color: var(--primary-navy-hover) !important;
+  color: white !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 15px -3px rgba(11, 42, 74, 0.25) !important;
+}
+
+/* Secondary Gold Buttons */
+.btn-secondary-gold {
+  background-color: var(--secondary-gold) !important;
+  color: var(--primary-navy) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  padding: 1rem 1.5rem !important;
+  font-weight: 600 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 4px 6px -1px rgba(255, 215, 0, 0.15) !important;
+}
+
+.btn-secondary-gold:hover {
+  background-color: var(--secondary-gold-hover) !important;
+  color: var(--primary-navy) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 15px -3px rgba(255, 215, 0, 0.25) !important;
+}
+
+/* Dashboard Tiles */
+.dashboard-tile {
+  height: auto !important;
+  padding: 2rem 1.5rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 16px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  min-height: 140px !important;
+  text-align: center !important;
+}
+
+.dashboard-tile:hover {
+  transform: translateY(-4px) !important;
+}
+
+.dashboard-tile-navy {
+  background-color: var(--primary-navy) !important;
+  color: white !important;
+  box-shadow: 0 4px 6px -1px rgba(11, 42, 74, 0.15) !important;
+}
+
+.dashboard-tile-navy:hover {
+  background-color: var(--primary-navy-hover) !important;
+  color: white !important;
+  box-shadow: 0 12px 20px -5px rgba(11, 42, 74, 0.25) !important;
+}
+
+.dashboard-tile-gold {
+  background-color: var(--secondary-gold) !important;
+  color: var(--primary-navy) !important;
+  box-shadow: 0 4px 6px -1px rgba(255, 215, 0, 0.15) !important;
+}
+
+.dashboard-tile-gold:hover {
+  background-color: var(--secondary-gold-hover) !important;
+  color: var(--primary-navy) !important;
+  box-shadow: 0 12px 20px -5px rgba(255, 215, 0, 0.25) !important;
+}
+
+/* Quick Access Strip */
+.quick-access-strip {
+  background: white;
+  border: 1px solid var(--accent-gray);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(11, 42, 74, 0.05);
+  margin-bottom: 2rem;
+}
+
+.quick-access-btn {
+  background: var(--accent-gray) !important;
+  color: var(--text-secondary) !important;
+  border: none !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 8px !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+.quick-access-btn:hover {
+  background: var(--primary-navy) !important;
+  color: white !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Cards & Components */
+.premium-card {
+  background: white !important;
+  border-radius: 16px !important;
+  border: 1px solid var(--accent-gray) !important;
+  box-shadow: 0 4px 6px -1px rgba(11, 42, 74, 0.08) !important;
+  transition: all 0.3s ease !important;
+}
+
+.premium-card:hover {
+  box-shadow: 0 12px 20px -5px rgba(11, 42, 74, 0.15) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Form Elements */
+.form-input {
+  border: 1px solid var(--accent-gray) !important;
+  border-radius: 8px !important;
+  padding: 0.75rem !important;
+  font-size: 1rem !important;
+  transition: border-color 0.2s ease !important;
+}
+
+.form-input:focus {
+  border-color: var(--primary-navy) !important;
+  box-shadow: 0 0 0 3px rgba(11, 42, 74, 0.1) !important;
+  outline: none !important;
+}
+
+/* Login Page */
 .login-button {
-  background-color: #003366 !important;
+  background-color: var(--primary-navy) !important;
   color: white !important;
   border: none !important;
   padding: 0.75rem 1.5rem !important;
-  border-radius: 0.5rem !important;
+  border-radius: 8px !important;
   font-weight: 600 !important;
   width: 100% !important;
   transition: all 0.2s ease !important;
 }
 
 .login-button:hover {
-  background-color: #002952 !important;
+  background-color: var(--primary-navy-hover) !important;
   color: white !important;
   transform: translateY(-1px) !important;
 }
 
 .login-button:disabled {
-  background-color: #94a3b8 !important;
+  background-color: var(--accent-gray) !important;
+  color: var(--text-muted) !important;
   transform: none !important;
 }
 
-/* Dashboard button styles */
-.dashboard-btn-navy {
-  background-color: #003366 !important;
-  color: white !important;
-  border: none !important;
-  height: auto !important;
-  padding: 2rem 1.5rem !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border-radius: 16px !important;
-  font-weight: 600 !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
-  min-height: 140px !important;
-}
-
-.dashboard-btn-navy:hover {
-  background-color: #002952 !important;
-  color: white !important;
-  transform: translateY(-3px) !important;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
-}
-
-.dashboard-btn-gold {
-  background-color: #FFD700 !important;
-  color: #003366 !important;
-  border: none !important;
-  height: auto !important;
-  padding: 2rem 1.5rem !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border-radius: 16px !important;
-  font-weight: 600 !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
-  min-height: 140px !important;
-}
-
-.dashboard-btn-gold:hover {
-  background-color: #e6c200 !important;
-  color: #003366 !important;
-  transform: translateY(-3px) !important;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
-}
-
-/* Quick actions container */
-.quick-actions-container {
-  background: #FAF0DE !important;
-  border-radius: 20px !important;
-  padding: 2.5rem !important;
-  margin-bottom: 2rem !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* Header styles */
-.dashboard-header {
-  background: linear-gradient(135deg, var(--navy-600) 0%, var(--navy-700) 100%);
-  border-radius: 12px;
-  margin-bottom: 2rem;
-  padding: 2rem;
-  color: white;
-}
-
-/* Enhanced card styling */
-.premium-card {
-  background: white !important;
-  border-radius: 16px !important;
-  border: 1px solid var(--navy-200) !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
-  transition: all 0.3s ease !important;
-}
-
-.premium-card:hover {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
-  transform: translateY(-2px) !important;
-}
-
-/* Logo styles */
-.logo {
-  max-height: 100px;
-  width: auto;
-  object-fit: contain;
-}
-
+/* Responsive Design */
 @media (max-width: 768px) {
-  .logo {
-    max-height: 60px;
-  }
-  
-  .dashboard-btn-navy,
-  .dashboard-btn-gold {
+  .dashboard-tile {
     padding: 1.5rem 1rem !important;
     min-height: 120px !important;
   }
   
-  .quick-actions-container {
-    padding: 1.5rem !important;
+  .quick-access-strip {
+    padding: 0.75rem;
+  }
+  
+  .quick-access-btn {
+    padding: 0.375rem 0.75rem !important;
+    font-size: 0.8rem !important;
+  }
+  
+  .connectvault-logo {
+    height: 28px;
   }
 }
 
 @media (max-width: 640px) {
-  .dashboard-btn-navy,
-  .dashboard-btn-gold {
+  .dashboard-tile {
     padding: 1rem !important;
     min-height: 100px !important;
   }
   
-  .quick-actions-container {
-    padding: 1rem !important;
+  .dashboard-tile span {
+    font-size: 0.9rem !important;
   }
 }
 
-/* Force text colors */
-.text-navy-900 {
-  color: #001529 !important;
+/* Accessibility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-.text-navy-600 {
-  color: #003366 !important;
+/* Focus visible styles */
+*:focus-visible {
+  outline: 2px solid var(--primary-navy);
+  outline-offset: 2px;
 }
 
-/* Custom component overrides */
-button[class*="bg-navy"] {
-  background-color: #003366 !important;
+/* Toast notifications */
+.toast-success {
+  background-color: #10B981;
+  color: white;
 }
 
-button[class*="bg-gold"] {
-  background-color: #FFD700 !important;
+.toast-error {
+  background-color: #EF4444;
+  color: white;
+}
+
+.toast-info {
+  background-color: var(--primary-navy);
+  color: white;
 }

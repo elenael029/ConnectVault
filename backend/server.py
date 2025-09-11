@@ -1,13 +1,15 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, status
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, UploadFile, File
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import json
+import requests
 from pathlib import Path
 from pydantic import BaseModel, Field, EmailStr
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 import uuid
 from datetime import datetime, timedelta, timezone
 from passlib.context import CryptContext
@@ -35,6 +37,60 @@ app = FastAPI(title="ConnectVault CRM API")
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
+
+# Settings Management
+SETTINGS_FILE = ROOT_DIR / "settings.json"
+
+# Default settings
+DEFAULT_SETTINGS = {
+    "branding": {
+        "app_name": "ConnectVault",
+        "logo_path": ""
+    },
+    "quick_access_links": {
+        "chatgpt": "https://chatgpt.com/",
+        "instagram": "https://instagram.com/",
+        "tiktok": "https://tiktok.com/",
+        "youtube": "https://youtube.com/",
+        "facebook": "https://facebook.com/",
+        "pinterest": "https://pinterest.com/"
+    },
+    "email_integration": {
+        "mailerlite_api_key": "",
+        "default_group_id": ""
+    }
+}
+
+def load_settings():
+    """Load settings from file or return defaults"""
+    try:
+        if SETTINGS_FILE.exists():
+            with open(SETTINGS_FILE, 'r') as f:
+                settings = json.load(f)
+                # Merge with defaults to ensure all keys exist
+                for key in DEFAULT_SETTINGS:
+                    if key not in settings:
+                        settings[key] = DEFAULT_SETTINGS[key]
+                    elif isinstance(DEFAULT_SETTINGS[key], dict):
+                        for subkey in DEFAULT_SETTINGS[key]:
+                            if subkey not in settings[key]:
+                                settings[key][subkey] = DEFAULT_SETTINGS[key][subkey]
+                return settings
+        else:
+            return DEFAULT_SETTINGS.copy()
+    except Exception as e:
+        logging.error(f"Error loading settings: {e}")
+        return DEFAULT_SETTINGS.copy()
+
+def save_settings(settings):
+    """Save settings to file"""
+    try:
+        with open(SETTINGS_FILE, 'w') as f:
+            json.dump(settings, f, indent=2)
+        return True
+    except Exception as e:
+        logging.error(f"Error saving settings: {e}")
+        return False
 
 # Models
 class User(BaseModel):
@@ -87,22 +143,22 @@ class ContactCreate(BaseModel):
     platform: str
     notes: str = ""
 
-class Offer(BaseModel):
+class PromoLink(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str
-    offer_name: str
+    promo_name: str
     promo_link: str
     tracking_link: str = ""
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-class OfferCreate(BaseModel):
-    offer_name: str
+class PromoLinkCreate(BaseModel):
+    promo_name: str
     promo_link: str
 
 class Commission(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str
-    offer_id: str
+    promo_id: str
     customer_name: str
     customer_email: str
     commission_amount: float
@@ -111,7 +167,7 @@ class Commission(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class CommissionCreate(BaseModel):
-    offer_id: str
+    promo_id: str
     customer_name: str
     customer_email: str
     commission_amount: float
@@ -133,6 +189,16 @@ class TaskCreate(BaseModel):
     description: str = ""
     status: str = "pending"
     due_date: Optional[datetime] = None
+
+class EmailSubscriber(BaseModel):
+    name: str
+    email: EmailStr
+    group_id: Optional[str] = None
+
+class SettingsUpdate(BaseModel):
+    branding: Optional[Dict[str, Any]] = None
+    quick_access_links: Optional[Dict[str, str]] = None
+    email_integration: Optional[Dict[str, str]] = None
 
 # Utility functions
 def verify_password(plain_password, hashed_password):
@@ -171,6 +237,14 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     if user is None:
         raise credentials_exception
     return User(**user)
+
+async def get_admin_user(current_user: User = Depends(get_current_user)):
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required"
+        )
+    return current_user
 
 # Authentication endpoints
 @api_router.post("/auth/register", response_model=dict)
@@ -288,7 +362,7 @@ async def get_dashboard_summary(current_user: User = Depends(get_current_user)):
         "status": {"$ne": "done"}
     })
     
-    active_offers = await db.offers.count_documents({"user_id": current_user.id})
+    active_promo_links = await db.promo_links.count_documents({"user_id": current_user.id})
     
     # Commission summary
     total_commissions = await db.commissions.aggregate([
@@ -305,9 +379,107 @@ async def get_dashboard_summary(current_user: User = Depends(get_current_user)):
     return {
         "total_contacts": total_contacts,
         "tasks_due_today": tasks_due_today,
-        "active_offers": active_offers,
+        "active_promo_links": active_promo_links,
         "commission_summary": commission_summary
     }
+
+# Settings endpoints
+@api_router.get("/settings")
+async def get_settings():
+    """Get application settings (public data only)"""
+    settings = load_settings()
+    # Remove sensitive data
+    public_settings = {
+        "branding": settings["branding"],
+        "quick_access_links": settings["quick_access_links"]
+    }
+    return public_settings
+
+@api_router.get("/settings/admin")
+async def get_admin_settings(current_user: User = Depends(get_admin_user)):
+    """Get all settings for admin users"""
+    settings = load_settings()
+    # Don't expose the actual API key, just whether it's set
+    settings["email_integration"]["mailerlite_api_key"] = bool(settings["email_integration"]["mailerlite_api_key"])
+    return settings
+
+@api_router.put("/settings")
+async def update_settings(settings_update: SettingsUpdate, current_user: User = Depends(get_admin_user)):
+    """Update application settings (admin only)"""
+    current_settings = load_settings()
+    
+    if settings_update.branding:
+        current_settings["branding"].update(settings_update.branding)
+    
+    if settings_update.quick_access_links:
+        current_settings["quick_access_links"].update(settings_update.quick_access_links)
+    
+    if settings_update.email_integration:
+        current_settings["email_integration"].update(settings_update.email_integration)
+    
+    if save_settings(current_settings):
+        return {"message": "Settings updated successfully"}
+    else:
+        raise HTTPException(status_code=500, detail="Failed to save settings")
+
+# Email integration endpoints
+@api_router.post("/email/subscribe")
+async def subscribe_email(subscriber: EmailSubscriber, current_user: User = Depends(get_current_user)):
+    """Add subscriber to MailerLite"""
+    settings = load_settings()
+    api_key = settings["email_integration"]["mailerlite_api_key"]
+    
+    if not api_key:
+        raise HTTPException(
+            status_code=400,
+            detail="MailerLite API key not configured. Please contact admin."
+        )
+    
+    # Use provided group_id or default
+    group_id = subscriber.group_id or settings["email_integration"]["default_group_id"]
+    
+    # Prepare MailerLite API request
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    
+    payload = {
+        "email": subscriber.email,
+        "fields": {
+            "name": subscriber.name
+        }
+    }
+    
+    if group_id:
+        payload["groups"] = [group_id]
+    
+    try:
+        response = requests.post(
+            "https://connect.mailerlite.com/api/subscribers",
+            headers=headers,
+            json=payload,
+            timeout=30
+        )
+        
+        if response.status_code in [200, 201]:
+            return {"message": "Subscriber added successfully", "email": subscriber.email}
+        elif response.status_code == 422:
+            # Subscriber already exists
+            return {"message": "Subscriber already exists", "email": subscriber.email}
+        else:
+            logging.error(f"MailerLite API error: {response.status_code} - {response.text}")
+            raise HTTPException(
+                status_code=400,
+                detail="Failed to add subscriber. Please check your information and try again."
+            )
+    
+    except requests.exceptions.RequestException as e:
+        logging.error(f"MailerLite API request failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Email service temporarily unavailable. Please try again later."
+        )
 
 # Health check
 @api_router.get("/health")
