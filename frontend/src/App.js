@@ -129,7 +129,16 @@ const AuthProvider = ({ children }) => {
       setToken(access_token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
       
-      window.location.href = '/dashboard';
+      // Fetch user data after successful login
+      try {
+        const userResponse = await axios.get(`${API}/dashboard/summary`);
+        // Set a simple user object to indicate authentication
+        setUser({ username, authenticated: true });
+      } catch (userError) {
+        console.error('Failed to fetch user data:', userError);
+        // Even if user data fetch fails, we have a valid token
+        setUser({ username, authenticated: true });
+      }
       
       return { success: true };
     } catch (error) {
