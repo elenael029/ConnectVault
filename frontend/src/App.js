@@ -620,6 +620,7 @@ const Login = () => {
 
     const result = await login(username, password);
     if (result.success) {
+      // Navigate using React Router instead of window.location
       navigate('/dashboard');
     } else {
       setError(result.error);
