@@ -447,6 +447,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const { settings } = useSettings();
 
   useEffect(() => {
@@ -466,6 +467,17 @@ const Dashboard = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Create personalized greeting
+  const getWelcomeMessage = () => {
+    if (user?.first_name) {
+      return `Welcome back, ${user.first_name}!`;
+    } else if (user?.email) {
+      return `Welcome back, ${user.email}!`;
+    } else {
+      return "Welcome back!";
     }
   };
 
@@ -491,7 +503,7 @@ const Dashboard = () => {
       
       <div className="mb-8">
         <h2 className="text-3xl font-bold text-primary-navy mb-2">Dashboard</h2>
-        <p className="text-text-secondary">Welcome back! Here's your CRM overview.</p>
+        <p className="text-text-secondary">{getWelcomeMessage()} Here's your CRM overview.</p>
       </div>
 
       {/* Summary Cards */}
