@@ -468,13 +468,9 @@ const Dashboard = () => {
 
   // Create personalized greeting
   const getWelcomeMessage = () => {
-    if (user?.first_name) {
-      return `Welcome back, ${user.first_name}!`;
-    } else if (user?.email) {
-      return `Welcome back, ${user.email}!`;
-    } else {
-      return "Welcome back!";
-    }
+    const first = user?.firstName || user?.name || user?.first_name || null;
+    const email = user?.email || null;
+    return first ? `Welcome back, ${first}!` : (email ? `Welcome back, ${email}!` : "Welcome back!");
   };
 
   if (loading) {
