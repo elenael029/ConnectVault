@@ -273,14 +273,16 @@ h6 { font-size: 1rem; }
 
 /* ConnectVault Logo */
 .connectvault-logo {
-  width: 32px;
-  height: 32px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   object-fit: cover;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 
 .connectvault-text-logo {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 700;
   color: var(--navy-primary);
   letter-spacing: -0.025em;
@@ -289,7 +291,7 @@ h6 { font-size: 1rem; }
 .connectvault-header {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   padding: 16px 24px;
 }
 
