@@ -640,9 +640,15 @@ const Login = () => {
     <div className="min-h-screen dashboard-gradient-bg flex items-center justify-center px-4">
       <Card className="w-full max-w-md premium-card">
         <CardHeader className="text-center">
-          <ConnectVaultLogo className="mx-auto mb-4" />
-          <CardTitle className="text-2xl font-bold text-primary-navy">Login to your CRM</CardTitle>
-          <CardDescription>Access your CRM dashboard</CardDescription>
+          <div className="flex flex-col items-center">
+            <img 
+              src="/logo.png" 
+              alt="ConnectVault logo" 
+              className="login-logo mb-3"
+            />
+            <h1 className="login-brand-text mb-2">ConnectVault</h1>
+            <p className="login-subtitle">Access your CRM dashboard</p>
+          </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
