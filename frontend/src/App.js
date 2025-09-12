@@ -2593,7 +2593,7 @@ const MarketingVault = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-text-primary mb-2">Title *</label>
+                <label className="form-label">Title *</label>
                 <Input
                   value={editFormData.title}
                   onChange={(e) => setEditFormData({...editFormData, title: e.target.value})}
@@ -2601,7 +2601,7 @@ const MarketingVault = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-text-primary mb-2">Subject *</label>
+                <label className="form-label">Subject *</label>
                 <Input
                   value={editFormData.subject}
                   onChange={(e) => setEditFormData({...editFormData, subject: e.target.value})}
@@ -2609,7 +2609,7 @@ const MarketingVault = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-text-primary mb-2">Body *</label>
+                <label className="form-label">Body *</label>
                 <Textarea
                   value={editFormData.body}
                   onChange={(e) => setEditFormData({...editFormData, body: e.target.value})}
@@ -2618,16 +2618,17 @@ const MarketingVault = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">Tags</label>
+                  <label className="form-label">Tags</label>
                   <Input
                     value={editFormData.tags}
                     onChange={(e) => setEditFormData({...editFormData, tags: e.target.value})}
                     placeholder="tag1, tag2"
                     className="form-input"
                   />
+                  <div className="form-help-text">Comma-separated tags</div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">Category</label>
+                  <label className="form-label">Category</label>
                   <Input
                     value={editFormData.category}
                     onChange={(e) => setEditFormData({...editFormData, category: e.target.value})}
@@ -2636,7 +2637,7 @@ const MarketingVault = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">Purpose</label>
+                  <label className="form-label">Purpose</label>
                   <Input
                     value={editFormData.purpose}
                     onChange={(e) => setEditFormData({...editFormData, purpose: e.target.value})}
