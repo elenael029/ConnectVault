@@ -3,6 +3,30 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Login page specific styles */
+.login-logo {
+  height: 72px;
+  width: auto;
+  object-fit: contain;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+.login-brand-text {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--navy-primary);
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+
+.login-subtitle {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+  margin-bottom: 16px;
+}
+
 /* Header styles for new layout */
 .cv-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background: linear-gradient(180deg, #ffffff 0%, var(--cream-bg) 100%);border-bottom: 1px solid var(--border-light);min-height:72px;}
 .cv-header__left{display:flex;align-items:center;gap:12px}
