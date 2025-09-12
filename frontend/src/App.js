@@ -254,12 +254,12 @@ const ConnectVaultLogo = ({ className = "" }) => {
 // Quick Access Strip Component
 const QuickAccessStrip = () => {
   const quickLinks = [
-    { key: 'chatgpt', label: 'ChatGPT', url: 'https://chat.openai.com' },
-    { key: 'instagram', label: 'Instagram', url: 'https://instagram.com' },
-    { key: 'tiktok', label: 'TikTok', url: 'https://tiktok.com' },
-    { key: 'youtube', label: 'YouTube', url: 'https://youtube.com' },
-    { key: 'facebook', label: 'Facebook', url: 'https://facebook.com' },
-    { key: 'pinterest', label: 'Pinterest', url: 'https://pinterest.com' }
+    { key: 'chatgpt', label: 'ChatGPT', url: 'https://chat.openai.com', icon: '🤖' },
+    { key: 'instagram', label: 'Instagram', url: 'https://instagram.com', icon: '📸' },
+    { key: 'tiktok', label: 'TikTok', url: 'https://tiktok.com', icon: '🎵' },
+    { key: 'youtube', label: 'YouTube', url: 'https://youtube.com', icon: '🎥' },
+    { key: 'facebook', label: 'Facebook', url: 'https://facebook.com', icon: '👥' },
+    { key: 'pinterest', label: 'Pinterest', url: 'https://pinterest.com', icon: '📌' }
   ];
 
   return (
@@ -273,9 +273,10 @@ const QuickAccessStrip = () => {
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="quick-access-btn"
+              className="quick-access-btn hover-lift"
               aria-label={`Open ${link.label} in new tab`}
             >
+              <span className="text-base">{link.icon}</span>
               <ExternalLink className="h-3 w-3" />
               {link.label}
             </a>
