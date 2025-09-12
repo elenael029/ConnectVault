@@ -2427,28 +2427,25 @@ const MarketingVault = () => {
         <div>
           {/* Tabs */}
           <div className="flex justify-between items-center mb-6">
-            <div className="flex space-x-1">
-              <Button
-                variant={activeTab === 'emails' ? 'default' : 'outline'}
+            <div className="flex space-x-2">
+              <button
                 onClick={() => setActiveTab('emails')}
-                className={activeTab === 'emails' ? 'btn-primary-navy' : ''}
+                className={`tab-pill ${activeTab === 'emails' ? 'tab-pill-active' : 'tab-pill-inactive'}`}
               >
                 Email Swipes ({getContentByType('email').length})
-              </Button>
-              <Button
-                variant={activeTab === 'hooks' ? 'default' : 'outline'}
+              </button>
+              <button
                 onClick={() => setActiveTab('hooks')}
-                className={activeTab === 'hooks' ? 'btn-primary-navy' : ''}
+                className={`tab-pill ${activeTab === 'hooks' ? 'tab-pill-active' : 'tab-pill-inactive'}`}
               >
                 Hooks ({getContentByType('hook').length})
-              </Button>
-              <Button
-                variant={activeTab === 'prompts' ? 'default' : 'outline'}
+              </button>
+              <button
                 onClick={() => setActiveTab('prompts')}
-                className={activeTab === 'prompts' ? 'btn-primary-navy' : ''}
+                className={`tab-pill ${activeTab === 'prompts' ? 'tab-pill-active' : 'tab-pill-inactive'}`}
               >
                 ChatGPT Prompts ({getContentByType('prompt').length})
-              </Button>
+              </button>
             </div>
 
             {/* Email Swipes Tab Actions */}
