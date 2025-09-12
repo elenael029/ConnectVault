@@ -344,83 +344,79 @@ const Layout = ({ children, title = "ConnectVault" }) => {
   return (
     <div className="min-h-screen dashboard-bg">
       {/* Header */}
-      <header className="connectvault-header">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <ConnectVaultLogo />
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Button 
-                  variant="outline" 
-                  className="relative"
-                  onClick={() => setShowNotifications(!showNotifications)}
-                  aria-label="View notifications"
-                >
-                  <Bell className="h-4 w-4" />
-                  {unreadCount > 0 && (
-                    <Badge className="absolute -top-2 -right-2 bg-secondary-gold text-primary-navy h-5 w-5 rounded-full text-xs flex items-center justify-center">
-                      {unreadCount}
-                    </Badge>
-                  )}
-                </Button>
-                
-                {showNotifications && (
-                  <div className="absolute right-0 mt-2 w-80 bg-white border border-accent-gray rounded-lg shadow-lg z-50">
-                    <div className="p-4 border-b border-accent-gray">
-                      <h3 className="font-semibold text-primary-navy">Notifications</h3>
+      <header className="cv-header">
+        <div className="cv-header__left">
+          <img src="/logo.png" alt="ConnectVault" className="cv-logo" />
+          <span className="cv-brand">ConnectVault</span>
+        </div>
+        <div className="cv-header__right">
+          <div className="relative">
+            <Button 
+              variant="outline" 
+              className="relative"
+              onClick={() => setShowNotifications(!showNotifications)}
+              aria-label="View notifications"
+            >
+              <Bell className="h-4 w-4" />
+              {unreadCount > 0 && (
+                <Badge className="absolute -top-2 -right-2 bg-secondary-gold text-primary-navy h-5 w-5 rounded-full text-xs flex items-center justify-center">
+                  {unreadCount}
+                </Badge>
+              )}
+            </Button>
+            
+            {showNotifications && (
+              <div className="absolute right-0 mt-2 w-80 bg-white border border-accent-gray rounded-lg shadow-lg z-50">
+                <div className="p-4 border-b border-accent-gray">
+                  <h3 className="font-semibold text-primary-navy">Notifications</h3>
+                </div>
+                <div className="max-h-64 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <div className="p-4 text-center text-gray-500">
+                      No notifications
                     </div>
-                    <div className="max-h-64 overflow-y-auto">
-                      {notifications.length === 0 ? (
-                        <div className="p-4 text-center text-gray-500">
-                          No notifications
-                        </div>
-                      ) : (
-                        notifications.map((notification) => (
-                          <div
-                            key={notification.id}
-                            className={`p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${
-                              !notification.read ? 'bg-blue-50' : ''
-                            }`}
-                            onClick={() => markNotificationAsRead(notification.id)}
-                          >
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <p className="text-sm font-medium text-gray-900">
-                                  {notification.message}
-                                </p>
-                                <p className="text-xs text-gray-500 mt-1">
-                                  {notification.time}
-                                </p>
-                              </div>
-                              {!notification.read && (
-                                <div className="w-2 h-2 bg-blue-500 rounded-full ml-2 mt-1"></div>
-                              )}
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                    <div className="p-3 border-t border-gray-200">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowNotifications(false)}
-                        className="w-full"
+                  ) : (
+                    notifications.map((notification) => (
+                      <div
+                        key={notification.id}
+                        className={`p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${
+                          !notification.read ? 'bg-blue-50' : ''
+                        }`}
+                        onClick={() => markNotificationAsRead(notification.id)}
                       >
-                        Close
-                      </Button>
-                    </div>
-                  </div>
-                )}
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-900">
+                              {notification.message}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {notification.time}
+                            </p>
+                          </div>
+                          {!notification.read && (
+                            <div className="w-2 h-2 bg-blue-500 rounded-full ml-2 mt-1"></div>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+                <div className="p-3 border-t border-gray-200">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowNotifications(false)}
+                    className="w-full"
+                  >
+                    Close
+                  </Button>
+                </div>
               </div>
-              <Button variant="outline" onClick={() => navigate('/settings')} aria-label="Settings">
-                <SettingsIcon className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" onClick={logout} aria-label="Logout">
-                Logout
-              </Button>
-            </div>
+            )}
           </div>
+          <Button variant="outline" onClick={logout} aria-label="Logout">
+            Logout
+          </Button>
         </div>
       </header>
 
