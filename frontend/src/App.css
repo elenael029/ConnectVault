@@ -4,9 +4,9 @@
 @tailwind utilities;
 
 /* Header styles for new layout */
-.cv-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background: linear-gradient(180deg, #ffffff 0%, var(--cream-bg) 100%);border-bottom: 1px solid var(--border-light);}
+.cv-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background: linear-gradient(180deg, #ffffff 0%, var(--cream-bg) 100%);border-bottom: 1px solid var(--border-light);min-height:72px;}
 .cv-header__left{display:flex;align-items:center;gap:12px}
-.cv-logo{height:36px;width:auto;object-fit:contain}
+.cv-logo{height:52px;width:auto;object-fit:contain;image-rendering: -webkit-optimize-contrast;image-rendering: crisp-edges;image-rendering: pixelated;}
 .cv-brand{font-weight:700;font-size:22px;letter-spacing:.3px;color: var(--navy-primary);}
 .cv-header__right{display:flex;align-items:center;gap:12px}
 
