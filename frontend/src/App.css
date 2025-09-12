@@ -3,6 +3,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Header styles for new layout */
+.cv-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background: linear-gradient(180deg, #ffffff 0%, var(--cream-bg) 100%);border-bottom: 1px solid var(--border-light);}
+.cv-header__left{display:flex;align-items:center;gap:12px}
+.cv-logo{height:36px;width:auto;object-fit:contain}
+.cv-brand{font-weight:700;font-size:22px;letter-spacing:.3px;color: var(--navy-primary);}
+.cv-header__right{display:flex;align-items:center;gap:12px}
+
 /* Global Base Styles */
 :root {
   --cream-bg: #F7F1E3;
