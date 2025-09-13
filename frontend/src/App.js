@@ -2054,6 +2054,22 @@ const MarketingVault = () => {
     category: '',
     purpose: ''
   });
+  
+  // Files tab state
+  const [files, setFiles] = useState([]);
+  const [filesLoading, setFilesLoading] = useState(false);
+  const [showFileUpload, setShowFileUpload] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [showFileRename, setShowFileRename] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [fileFormData, setFileFormData] = useState({
+    name: '',
+    category: 'General'
+  });
+  
   const navigate = useNavigate();
   const { toast } = useToast();
 
