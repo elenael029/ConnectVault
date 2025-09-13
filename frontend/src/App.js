@@ -2359,6 +2359,19 @@ const MarketingVault = () => {
     }
   };
 
+  const handleDeleteSwipe = (swipe) => {
+    if (window.confirm(`Delete "${swipe.title}"? This cannot be undone.`)) {
+      const updatedContent = allContent.filter(item => item.id !== swipe.id);
+      setAllContent(updatedContent);
+      localStorage.setItem('marketing-vault', JSON.stringify(updatedContent));
+
+      toast({
+        title: "Deleted",
+        description: "Swipe deleted successfully",
+      });
+    }
+  };
+
   const handleExport = (format) => {
     const emailSwipes = getContentByType('email');
     const timestamp = new Date().toISOString().split('T')[0];
