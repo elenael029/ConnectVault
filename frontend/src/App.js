@@ -259,6 +259,7 @@ const QuickAccessStrip = () => {
     { key: 'tiktok', label: 'TikTok', url: 'https://tiktok.com', icon: '🎵' },
     { key: 'youtube', label: 'YouTube', url: 'https://youtube.com', icon: '🎥' },
     { key: 'facebook', label: 'Facebook', url: 'https://facebook.com', icon: '👥' },
+    { key: 'linkedin', label: 'LinkedIn', url: 'https://linkedin.com', icon: '💼' },
     { key: 'pinterest', label: 'Pinterest', url: 'https://pinterest.com', icon: '📌' }
   ];
 
