@@ -2859,6 +2859,440 @@ const MarketingVault = () => {
   );
 };
 
+// Commissions Component
+const Commissions = () => {
+  const [commissions, setCommissions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editingCommission, setEditingCommission] = useState(null);
+  const [formData, setFormData] = useState({
+    program_name: '',
+    amount: '',
+    status: 'pending',
+    expected_date: '',
+    paid_date: '',
+    promo_link_id: '',
+    notes: ''
+  });
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchCommissions();
+  }, []);
+
+  const fetchCommissions = async () => {
+    try {
+      const response = await axios.get(`${API}/commissions`);
+      setCommissions(response.data);
+    } catch (error) {
+      console.error('Error fetching commissions:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load commissions",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!formData.program_name.trim() || !formData.amount) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter program name and amount",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const submissionData = {
+        ...formData,
+        amount: parseFloat(formData.amount) || 0,
+        expected_date: formData.expected_date || null,
+        paid_date: formData.paid_date || null
+      };
+
+      if (editingCommission) {
+        await axios.put(`${API}/commissions/${editingCommission.id}`, submissionData);
+        toast({
+          title: "Success",
+          description: "Commission updated successfully",
+        });
+      } else {
+        await axios.post(`${API}/commissions`, submissionData);
+        toast({
+          title: "Success",
+          description: "Commission added successfully",
+        });
+      }
+
+      setFormData({
+        program_name: '',
+        amount: '',
+        status: 'pending',
+        expected_date: '',
+        paid_date: '',
+        promo_link_id: '',
+        notes: ''
+      });
+      setShowForm(false);
+      setEditingCommission(null);
+      fetchCommissions();
+    } catch (error) {
+      console.error('Error saving commission:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save commission",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEdit = (commission) => {
+    setFormData({
+      program_name: commission.program_name,
+      amount: commission.amount.toString(),
+      status: commission.status,
+      expected_date: commission.expected_date ? commission.expected_date.split('T')[0] : '',
+      paid_date: commission.paid_date ? commission.paid_date.split('T')[0] : '',
+      promo_link_id: commission.promo_link_id || '',
+      notes: commission.notes || ''
+    });
+    setEditingCommission(commission);
+    setShowForm(true);
+  };
+
+  const handleDelete = async (commissionId) => {
+    if (!window.confirm('Are you sure you want to delete this commission?')) {
+      return;
+    }
+
+    try {
+      await axios.delete(`${API}/commissions/${commissionId}`);
+      toast({
+        title: "Success",
+        description: "Commission deleted successfully",
+      });
+      fetchCommissions();
+    } catch (error) {
+      console.error('Error deleting commission:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete commission",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      const response = await axios.get(`${API}/commissions/export/csv`);
+      const csvData = response.data.csv_data;
+      
+      // Create and download CSV file
+      const blob = new Blob([csvData], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'commissions.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Success",
+        description: "Commissions exported successfully",
+      });
+    } catch (error) {
+      console.error('Error exporting commissions:', error);
+      toast({
+        title: "Error",
+        description: "Failed to export commissions",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getSummary = () => {
+    const total_paid = commissions.filter(c => c.status === 'paid').reduce((sum, c) => sum + c.amount, 0);
+    const total_unpaid = commissions.filter(c => c.status === 'unpaid').reduce((sum, c) => sum + c.amount, 0);
+    const total_pending = commissions.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.amount, 0);
+    
+    return { total_paid, total_unpaid, total_pending };
+  };
+
+  const summary = getSummary();
+
+  return (
+    <Layout title="Commissions">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <Button variant="outline" onClick={() => navigate('/dashboard')} className="mb-4 btn-primary-navy">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+          <h2 className="text-3xl font-bold text-primary-navy">Commissions</h2>
+          <p className="text-text-secondary">Manage your commission earnings</p>
+        </div>
+        <div className="flex space-x-4">
+          <Button onClick={handleExport} variant="outline" className="btn-secondary-gold">
+            <Download className="h-4 w-4 mr-2" />
+            Export CSV
+          </Button>
+          <Button onClick={() => {
+            setEditingCommission(null);
+            setFormData({
+              program_name: '',
+              amount: '',
+              status: 'pending',
+              expected_date: '',
+              paid_date: '',
+              promo_link_id: '',
+              notes: ''
+            });
+            setShowForm(true);
+          }} className="btn-primary-navy">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Commission
+          </Button>
+        </div>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <Card className="premium-card">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-text-secondary">Paid</p>
+                <p className="text-2xl font-bold text-green-600">${summary.total_paid.toFixed(2)}</p>
+              </div>
+              <div className="p-3 bg-green-100 rounded-full">
+                <DollarSign className="h-6 w-6 text-green-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="premium-card">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-text-secondary">Unpaid</p>
+                <p className="text-2xl font-bold text-red-600">${summary.total_unpaid.toFixed(2)}</p>
+              </div>
+              <div className="p-3 bg-red-100 rounded-full">
+                <DollarSign className="h-6 w-6 text-red-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="premium-card">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-text-secondary">Pending</p>
+                <p className="text-2xl font-bold text-gray-600">${summary.total_pending.toFixed(2)}</p>
+              </div>
+              <div className="p-3 bg-gray-100 rounded-full">
+                <DollarSign className="h-6 w-6 text-gray-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Add/Edit Form */}
+      {showForm && (
+        <Card className="premium-card mb-6">
+          <CardHeader>
+            <CardTitle className="text-primary-navy">
+              {editingCommission ? 'Edit Commission' : 'Add New Commission'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Program Name *</label>
+                <Input
+                  value={formData.program_name}
+                  onChange={(e) => setFormData({...formData, program_name: e.target.value})}
+                  placeholder="Program name"
+                  required
+                  className="form-input"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Amount *</label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.amount}
+                  onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                  placeholder="0.00"
+                  required
+                  className="form-input"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Status</label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => setFormData({...formData, status: e.target.value})}
+                  className="form-input w-full"
+                >
+                  <option value="pending">Pending</option>
+                  <option value="paid">Paid</option>
+                  <option value="unpaid">Unpaid</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Expected Date</label>
+                <Input
+                  type="date"
+                  value={formData.expected_date}
+                  onChange={(e) => setFormData({...formData, expected_date: e.target.value})}
+                  className="form-input"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Paid Date</label>
+                <Input
+                  type="date"
+                  value={formData.paid_date}
+                  onChange={(e) => setFormData({...formData, paid_date: e.target.value})}
+                  className="form-input"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Promo Link ID</label>
+                <Input
+                  value={formData.promo_link_id}
+                  onChange={(e) => setFormData({...formData, promo_link_id: e.target.value})}
+                  placeholder="Optional"
+                  className="form-input"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-text-primary mb-2">Notes</label>
+                <Textarea
+                  value={formData.notes}
+                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                  placeholder="Commission notes"
+                  className="form-input"
+                  rows="3"
+                />
+              </div>
+              <div className="md:col-span-2 flex space-x-4">
+                <Button type="submit" className="btn-primary-navy">
+                  {editingCommission ? 'Update Commission' : 'Add Commission'}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => {
+                  setShowForm(false);
+                  setEditingCommission(null);
+                }}>
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Commissions Table */}
+      <Card className="premium-card">
+        <CardHeader>
+          <CardTitle className="text-primary-navy">Commission History ({commissions.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="text-center py-8">Loading...</div>
+          ) : commissions.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              No commissions yet. Add your first commission to get started!
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-3 px-4 font-semibold">Program</th>
+                    <th className="text-left py-3 px-4 font-semibold">Amount</th>
+                    <th className="text-left py-3 px-4 font-semibold">Status</th>
+                    <th className="text-left py-3 px-4 font-semibold">Expected Date</th>
+                    <th className="text-left py-3 px-4 font-semibold">Paid Date</th>
+                    <th className="text-left py-3 px-4 font-semibold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {commissions.map((commission) => (
+                    <tr key={commission.id} className="border-b hover:bg-gray-50">
+                      <td className="py-3 px-4">
+                        <div>
+                          <div className="font-medium">{commission.program_name}</div>
+                          {commission.notes && (
+                            <div className="text-sm text-gray-500">{commission.notes}</div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 font-semibold">
+                        ${commission.amount.toFixed(2)}
+                      </td>
+                      <td className="py-3 px-4">
+                        <Badge 
+                          variant={
+                            commission.status === 'paid' ? 'default' : 
+                            commission.status === 'unpaid' ? 'destructive' : 
+                            'secondary'
+                          }
+                        >
+                          {commission.status}
+                        </Badge>
+                      </td>
+                      <td className="py-3 px-4">
+                        {commission.expected_date ? new Date(commission.expected_date).toLocaleDateString() : '-'}
+                      </td>
+                      <td className="py-3 px-4">
+                        {commission.paid_date ? new Date(commission.paid_date).toLocaleDateString() : '-'}
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEdit(commission)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDelete(commission.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </Layout>
+  );
+};
+
 // Forgot Password Component
 const ForgotPassword = () => {
   const [emailOrUsername, setEmailOrUsername] = useState('');
