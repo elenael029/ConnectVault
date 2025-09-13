@@ -2530,7 +2530,7 @@ const MarketingVault = () => {
     return results;
   };
 
-  const handleFileUpload = (event) => {
+  const handleContentFileUpload = (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
