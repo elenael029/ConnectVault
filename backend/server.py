@@ -603,6 +603,70 @@ async def subscribe_email(subscriber: EmailSubscriber, current_user: User = Depe
             detail="Email service temporarily unavailable. Please try again later."
         )
 
+# Commission endpoints
+@api_router.get("/commissions", response_model=List[Commission])
+async def get_commissions(current_user: User = Depends(get_current_user)):
+    """Get all commissions for current user"""
+    commissions = await db.commissions.find({"user_id": current_user.id}).to_list(length=None)
+    return [Commission(**commission) for commission in commissions]
+
+@api_router.post("/commissions", response_model=Commission)
+async def create_commission(commission_data: CommissionCreate, current_user: User = Depends(get_current_user)):
+    """Create a new commission"""
+    commission = Commission(**commission_data.dict(), user_id=current_user.id)
+    commission_dict = commission.dict()
+    await db.commissions.insert_one(commission_dict)
+    return commission
+
+@api_router.get("/commissions/{commission_id}", response_model=Commission)
+async def get_commission(commission_id: str, current_user: User = Depends(get_current_user)):
+    """Get a specific commission"""
+    commission = await db.commissions.find_one({"id": commission_id, "user_id": current_user.id})
+    if not commission:
+        raise HTTPException(status_code=404, detail="Commission not found")
+    return Commission(**commission)
+
+@api_router.put("/commissions/{commission_id}", response_model=Commission)
+async def update_commission(commission_id: str, commission_update: CommissionUpdate, current_user: User = Depends(get_current_user)):
+    """Update a commission"""
+    # Check if commission exists and belongs to user
+    existing = await db.commissions.find_one({"id": commission_id, "user_id": current_user.id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Commission not found")
+    
+    # Update only provided fields
+    update_data = {k: v for k, v in commission_update.dict().items() if v is not None}
+    update_data["updated_at"] = datetime.now(timezone.utc)
+    
+    await db.commissions.update_one(
+        {"id": commission_id, "user_id": current_user.id},
+        {"$set": update_data}
+    )
+    
+    # Return updated commission
+    updated = await db.commissions.find_one({"id": commission_id, "user_id": current_user.id})
+    return Commission(**updated)
+
+@api_router.delete("/commissions/{commission_id}")
+async def delete_commission(commission_id: str, current_user: User = Depends(get_current_user)):
+    """Delete a commission"""
+    result = await db.commissions.delete_one({"id": commission_id, "user_id": current_user.id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Commission not found")
+    return {"message": "Commission deleted successfully"}
+
+@api_router.get("/commissions/export/csv")
+async def export_commissions_csv(current_user: User = Depends(get_current_user)):
+    """Export commissions as CSV"""
+    commissions = await db.commissions.find({"user_id": current_user.id}).to_list(length=None)
+    
+    # Convert to CSV format
+    csv_data = "Program Name,Amount,Status,Expected Date,Paid Date,Notes,Created At\n"
+    for commission in commissions:
+        csv_data += f"{commission.get('program_name', '')},{commission.get('amount', 0)},{commission.get('status', '')},{commission.get('expected_date', '') or ''},{commission.get('paid_date', '') or ''},{commission.get('notes', '').replace(',', ';')},{commission.get('created_at', '')}\n"
+    
+    return {"csv_data": csv_data}
+
 # Health check
 @api_router.get("/health")
 async def health_check():
