@@ -2969,6 +2969,7 @@ const MarketingVault = () => {
           {activeTab === 'emails' && renderEmails()}
           {activeTab === 'hooks' && renderHooks()}
           {activeTab === 'prompts' && renderPrompts()}
+          {activeTab === 'files' && renderFiles()}
         </div>
       )}
 
