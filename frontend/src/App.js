@@ -2603,6 +2603,12 @@ const MarketingVault = () => {
               >
                 ChatGPT Prompts ({getContentByType('prompt').length})
               </button>
+              <button
+                onClick={() => setActiveTab('files')}
+                className={`tab-pill ${activeTab === 'files' ? 'tab-pill-active' : 'tab-pill-inactive'}`}
+              >
+                Files
+              </button>
             </div>
 
             {/* Email Swipes Tab Actions */}
