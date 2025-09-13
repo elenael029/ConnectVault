@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-ConnectVault CRM Backend Authentication Testing
-Tests the core authentication endpoints and JWT token handling
+ConnectVault CRM Backend Comprehensive Testing
+Tests authentication endpoints and Commission module CRUD operations
 """
 
 import requests
@@ -13,18 +13,17 @@ from datetime import datetime, timezone
 # Load environment variables
 BACKEND_URL = "https://connectvault-crm.preview.emergentagent.com/api"
 
-class BackendAuthTester:
+class BackendTester:
     def __init__(self):
         self.base_url = BACKEND_URL
-        self.test_user_data = {
-            "full_name": "John Smith",
-            "username": f"testuser_{int(time.time())}",
-            "email": f"testuser_{int(time.time())}@example.com",
-            "password": "SecurePassword123!",
-            "role": "user"
+        # Use existing test user as specified in review request
+        self.existing_user_data = {
+            "username": "frontendtest",
+            "password": "Test123!"
         }
         self.access_token = None
         self.test_results = []
+        self.created_commission_ids = []  # Track created commissions for cleanup
         
     def log_result(self, test_name, success, message, details=None):
         """Log test result"""
@@ -41,113 +40,14 @@ class BackendAuthTester:
         if details and not success:
             print(f"   Details: {details}")
     
-    def test_user_registration(self):
-        """Test POST /api/auth/register endpoint"""
-        print("\n=== Testing User Registration ===")
-        
-        try:
-            response = requests.post(
-                f"{self.base_url}/auth/register",
-                json=self.test_user_data,
-                timeout=30
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                if "message" in data and "successfully" in data["message"].lower():
-                    self.log_result(
-                        "User Registration", 
-                        True, 
-                        "User registered successfully",
-                        {"response": data, "status_code": response.status_code}
-                    )
-                    return True
-                else:
-                    self.log_result(
-                        "User Registration", 
-                        False, 
-                        "Unexpected response format",
-                        {"response": data, "status_code": response.status_code}
-                    )
-                    return False
-            else:
-                self.log_result(
-                    "User Registration", 
-                    False, 
-                    f"Registration failed with status {response.status_code}",
-                    {"response": response.text, "status_code": response.status_code}
-                )
-                return False
-                
-        except requests.exceptions.RequestException as e:
-            self.log_result(
-                "User Registration", 
-                False, 
-                f"Request failed: {str(e)}",
-                {"error": str(e)}
-            )
-            return False
-    
-    def test_duplicate_registration(self):
-        """Test duplicate user registration should fail"""
-        print("\n=== Testing Duplicate Registration ===")
-        
-        try:
-            response = requests.post(
-                f"{self.base_url}/auth/register",
-                json=self.test_user_data,
-                timeout=30
-            )
-            
-            if response.status_code == 400:
-                data = response.json()
-                if "already exists" in data.get("detail", "").lower():
-                    self.log_result(
-                        "Duplicate Registration Prevention", 
-                        True, 
-                        "Correctly rejected duplicate registration",
-                        {"response": data, "status_code": response.status_code}
-                    )
-                    return True
-                else:
-                    self.log_result(
-                        "Duplicate Registration Prevention", 
-                        False, 
-                        "Wrong error message for duplicate registration",
-                        {"response": data, "status_code": response.status_code}
-                    )
-                    return False
-            else:
-                self.log_result(
-                    "Duplicate Registration Prevention", 
-                    False, 
-                    f"Should have failed with 400, got {response.status_code}",
-                    {"response": response.text, "status_code": response.status_code}
-                )
-                return False
-                
-        except requests.exceptions.RequestException as e:
-            self.log_result(
-                "Duplicate Registration Prevention", 
-                False, 
-                f"Request failed: {str(e)}",
-                {"error": str(e)}
-            )
-            return False
-    
-    def test_user_login(self):
-        """Test POST /api/auth/login endpoint"""
-        print("\n=== Testing User Login ===")
-        
-        login_data = {
-            "username": self.test_user_data["username"],
-            "password": self.test_user_data["password"]
-        }
+    def test_existing_user_login(self):
+        """Test POST /api/auth/login with existing test user"""
+        print("\n=== Testing Existing User Login ===")
         
         try:
             response = requests.post(
                 f"{self.base_url}/auth/login",
-                json=login_data,
+                json=self.existing_user_data,
                 timeout=30
             )
             
@@ -160,10 +60,11 @@ class BackendAuthTester:
                     # Verify token format
                     if token_type.lower() == "bearer" and len(self.access_token) > 50:
                         self.log_result(
-                            "User Login", 
+                            "Existing User Login", 
                             True, 
-                            "Login successful, JWT token received",
+                            "Login successful with existing test user",
                             {
+                                "username": self.existing_user_data["username"],
                                 "token_type": token_type,
                                 "token_length": len(self.access_token),
                                 "status_code": response.status_code
@@ -172,7 +73,7 @@ class BackendAuthTester:
                         return True
                     else:
                         self.log_result(
-                            "User Login", 
+                            "Existing User Login", 
                             False, 
                             "Invalid token format received",
                             {"response": data, "status_code": response.status_code}
@@ -180,7 +81,7 @@ class BackendAuthTester:
                         return False
                 else:
                     self.log_result(
-                        "User Login", 
+                        "Existing User Login", 
                         False, 
                         "Missing access_token or token_type in response",
                         {"response": data, "status_code": response.status_code}
@@ -188,7 +89,7 @@ class BackendAuthTester:
                     return False
             else:
                 self.log_result(
-                    "User Login", 
+                    "Existing User Login", 
                     False, 
                     f"Login failed with status {response.status_code}",
                     {"response": response.text, "status_code": response.status_code}
@@ -197,72 +98,20 @@ class BackendAuthTester:
                 
         except requests.exceptions.RequestException as e:
             self.log_result(
-                "User Login", 
+                "Existing User Login", 
                 False, 
                 f"Request failed: {str(e)}",
                 {"error": str(e)}
             )
             return False
-    
-    def test_invalid_login(self):
-        """Test login with invalid credentials"""
-        print("\n=== Testing Invalid Login ===")
-        
-        invalid_login_data = {
-            "username": self.test_user_data["username"],
-            "password": "WrongPassword123!"
-        }
-        
-        try:
-            response = requests.post(
-                f"{self.base_url}/auth/login",
-                json=invalid_login_data,
-                timeout=30
-            )
-            
-            if response.status_code == 401:
-                data = response.json()
-                if "invalid" in data.get("detail", "").lower():
-                    self.log_result(
-                        "Invalid Login Prevention", 
-                        True, 
-                        "Correctly rejected invalid credentials",
-                        {"response": data, "status_code": response.status_code}
-                    )
-                    return True
-                else:
-                    self.log_result(
-                        "Invalid Login Prevention", 
-                        False, 
-                        "Wrong error message for invalid login",
-                        {"response": data, "status_code": response.status_code}
-                    )
-                    return False
-            else:
-                self.log_result(
-                    "Invalid Login Prevention", 
-                    False, 
-                    f"Should have failed with 401, got {response.status_code}",
-                    {"response": response.text, "status_code": response.status_code}
-                )
-                return False
-                
-        except requests.exceptions.RequestException as e:
-            self.log_result(
-                "Invalid Login Prevention", 
-                False, 
-                f"Request failed: {str(e)}",
-                {"error": str(e)}
-            )
-            return False
-    
-    def test_dashboard_summary_with_token(self):
-        """Test GET /api/dashboard/summary with valid JWT token"""
-        print("\n=== Testing Dashboard Summary (Protected Endpoint) ===")
+
+    def test_dashboard_summary_commission_fields(self):
+        """Test GET /api/dashboard/summary includes commission_summary with required fields"""
+        print("\n=== Testing Dashboard Summary Commission Fields ===")
         
         if not self.access_token:
             self.log_result(
-                "Dashboard Summary", 
+                "Dashboard Commission Summary", 
                 False, 
                 "No access token available for testing",
                 {"error": "Login test must pass first"}
@@ -283,32 +132,43 @@ class BackendAuthTester:
             
             if response.status_code == 200:
                 data = response.json()
-                expected_fields = ["total_contacts", "tasks_due_today", "active_promo_links", "commission_summary"]
                 
-                if all(field in data for field in expected_fields):
-                    self.log_result(
-                        "Dashboard Summary", 
-                        True, 
-                        "Dashboard summary retrieved successfully",
-                        {
-                            "response": data,
-                            "status_code": response.status_code,
-                            "fields_present": list(data.keys())
-                        }
-                    )
-                    return True
+                # Check if commission_summary exists
+                if "commission_summary" in data:
+                    commission_summary = data["commission_summary"]
+                    required_fields = ["total_paid", "total_unpaid", "total_pending"]
+                    
+                    if all(field in commission_summary for field in required_fields):
+                        self.log_result(
+                            "Dashboard Commission Summary", 
+                            True, 
+                            "Commission summary contains all required fields",
+                            {
+                                "commission_summary": commission_summary,
+                                "status_code": response.status_code
+                            }
+                        )
+                        return True
+                    else:
+                        missing_fields = [field for field in required_fields if field not in commission_summary]
+                        self.log_result(
+                            "Dashboard Commission Summary", 
+                            False, 
+                            f"Missing commission summary fields: {missing_fields}",
+                            {"commission_summary": commission_summary, "status_code": response.status_code}
+                        )
+                        return False
                 else:
-                    missing_fields = [field for field in expected_fields if field not in data]
                     self.log_result(
-                        "Dashboard Summary", 
+                        "Dashboard Commission Summary", 
                         False, 
-                        f"Missing expected fields: {missing_fields}",
+                        "commission_summary field missing from dashboard response",
                         {"response": data, "status_code": response.status_code}
                     )
                     return False
             else:
                 self.log_result(
-                    "Dashboard Summary", 
+                    "Dashboard Commission Summary", 
                     False, 
                     f"Dashboard request failed with status {response.status_code}",
                     {"response": response.text, "status_code": response.status_code}
@@ -317,92 +177,806 @@ class BackendAuthTester:
                 
         except requests.exceptions.RequestException as e:
             self.log_result(
-                "Dashboard Summary", 
+                "Dashboard Commission Summary", 
                 False, 
                 f"Request failed: {str(e)}",
                 {"error": str(e)}
             )
             return False
-    
-    def test_dashboard_summary_without_token(self):
-        """Test GET /api/dashboard/summary without JWT token"""
-        print("\n=== Testing Dashboard Summary Without Token ===")
+
+    def test_get_commissions_empty(self):
+        """Test GET /api/commissions returns empty list initially"""
+        print("\n=== Testing Get Commissions (Empty) ===")
         
-        try:
-            response = requests.get(
-                f"{self.base_url}/dashboard/summary",
-                timeout=30
-            )
-            
-            if response.status_code == 401:
-                self.log_result(
-                    "Dashboard Summary Without Token", 
-                    True, 
-                    "Correctly rejected request without token",
-                    {"status_code": response.status_code}
-                )
-                return True
-            else:
-                self.log_result(
-                    "Dashboard Summary Without Token", 
-                    False, 
-                    f"Should have failed with 401, got {response.status_code}",
-                    {"response": response.text, "status_code": response.status_code}
-                )
-                return False
-                
-        except requests.exceptions.RequestException as e:
+        if not self.access_token:
             self.log_result(
-                "Dashboard Summary Without Token", 
+                "Get Commissions Empty", 
                 False, 
-                f"Request failed: {str(e)}",
-                {"error": str(e)}
+                "No access token available for testing",
+                {"error": "Login test must pass first"}
             )
             return False
-    
-    def test_dashboard_summary_with_invalid_token(self):
-        """Test GET /api/dashboard/summary with invalid JWT token"""
-        print("\n=== Testing Dashboard Summary With Invalid Token ===")
         
-        invalid_token = "invalid.jwt.token.here"
         headers = {
-            "Authorization": f"Bearer {invalid_token}",
+            "Authorization": f"Bearer {self.access_token}",
             "Content-Type": "application/json"
         }
         
         try:
             response = requests.get(
-                f"{self.base_url}/dashboard/summary",
+                f"{self.base_url}/commissions",
                 headers=headers,
                 timeout=30
             )
             
-            if response.status_code == 401:
-                self.log_result(
-                    "Dashboard Summary With Invalid Token", 
-                    True, 
-                    "Correctly rejected request with invalid token",
-                    {"status_code": response.status_code}
-                )
-                return True
+            if response.status_code == 200:
+                data = response.json()
+                if isinstance(data, list):
+                    self.log_result(
+                        "Get Commissions Empty", 
+                        True, 
+                        f"Successfully retrieved commissions list (count: {len(data)})",
+                        {"commissions_count": len(data), "status_code": response.status_code}
+                    )
+                    return True
+                else:
+                    self.log_result(
+                        "Get Commissions Empty", 
+                        False, 
+                        "Response is not a list",
+                        {"response": data, "status_code": response.status_code}
+                    )
+                    return False
             else:
                 self.log_result(
-                    "Dashboard Summary With Invalid Token", 
+                    "Get Commissions Empty", 
                     False, 
-                    f"Should have failed with 401, got {response.status_code}",
+                    f"Get commissions failed with status {response.status_code}",
                     {"response": response.text, "status_code": response.status_code}
                 )
                 return False
                 
         except requests.exceptions.RequestException as e:
             self.log_result(
-                "Dashboard Summary With Invalid Token", 
+                "Get Commissions Empty", 
                 False, 
                 f"Request failed: {str(e)}",
                 {"error": str(e)}
             )
             return False
-    
+
+    def test_create_commission(self):
+        """Test POST /api/commissions creates new commission"""
+        print("\n=== Testing Create Commission ===")
+        
+        if not self.access_token:
+            self.log_result(
+                "Create Commission", 
+                False, 
+                "No access token available for testing",
+                {"error": "Login test must pass first"}
+            )
+            return False
+        
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json"
+        }
+        
+        # Test data as specified in review request
+        commission_data = {
+            "program_name": "Amazon Associates",
+            "amount": 150.00,
+            "status": "pending",
+            "expected_date": "2024-02-15T00:00:00Z",
+            "paid_date": None,
+            "promo_link_id": None,
+            "notes": "Test commission for Amazon Associates program"
+        }
+        
+        try:
+            response = requests.post(
+                f"{self.base_url}/commissions",
+                json=commission_data,
+                headers=headers,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ["id", "user_id", "program_name", "amount", "status", "created_at"]
+                
+                if all(field in data for field in required_fields):
+                    # Store commission ID for later tests
+                    self.created_commission_ids.append(data["id"])
+                    
+                    # Verify data matches what we sent
+                    if (data["program_name"] == commission_data["program_name"] and 
+                        data["amount"] == commission_data["amount"] and
+                        data["status"] == commission_data["status"]):
+                        
+                        self.log_result(
+                            "Create Commission", 
+                            True, 
+                            "Commission created successfully with correct data",
+                            {
+                                "commission_id": data["id"],
+                                "program_name": data["program_name"],
+                                "amount": data["amount"],
+                                "status": data["status"],
+                                "status_code": response.status_code
+                            }
+                        )
+                        return True
+                    else:
+                        self.log_result(
+                            "Create Commission", 
+                            False, 
+                            "Commission data doesn't match input",
+                            {"sent": commission_data, "received": data, "status_code": response.status_code}
+                        )
+                        return False
+                else:
+                    missing_fields = [field for field in required_fields if field not in data]
+                    self.log_result(
+                        "Create Commission", 
+                        False, 
+                        f"Missing required fields in response: {missing_fields}",
+                        {"response": data, "status_code": response.status_code}
+                    )
+                    return False
+            else:
+                self.log_result(
+                    "Create Commission", 
+                    False, 
+                    f"Create commission failed with status {response.status_code}",
+                    {"response": response.text, "status_code": response.status_code}
+                )
+                return False
+                
+        except requests.exceptions.RequestException as e:
+            self.log_result(
+                "Create Commission", 
+                False, 
+                f"Request failed: {str(e)}",
+                {"error": str(e)}
+            )
+            return False
+
+    def test_create_multiple_commissions(self):
+        """Test creating multiple commissions with different statuses"""
+        print("\n=== Testing Create Multiple Commissions ===")
+        
+        if not self.access_token:
+            self.log_result(
+                "Create Multiple Commissions", 
+                False, 
+                "No access token available for testing",
+                {"error": "Login test must pass first"}
+            )
+            return False
+        
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json"
+        }
+        
+        # Test data with different statuses as specified in review request
+        commissions_data = [
+            {
+                "program_name": "ClickBank",
+                "amount": 250.50,
+                "status": "paid",
+                "expected_date": "2024-01-15T00:00:00Z",
+                "paid_date": "2024-01-20T00:00:00Z",
+                "notes": "ClickBank commission - paid"
+            },
+            {
+                "program_name": "ShareASale",
+                "amount": 75.25,
+                "status": "unpaid",
+                "expected_date": "2024-01-30T00:00:00Z",
+                "paid_date": None,
+                "notes": "ShareASale commission - unpaid"
+            }
+        ]
+        
+        created_count = 0
+        
+        for i, commission_data in enumerate(commissions_data):
+            try:
+                response = requests.post(
+                    f"{self.base_url}/commissions",
+                    json=commission_data,
+                    headers=headers,
+                    timeout=30
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    if "id" in data:
+                        self.created_commission_ids.append(data["id"])
+                        created_count += 1
+                    else:
+                        self.log_result(
+                            "Create Multiple Commissions", 
+                            False, 
+                            f"Commission {i+1} missing ID in response",
+                            {"response": data, "status_code": response.status_code}
+                        )
+                        return False
+                else:
+                    self.log_result(
+                        "Create Multiple Commissions", 
+                        False, 
+                        f"Commission {i+1} creation failed with status {response.status_code}",
+                        {"response": response.text, "status_code": response.status_code}
+                    )
+                    return False
+                    
+            except requests.exceptions.RequestException as e:
+                self.log_result(
+                    "Create Multiple Commissions", 
+                    False, 
+                    f"Request failed for commission {i+1}: {str(e)}",
+                    {"error": str(e)}
+                )
+                return False
+        
+        if created_count == len(commissions_data):
+            self.log_result(
+                "Create Multiple Commissions", 
+                True, 
+                f"Successfully created {created_count} commissions with different statuses",
+                {"created_count": created_count, "total_commissions": len(self.created_commission_ids)}
+            )
+            return True
+        else:
+            self.log_result(
+                "Create Multiple Commissions", 
+                False, 
+                f"Only created {created_count} out of {len(commissions_data)} commissions",
+                {"created_count": created_count, "expected_count": len(commissions_data)}
+            )
+            return False
+
+    def test_get_commissions_with_data(self):
+        """Test GET /api/commissions returns created commissions"""
+        print("\n=== Testing Get Commissions (With Data) ===")
+        
+        if not self.access_token:
+            self.log_result(
+                "Get Commissions With Data", 
+                False, 
+                "No access token available for testing",
+                {"error": "Login test must pass first"}
+            )
+            return False
+        
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json"
+        }
+        
+        try:
+            response = requests.get(
+                f"{self.base_url}/commissions",
+                headers=headers,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if isinstance(data, list):
+                    expected_count = len(self.created_commission_ids)
+                    actual_count = len(data)
+                    
+                    if actual_count >= expected_count:
+                        # Verify that our created commissions are in the list
+                        found_ids = [commission["id"] for commission in data if "id" in commission]
+                        missing_ids = [cid for cid in self.created_commission_ids if cid not in found_ids]
+                        
+                        if not missing_ids:
+                            self.log_result(
+                                "Get Commissions With Data", 
+                                True, 
+                                f"Successfully retrieved {actual_count} commissions, all created commissions found",
+                                {"commissions_count": actual_count, "created_ids_found": len(self.created_commission_ids), "status_code": response.status_code}
+                            )
+                            return True
+                        else:
+                            self.log_result(
+                                "Get Commissions With Data", 
+                                False, 
+                                f"Missing {len(missing_ids)} created commissions in response",
+                                {"missing_ids": missing_ids, "found_count": actual_count, "status_code": response.status_code}
+                            )
+                            return False
+                    else:
+                        self.log_result(
+                            "Get Commissions With Data", 
+                            False, 
+                            f"Expected at least {expected_count} commissions, got {actual_count}",
+                            {"expected_count": expected_count, "actual_count": actual_count, "status_code": response.status_code}
+                        )
+                        return False
+                else:
+                    self.log_result(
+                        "Get Commissions With Data", 
+                        False, 
+                        "Response is not a list",
+                        {"response": data, "status_code": response.status_code}
+                    )
+                    return False
+            else:
+                self.log_result(
+                    "Get Commissions With Data", 
+                    False, 
+                    f"Get commissions failed with status {response.status_code}",
+                    {"response": response.text, "status_code": response.status_code}
+                )
+                return False
+                
+        except requests.exceptions.RequestException as e:
+            self.log_result(
+                "Get Commissions With Data", 
+                False, 
+                f"Request failed: {str(e)}",
+                {"error": str(e)}
+            )
+            return False
+
+    def test_get_single_commission(self):
+        """Test GET /api/commissions/{id} retrieves specific commission"""
+        print("\n=== Testing Get Single Commission ===")
+        
+        if not self.access_token:
+            self.log_result(
+                "Get Single Commission", 
+                False, 
+                "No access token available for testing",
+                {"error": "Login test must pass first"}
+            )
+            return False
+        
+        if not self.created_commission_ids:
+            self.log_result(
+                "Get Single Commission", 
+                False, 
+                "No commission IDs available for testing",
+                {"error": "Create commission tests must pass first"}
+            )
+            return False
+        
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json"
+        }
+        
+        commission_id = self.created_commission_ids[0]
+        
+        try:
+            response = requests.get(
+                f"{self.base_url}/commissions/{commission_id}",
+                headers=headers,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ["id", "user_id", "program_name", "amount", "status", "created_at"]
+                
+                if all(field in data for field in required_fields):
+                    if data["id"] == commission_id:
+                        self.log_result(
+                            "Get Single Commission", 
+                            True, 
+                            "Successfully retrieved specific commission",
+                            {
+                                "commission_id": data["id"],
+                                "program_name": data["program_name"],
+                                "amount": data["amount"],
+                                "status": data["status"],
+                                "status_code": response.status_code
+                            }
+                        )
+                        return True
+                    else:
+                        self.log_result(
+                            "Get Single Commission", 
+                            False, 
+                            f"Retrieved commission ID {data['id']} doesn't match requested ID {commission_id}",
+                            {"requested_id": commission_id, "received_id": data["id"], "status_code": response.status_code}
+                        )
+                        return False
+                else:
+                    missing_fields = [field for field in required_fields if field not in data]
+                    self.log_result(
+                        "Get Single Commission", 
+                        False, 
+                        f"Missing required fields in response: {missing_fields}",
+                        {"response": data, "status_code": response.status_code}
+                    )
+                    return False
+            elif response.status_code == 404:
+                self.log_result(
+                    "Get Single Commission", 
+                    False, 
+                    f"Commission {commission_id} not found",
+                    {"commission_id": commission_id, "status_code": response.status_code}
+                )
+                return False
+            else:
+                self.log_result(
+                    "Get Single Commission", 
+                    False, 
+                    f"Get single commission failed with status {response.status_code}",
+                    {"response": response.text, "status_code": response.status_code}
+                )
+                return False
+                
+        except requests.exceptions.RequestException as e:
+            self.log_result(
+                "Get Single Commission", 
+                False, 
+                f"Request failed: {str(e)}",
+                {"error": str(e)}
+            )
+            return False
+
+    def test_update_commission(self):
+        """Test PUT /api/commissions/{id} updates existing commission"""
+        print("\n=== Testing Update Commission ===")
+        
+        if not self.access_token:
+            self.log_result(
+                "Update Commission", 
+                False, 
+                "No access token available for testing",
+                {"error": "Login test must pass first"}
+            )
+            return False
+        
+        if not self.created_commission_ids:
+            self.log_result(
+                "Update Commission", 
+                False, 
+                "No commission IDs available for testing",
+                {"error": "Create commission tests must pass first"}
+            )
+            return False
+        
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json"
+        }
+        
+        commission_id = self.created_commission_ids[0]
+        
+        # Update data
+        update_data = {
+            "amount": 175.00,
+            "status": "paid",
+            "paid_date": "2024-02-20T00:00:00Z",
+            "notes": "Updated commission - now paid"
+        }
+        
+        try:
+            response = requests.put(
+                f"{self.base_url}/commissions/{commission_id}",
+                json=update_data,
+                headers=headers,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Verify updates were applied
+                if (data["amount"] == update_data["amount"] and 
+                    data["status"] == update_data["status"] and
+                    data["notes"] == update_data["notes"]):
+                    
+                    self.log_result(
+                        "Update Commission", 
+                        True, 
+                        "Commission updated successfully",
+                        {
+                            "commission_id": data["id"],
+                            "updated_amount": data["amount"],
+                            "updated_status": data["status"],
+                            "updated_notes": data["notes"],
+                            "status_code": response.status_code
+                        }
+                    )
+                    return True
+                else:
+                    self.log_result(
+                        "Update Commission", 
+                        False, 
+                        "Commission updates were not applied correctly",
+                        {"sent": update_data, "received": data, "status_code": response.status_code}
+                    )
+                    return False
+            elif response.status_code == 404:
+                self.log_result(
+                    "Update Commission", 
+                    False, 
+                    f"Commission {commission_id} not found for update",
+                    {"commission_id": commission_id, "status_code": response.status_code}
+                )
+                return False
+            else:
+                self.log_result(
+                    "Update Commission", 
+                    False, 
+                    f"Update commission failed with status {response.status_code}",
+                    {"response": response.text, "status_code": response.status_code}
+                )
+                return False
+                
+        except requests.exceptions.RequestException as e:
+            self.log_result(
+                "Update Commission", 
+                False, 
+                f"Request failed: {str(e)}",
+                {"error": str(e)}
+            )
+            return False
+
+    def test_export_commissions_csv(self):
+        """Test GET /api/commissions/export/csv exports commissions as CSV"""
+        print("\n=== Testing Export Commissions CSV ===")
+        
+        if not self.access_token:
+            self.log_result(
+                "Export Commissions CSV", 
+                False, 
+                "No access token available for testing",
+                {"error": "Login test must pass first"}
+            )
+            return False
+        
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json"
+        }
+        
+        try:
+            response = requests.get(
+                f"{self.base_url}/commissions/export/csv",
+                headers=headers,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                if "csv_data" in data:
+                    csv_data = data["csv_data"]
+                    
+                    # Verify CSV format
+                    lines = csv_data.strip().split('\n')
+                    if len(lines) >= 1:  # At least header
+                        header = lines[0]
+                        expected_columns = ["Program Name", "Amount", "Status", "Expected Date", "Paid Date", "Notes", "Created At"]
+                        
+                        # Check if header contains expected columns
+                        if all(col in header for col in expected_columns):
+                            self.log_result(
+                                "Export Commissions CSV", 
+                                True, 
+                                f"CSV export successful with {len(lines)-1} data rows",
+                                {
+                                    "csv_lines": len(lines),
+                                    "header": header,
+                                    "status_code": response.status_code
+                                }
+                            )
+                            return True
+                        else:
+                            missing_columns = [col for col in expected_columns if col not in header]
+                            self.log_result(
+                                "Export Commissions CSV", 
+                                False, 
+                                f"CSV header missing expected columns: {missing_columns}",
+                                {"header": header, "missing_columns": missing_columns, "status_code": response.status_code}
+                            )
+                            return False
+                    else:
+                        self.log_result(
+                            "Export Commissions CSV", 
+                            False, 
+                            "CSV data is empty or malformed",
+                            {"csv_data": csv_data, "status_code": response.status_code}
+                        )
+                        return False
+                else:
+                    self.log_result(
+                        "Export Commissions CSV", 
+                        False, 
+                        "csv_data field missing from response",
+                        {"response": data, "status_code": response.status_code}
+                    )
+                    return False
+            else:
+                self.log_result(
+                    "Export Commissions CSV", 
+                    False, 
+                    f"CSV export failed with status {response.status_code}",
+                    {"response": response.text, "status_code": response.status_code}
+                )
+                return False
+                
+        except requests.exceptions.RequestException as e:
+            self.log_result(
+                "Export Commissions CSV", 
+                False, 
+                f"Request failed: {str(e)}",
+                {"error": str(e)}
+            )
+            return False
+
+    def test_delete_commission(self):
+        """Test DELETE /api/commissions/{id} deletes commission"""
+        print("\n=== Testing Delete Commission ===")
+        
+        if not self.access_token:
+            self.log_result(
+                "Delete Commission", 
+                False, 
+                "No access token available for testing",
+                {"error": "Login test must pass first"}
+            )
+            return False
+        
+        if not self.created_commission_ids:
+            self.log_result(
+                "Delete Commission", 
+                False, 
+                "No commission IDs available for testing",
+                {"error": "Create commission tests must pass first"}
+            )
+            return False
+        
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json"
+        }
+        
+        # Use the last created commission for deletion
+        commission_id = self.created_commission_ids[-1]
+        
+        try:
+            response = requests.delete(
+                f"{self.base_url}/commissions/{commission_id}",
+                headers=headers,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                if "message" in data and "deleted" in data["message"].lower():
+                    # Verify commission is actually deleted by trying to get it
+                    get_response = requests.get(
+                        f"{self.base_url}/commissions/{commission_id}",
+                        headers=headers,
+                        timeout=30
+                    )
+                    
+                    if get_response.status_code == 404:
+                        # Remove from our tracking list
+                        self.created_commission_ids.remove(commission_id)
+                        
+                        self.log_result(
+                            "Delete Commission", 
+                            True, 
+                            "Commission deleted successfully and verified",
+                            {
+                                "deleted_commission_id": commission_id,
+                                "delete_response": data,
+                                "verification_status": get_response.status_code,
+                                "status_code": response.status_code
+                            }
+                        )
+                        return True
+                    else:
+                        self.log_result(
+                            "Delete Commission", 
+                            False, 
+                            "Commission still exists after deletion",
+                            {"commission_id": commission_id, "verification_status": get_response.status_code, "status_code": response.status_code}
+                        )
+                        return False
+                else:
+                    self.log_result(
+                        "Delete Commission", 
+                        False, 
+                        "Unexpected delete response message",
+                        {"response": data, "status_code": response.status_code}
+                    )
+                    return False
+            elif response.status_code == 404:
+                self.log_result(
+                    "Delete Commission", 
+                    False, 
+                    f"Commission {commission_id} not found for deletion",
+                    {"commission_id": commission_id, "status_code": response.status_code}
+                )
+                return False
+            else:
+                self.log_result(
+                    "Delete Commission", 
+                    False, 
+                    f"Delete commission failed with status {response.status_code}",
+                    {"response": response.text, "status_code": response.status_code}
+                )
+                return False
+                
+        except requests.exceptions.RequestException as e:
+            self.log_result(
+                "Delete Commission", 
+                False, 
+                f"Request failed: {str(e)}",
+                {"error": str(e)}
+            )
+            return False
+
+    def test_commission_security_user_isolation(self):
+        """Test that commissions are properly filtered by user_id (security test)"""
+        print("\n=== Testing Commission Security (User Isolation) ===")
+        
+        if not self.access_token:
+            self.log_result(
+                "Commission Security", 
+                False, 
+                "No access token available for testing",
+                {"error": "Login test must pass first"}
+            )
+            return False
+        
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json"
+        }
+        
+        # Test with a non-existent commission ID (should return 404, not 403)
+        fake_commission_id = "non-existent-commission-id-12345"
+        
+        try:
+            response = requests.get(
+                f"{self.base_url}/commissions/{fake_commission_id}",
+                headers=headers,
+                timeout=30
+            )
+            
+            if response.status_code == 404:
+                self.log_result(
+                    "Commission Security", 
+                    True, 
+                    "Properly returns 404 for non-existent commission (user isolation working)",
+                    {"fake_id": fake_commission_id, "status_code": response.status_code}
+                )
+                return True
+            else:
+                self.log_result(
+                    "Commission Security", 
+                    False, 
+                    f"Expected 404 for non-existent commission, got {response.status_code}",
+                    {"fake_id": fake_commission_id, "response": response.text, "status_code": response.status_code}
+                )
+                return False
+                
+        except requests.exceptions.RequestException as e:
+            self.log_result(
+                "Commission Security", 
+                False, 
+                f"Request failed: {str(e)}",
+                {"error": str(e)}
+            )
+            return False
+
     def test_health_check(self):
         """Test GET /api/health endpoint"""
         print("\n=== Testing Health Check ===")
@@ -450,22 +1024,26 @@ class BackendAuthTester:
             return False
     
     def run_all_tests(self):
-        """Run all authentication tests"""
-        print("🚀 Starting ConnectVault CRM Backend Authentication Tests")
+        """Run all backend tests"""
+        print("🚀 Starting ConnectVault CRM Backend Comprehensive Tests")
         print(f"Backend URL: {self.base_url}")
-        print(f"Test User: {self.test_user_data['username']}")
-        print("=" * 60)
+        print(f"Test User: {self.existing_user_data['username']}")
+        print("=" * 80)
         
-        # Test sequence
+        # Test sequence - order matters for dependencies
         tests = [
             self.test_health_check,
-            self.test_user_registration,
-            self.test_duplicate_registration,
-            self.test_user_login,
-            self.test_invalid_login,
-            self.test_dashboard_summary_with_token,
-            self.test_dashboard_summary_without_token,
-            self.test_dashboard_summary_with_invalid_token
+            self.test_existing_user_login,
+            self.test_dashboard_summary_commission_fields,
+            self.test_get_commissions_empty,
+            self.test_create_commission,
+            self.test_create_multiple_commissions,
+            self.test_get_commissions_with_data,
+            self.test_get_single_commission,
+            self.test_update_commission,
+            self.test_export_commissions_csv,
+            self.test_commission_security_user_isolation,
+            self.test_delete_commission
         ]
         
         passed = 0
@@ -482,15 +1060,15 @@ class BackendAuthTester:
                 failed += 1
         
         # Summary
-        print("\n" + "=" * 60)
-        print("🏁 TEST SUMMARY")
-        print("=" * 60)
+        print("\n" + "=" * 80)
+        print("🏁 COMPREHENSIVE TEST SUMMARY")
+        print("=" * 80)
         print(f"✅ Passed: {passed}")
         print(f"❌ Failed: {failed}")
         print(f"📊 Total: {passed + failed}")
         
         if failed == 0:
-            print("🎉 All tests passed! Authentication system is working correctly.")
+            print("🎉 All tests passed! Commission module backend is working correctly.")
         else:
             print("⚠️  Some tests failed. Please review the issues above.")
         
@@ -498,7 +1076,7 @@ class BackendAuthTester:
 
 def main():
     """Main test execution"""
-    tester = BackendAuthTester()
+    tester = BackendTester()
     success = tester.run_all_tests()
     
     # Save detailed results
