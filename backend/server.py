@@ -382,12 +382,13 @@ async def get_dashboard_summary(current_user: User = Depends(get_current_user)):
         {"$match": {"user_id": current_user.id}},
         {"$group": {
             "_id": None,
-            "total_paid": {"$sum": {"$cond": [{"$eq": ["$paid", True]}, "$commission_amount", 0]}},
-            "total_unpaid": {"$sum": {"$cond": [{"$eq": ["$paid", False]}, "$commission_amount", 0]}}
+            "total_paid": {"$sum": {"$cond": [{"$eq": ["$status", "paid"]}, "$amount", 0]}},
+            "total_unpaid": {"$sum": {"$cond": [{"$eq": ["$status", "unpaid"]}, "$amount", 0]}},
+            "total_pending": {"$sum": {"$cond": [{"$eq": ["$status", "pending"]}, "$amount", 0]}}
         }}
     ]).to_list(1)
     
-    commission_summary = total_commissions[0] if total_commissions else {"total_paid": 0, "total_unpaid": 0}
+    commission_summary = total_commissions[0] if total_commissions else {"total_paid": 0, "total_unpaid": 0, "total_pending": 0}
     
     return {
         "total_contacts": total_contacts,
