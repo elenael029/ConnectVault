@@ -120,6 +120,18 @@ backend:
         agent: "testing"
         comment: "Comprehensive authentication testing completed successfully. All core endpoints working: POST /api/auth/register (✅), POST /api/auth/login (✅), GET /api/dashboard/summary with JWT (✅). JWT token generation, validation, and protected endpoint access all functioning correctly. Minor: API returns 403 instead of 401 for missing tokens, but functionality is correct."
 
+  - task: "Commissions API endpoints"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Created comprehensive commissions CRUD API endpoints: GET /api/commissions (list), POST /api/commissions (create), GET /api/commissions/{id} (get single), PUT /api/commissions/{id} (update), DELETE /api/commissions/{id} (delete), GET /api/commissions/export/csv (export). Updated Commission model with program_name, amount, status (pending/paid/unpaid), expected_date, paid_date, promo_link_id, notes fields. Updated dashboard summary to calculate totals by status. Needs testing."
+
 frontend:
   - task: "Frontend authentication flow"
     implemented: true
