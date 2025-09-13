@@ -1062,14 +1062,10 @@ class BackendTester:
             files = {
                 'file': (filename, pdf_content, 'application/pdf')
             }
-            data = {
-                'category': 'Marketing Materials'
-            }
             
             response = requests.post(
-                f"{self.base_url}/files",
+                f"{self.base_url}/files?category=Marketing Materials",
                 files=files,
-                data=data,
                 headers=headers,
                 timeout=30
             )
