@@ -2891,14 +2891,7 @@ const MarketingVault = () => {
                   className="btn-primary-navy"
                 >
                   <Upload className="h-4 w-4 mr-2" />
-                  Upload PDF
-                </Button>
-                <Button 
-                  onClick={() => setShowCategoryModal(true)}
-                  variant="outline"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Category
+                  Upload File
                 </Button>
               </div>
             )}
