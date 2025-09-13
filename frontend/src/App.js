@@ -3153,6 +3153,257 @@ const MarketingVault = () => {
   );
 };
 
+// Files Component (Main Tab)
+const Files = () => {
+  const [files, setFiles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    loadFiles();
+  }, []);
+
+  const loadFiles = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${API}/files`);
+      setFiles(response.data);
+    } catch (error) {
+      console.error('Error loading files:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load files",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const allowedTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOCX
+      'text/plain', // TXT
+      'application/vnd.ms-excel', // XLS
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' // XLSX
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Invalid File Type",
+        description: "Only PDF, DOCX, TXT, XLS, and XLSX files are allowed",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "File size must be less than 10MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('category', 'Business Documents');
+
+    try {
+      await axios.post(`${API}/files`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      toast({
+        title: "Success",
+        description: "File uploaded successfully",
+      });
+      
+      setShowUploadModal(false);
+      loadFiles();
+      
+      // Reset form
+      event.target.value = '';
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast({
+        title: "Upload Failed",
+        description: error.response?.data?.detail || "Failed to upload file",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFileDownload = async (file) => {
+    try {
+      const response = await axios.get(`${API}/files/${file.id}/download`, {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', file.name);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      toast({
+        title: "Download Failed",
+        description: "Failed to download file",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFileDelete = async (file) => {
+    if (!window.confirm(`Are you sure you want to delete "${file.name}"?`)) return;
+
+    try {
+      await axios.delete(`${API}/files/${file.id}`);
+      
+      toast({
+        title: "Success",
+        description: "File deleted successfully",
+      });
+      
+      loadFiles();
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      toast({
+        title: "Delete Failed",
+        description: "Failed to delete file",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  return (
+    <Layout title="Files">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <Button variant="outline" onClick={() => navigate('/dashboard')} className="mb-4 btn-primary-navy">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+          <h2 className="text-3xl font-bold text-primary-navy">Files</h2>
+          <p className="text-text-secondary">Upload and manage your business documents</p>
+        </div>
+        <Button onClick={() => setShowUploadModal(true)} className="btn-primary-navy">
+          <Upload className="h-4 w-4 mr-2" />
+          Upload File
+        </Button>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-8">Loading files...</div>
+      ) : files.length === 0 ? (
+        <Card className="premium-card text-center py-12">
+          <CardContent>
+            <FileText className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">No files yet</h3>
+            <p className="text-gray-500 mb-6">Upload your first business document to get started.</p>
+            <Button onClick={() => setShowUploadModal(true)} className="btn-primary-navy">
+              <Upload className="h-4 w-4 mr-2" />
+              Upload File
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="premium-card">
+          <CardHeader>
+            <CardTitle className="text-primary-navy">Your Files ({files.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {files.map((file) => (
+                <div key={file.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                  <div className="flex items-center flex-1">
+                    <FileText className="h-6 w-6 text-primary-navy mr-3" />
+                    <div>
+                      <p className="font-medium text-gray-900">{file.name}</p>
+                      <p className="text-sm text-gray-500">
+                        {formatFileSize(file.size_bytes)} • Uploaded on {new Date(file.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      onClick={() => handleFileDownload(file)}
+                      className="btn-primary-navy"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleFileDelete(file)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Upload Modal */}
+      {showUploadModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md premium-card">
+            <CardHeader>
+              <CardTitle className="text-primary-navy">Upload File</CardTitle>
+              <CardDescription>Upload business documents (PDF, DOCX, TXT, XLS, XLSX)</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">Select File</label>
+                <input
+                  type="file"
+                  accept=".pdf,.docx,.txt,.xls,.xlsx"
+                  onChange={handleFileUpload}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
+                <p className="text-xs text-gray-500 mt-1">PDF, DOCX, TXT, XLS, XLSX files only, max 10MB</p>
+              </div>
+              <div className="flex justify-between">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowUploadModal(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </Layout>
+  );
+};
+
 // Commissions Component
 const Commissions = () => {
   const [commissions, setCommissions] = useState([]);
