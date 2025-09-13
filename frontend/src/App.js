@@ -2277,26 +2277,6 @@ const MarketingVault = () => {
   const renderFiles = () => {
     return (
       <div>
-        {/* Search and Filter */}
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <Input
-            placeholder="Search files..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="form-input flex-1"
-          />
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="form-input md:w-48"
-          >
-            <option value="">All Categories</option>
-            {categories.map(category => (
-              <option key={category} value={category}>{category}</option>
-            ))}
-          </select>
-        </div>
-
         {filesLoading ? (
           <div className="text-center py-8">Loading files...</div>
         ) : files.length === 0 ? (
@@ -2304,82 +2284,41 @@ const MarketingVault = () => {
             <CardContent>
               <FileText className="h-16 w-16 mx-auto text-gray-400 mb-4" />
               <h3 className="text-lg font-semibold text-gray-700 mb-2">No files yet</h3>
-              <p className="text-gray-500 mb-6">Click 'Upload PDF' to add your first document.</p>
+              <p className="text-gray-500 mb-6">Upload your first PDF, DOCX, or TXT document.</p>
               <Button onClick={() => setShowFileUpload(true)} className="btn-primary-navy">
                 <Upload className="h-4 w-4 mr-2" />
-                Upload PDF
+                Upload File
               </Button>
             </CardContent>
           </Card>
         ) : (
           <Card className="premium-card">
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="text-left py-3 px-4 font-semibold">File Name</th>
-                      <th className="text-left py-3 px-4 font-semibold">Category</th>
-                      <th className="text-left py-3 px-4 font-semibold">Size</th>
-                      <th className="text-left py-3 px-4 font-semibold">Uploaded</th>
-                      <th className="text-left py-3 px-4 font-semibold">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {files.map((file) => (
-                      <tr key={file.id} className="border-b hover:bg-gray-50">
-                        <td className="py-3 px-4">
-                          <div className="flex items-center">
-                            <FileText className="h-5 w-5 text-red-500 mr-2" />
-                            <span className="font-medium">{file.name}</span>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <Badge variant="outline">{file.category}</Badge>
-                        </td>
-                        <td className="py-3 px-4 text-sm text-gray-600">
-                          {formatFileSize(file.size_bytes)}
-                        </td>
-                        <td className="py-3 px-4 text-sm text-gray-600">
-                          {new Date(file.created_at).toLocaleDateString()}
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="flex space-x-1">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleFileDownload(file)}
-                              title="Download"
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setSelectedFile(file);
-                                setFileFormData({ name: file.name, category: file.category });
-                                setShowFileRename(true);
-                              }}
-                              title="Rename/Edit"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleFileDelete(file)}
-                              className="text-red-600 hover:text-red-700"
-                              title="Delete"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            <CardHeader>
+              <CardTitle className="text-primary-navy">Uploaded Files ({files.length})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {files.map((file) => (
+                  <div key={file.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                    <div className="flex items-center flex-1">
+                      <FileText className="h-6 w-6 text-primary-navy mr-3" />
+                      <div>
+                        <p className="font-medium text-gray-900">{file.name}</p>
+                        <p className="text-sm text-gray-500">
+                          Uploaded on {new Date(file.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => handleFileDownload(file)}
+                      className="btn-primary-navy"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
+                    </Button>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
