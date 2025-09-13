@@ -2451,6 +2451,15 @@ const MarketingVault = () => {
                   <Button 
                     size="sm" 
                     variant="outline"
+                    onClick={handleUseInEmail}
+                    className="btn-primary-navy text-white"
+                  >
+                    <Mail className="h-4 w-4 mr-1" />
+                    Use in Email
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
                     onClick={() => handleEditSwipe(template)}
                   >
                     <Edit className="h-4 w-4" />
