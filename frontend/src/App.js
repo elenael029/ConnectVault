@@ -3577,6 +3577,11 @@ function App() {
                   <Settings />
                 </ProtectedRoute>
               } />
+              <Route path="/commissions" element={
+                <ProtectedRoute>
+                  <Commissions />
+                </ProtectedRoute>
+              } />
               {/* Legacy route redirect */}
               <Route path="/offers" element={<Navigate to="/promo-links" />} />
             </Routes>
