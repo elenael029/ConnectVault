@@ -3150,54 +3150,6 @@ const MarketingVault = () => {
           </Card>
         </div>
       )}
-
-      {/* File Rename Modal */}
-      {showFileRename && selectedFile && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md premium-card">
-            <CardHeader>
-              <CardTitle className="text-primary-navy">Edit File</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-text-primary mb-2">File Name</label>
-                <Input
-                  value={fileFormData.name}
-                  onChange={(e) => setFileFormData({...fileFormData, name: e.target.value})}
-                  placeholder="Enter file name"
-                  className="form-input"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-text-primary mb-2">Category</label>
-                <Input
-                  value={fileFormData.category}
-                  onChange={(e) => setFileFormData({...fileFormData, category: e.target.value})}
-                  placeholder="Enter category"
-                  className="form-input"
-                />
-              </div>
-              <div className="flex justify-between">
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    setShowFileRename(false);
-                    setSelectedFile(null);
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={handleFileRename}
-                  className="btn-primary-navy"
-                >
-                  Save Changes
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </Layout>
   );
 };
