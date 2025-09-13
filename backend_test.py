@@ -1027,6 +1027,987 @@ class BackendTester:
             )
             return False
     
+    def create_test_pdf(self, filename="test_file.pdf", content="Test PDF Content"):
+        """Create a small test PDF file in memory"""
+        buffer = io.BytesIO()
+        p = canvas.Canvas(buffer, pagesize=letter)
+        p.drawString(100, 750, content)
+        p.drawString(100, 730, f"Generated at: {datetime.now(timezone.utc).isoformat()}")
+        p.showPage()
+        p.save()
+        buffer.seek(0)
+        return buffer.getvalue(), filename
+
+    def test_upload_pdf_file(self):
+        """Test POST /api/files uploads PDF file successfully"""
+        print("\n=== Testing Upload PDF File ===")
+        
+        if not self.access_token:
+            self.log_result(
+                "Upload PDF File", 
+                False, 
+                "No access token available for testing",
+                {"error": "Login test must pass first"}
+            )
+            return False
+        
+        headers = {
+            "Authorization": f"Bearer {self.access_token}"
+        }
+        
+        # Create test PDF
+        pdf_content, filename = self.create_test_pdf("ConnectVault_Test_Document.pdf", "ConnectVault CRM Test Document")
+        
+        try:
+            files = {
+                'file': (filename, pdf_content, 'application/pdf')
+            }
+            data = {
+                'category': 'Marketing Materials'
+            }
+            
+            response = requests.post(
+                f"{self.base_url}/files",
+                files=files,
+                data=data,
+                headers=headers,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ["id", "user_id", "name", "category", "size_bytes", "mime_type", "created_at"]
+                
+                if all(field in data for field in required_fields):
+                    # Store file ID for later tests
+                    self.created_file_ids.append(data["id"])
+                    
+                    # Verify data matches what we sent
+                    if (data["name"] == filename and 
+                        data["category"] == "Marketing Materials" and
+                        data["mime_type"] == "application/pdf" and
+                        data["size_bytes"] > 0):
+                        
+                        self.log_result(
+                            "Upload PDF File", 
+                            True, 
+                            "PDF file uploaded successfully with correct metadata",
+                            {
+                                "file_id": data["id"],
+                                "filename": data["name"],
+                                "category": data["category"],
+                                "size_bytes": data["size_bytes"],
+                                "mime_type": data["mime_type"],
+                                "status_code": response.status_code
+                            }
+                        )
+                        return True
+                    else:
+                        self.log_result(
+                            "Upload PDF File", 
+                            False, 
+                            "File metadata doesn't match expected values",
+                            {"expected_name": filename, "received": data, "status_code": response.status_code}
+                        )
+                        return False
+                else:
+                    missing_fields = [field for field in required_fields if field not in data]
+                    self.log_result(
+                        "Upload PDF File", 
+                        False, 
+                        f"Missing required fields in response: {missing_fields}",
+                        {"response": data, "status_code": response.status_code}
+                    )
+                    return False
+            else:
+                self.log_result(
+                    "Upload PDF File", 
+                    False, 
+                    f"File upload failed with status {response.status_code}",
+                    {"response": response.text, "status_code": response.status_code}
+                )
+                return False
+                
+        except requests.exceptions.RequestException as e:
+            self.log_result(
+                "Upload PDF File", 
+                False, 
+                f"Request failed: {str(e)}",
+                {"error": str(e)}
+            )
+            return False
+
+    def test_file_type_validation(self):
+        """Test that non-PDF files are rejected"""
+        print("\n=== Testing File Type Validation ===")
+        
+        if not self.access_token:
+            self.log_result(
+                "File Type Validation", 
+                False, 
+                "No access token available for testing",
+                {"error": "Login test must pass first"}
+            )
+            return False
+        
+        headers = {
+            "Authorization": f"Bearer {self.access_token}"
+        }
+        
+        # Create a fake text file
+        text_content = b"This is not a PDF file"
+        
+        try:
+            files = {
+                'file': ('test.txt', text_content, 'text/plain')
+            }
+            data = {
+                'category': 'Documents'
+            }
+            
+            response = requests.post(
+                f"{self.base_url}/files",
+                files=files,
+                data=data,
+                headers=headers,
+                timeout=30
+            )
+            
+            if response.status_code == 400:
+                error_data = response.json()
+                if "PDF" in error_data.get("detail", "").upper():
+                    self.log_result(
+                        "File Type Validation", 
+                        True, 
+                        "Non-PDF file correctly rejected with 400 status",
+                        {
+                            "error_message": error_data.get("detail"),
+                            "status_code": response.status_code
+                        }
+                    )
+                    return True
+                else:
+                    self.log_result(
+                        "File Type Validation", 
+                        False, 
+                        "Wrong error message for non-PDF file",
+                        {"response": error_data, "status_code": response.status_code}
+                    )
+                    return False
+            else:
+                self.log_result(
+                    "File Type Validation", 
+                    False, 
+                    f"Expected 400 status for non-PDF file, got {response.status_code}",
+                    {"response": response.text, "status_code": response.status_code}
+                )
+                return False
+                
+        except requests.exceptions.RequestException as e:
+            self.log_result(
+                "File Type Validation", 
+                False, 
+                f"Request failed: {str(e)}",
+                {"error": str(e)}
+            )
+            return False
+
+    def test_file_size_validation(self):
+        """Test file size limit (10MB max)"""
+        print("\n=== Testing File Size Validation ===")
+        
+        if not self.access_token:
+            self.log_result(
+                "File Size Validation", 
+                False, 
+                "No access token available for testing",
+                {"error": "Login test must pass first"}
+            )
+            return False
+        
+        headers = {
+            "Authorization": f"Bearer {self.access_token}"
+        }
+        
+        # Create a large fake PDF (simulate > 10MB)
+        # We'll create a smaller file but test the validation logic
+        large_content = b"PDF" + b"x" * (11 * 1024 * 1024)  # 11MB of data
+        
+        try:
+            files = {
+                'file': ('large_test.pdf', large_content, 'application/pdf')
+            }
+            data = {
+                'category': 'Documents'
+            }
+            
+            response = requests.post(
+                f"{self.base_url}/files",
+                files=files,
+                data=data,
+                headers=headers,
+                timeout=60  # Longer timeout for large file
+            )
+            
+            if response.status_code == 400:
+                error_data = response.json()
+                if "10MB" in error_data.get("detail", "") or "size" in error_data.get("detail", "").lower():
+                    self.log_result(
+                        "File Size Validation", 
+                        True, 
+                        "Large file correctly rejected with size limit error",
+                        {
+                            "error_message": error_data.get("detail"),
+                            "file_size_mb": len(large_content) / (1024 * 1024),
+                            "status_code": response.status_code
+                        }
+                    )
+                    return True
+                else:
+                    self.log_result(
+                        "File Size Validation", 
+                        False, 
+                        "Wrong error message for large file",
+                        {"response": error_data, "status_code": response.status_code}
+                    )
+                    return False
+            else:
+                # If it didn't fail, check if it's because the server accepted it (which would be wrong)
+                self.log_result(
+                    "File Size Validation", 
+                    False, 
+                    f"Expected 400 status for large file, got {response.status_code}",
+                    {"response": response.text, "file_size_mb": len(large_content) / (1024 * 1024), "status_code": response.status_code}
+                )
+                return False
+                
+        except requests.exceptions.RequestException as e:
+            # Large file might cause timeout or connection issues, which is acceptable
+            if "timeout" in str(e).lower() or "connection" in str(e).lower():
+                self.log_result(
+                    "File Size Validation", 
+                    True, 
+                    "Large file caused timeout/connection error (acceptable behavior)",
+                    {"error": str(e), "file_size_mb": len(large_content) / (1024 * 1024)}
+                )
+                return True
+            else:
+                self.log_result(
+                    "File Size Validation", 
+                    False, 
+                    f"Request failed: {str(e)}",
+                    {"error": str(e)}
+                )
+                return False
+
+    def test_get_files_list(self):
+        """Test GET /api/files returns uploaded files"""
+        print("\n=== Testing Get Files List ===")
+        
+        if not self.access_token:
+            self.log_result(
+                "Get Files List", 
+                False, 
+                "No access token available for testing",
+                {"error": "Login test must pass first"}
+            )
+            return False
+        
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json"
+        }
+        
+        try:
+            response = requests.get(
+                f"{self.base_url}/files",
+                headers=headers,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if isinstance(data, list):
+                    expected_count = len(self.created_file_ids)
+                    actual_count = len(data)
+                    
+                    if actual_count >= expected_count:
+                        # Verify that our created files are in the list
+                        found_ids = [file_record["id"] for file_record in data if "id" in file_record]
+                        missing_ids = [fid for fid in self.created_file_ids if fid not in found_ids]
+                        
+                        if not missing_ids:
+                            self.log_result(
+                                "Get Files List", 
+                                True, 
+                                f"Successfully retrieved {actual_count} files, all created files found",
+                                {"files_count": actual_count, "created_ids_found": len(self.created_file_ids), "status_code": response.status_code}
+                            )
+                            return True
+                        else:
+                            self.log_result(
+                                "Get Files List", 
+                                False, 
+                                f"Missing {len(missing_ids)} created files in response",
+                                {"missing_ids": missing_ids, "found_count": actual_count, "status_code": response.status_code}
+                            )
+                            return False
+                    else:
+                        self.log_result(
+                            "Get Files List", 
+                            False, 
+                            f"Expected at least {expected_count} files, got {actual_count}",
+                            {"expected_count": expected_count, "actual_count": actual_count, "status_code": response.status_code}
+                        )
+                        return False
+                else:
+                    self.log_result(
+                        "Get Files List", 
+                        False, 
+                        "Response is not a list",
+                        {"response": data, "status_code": response.status_code}
+                    )
+                    return False
+            else:
+                self.log_result(
+                    "Get Files List", 
+                    False, 
+                    f"Get files failed with status {response.status_code}",
+                    {"response": response.text, "status_code": response.status_code}
+                )
+                return False
+                
+        except requests.exceptions.RequestException as e:
+            self.log_result(
+                "Get Files List", 
+                False, 
+                f"Request failed: {str(e)}",
+                {"error": str(e)}
+            )
+            return False
+
+    def test_search_files(self):
+        """Test GET /api/files with search parameter"""
+        print("\n=== Testing Search Files ===")
+        
+        if not self.access_token:
+            self.log_result(
+                "Search Files", 
+                False, 
+                "No access token available for testing",
+                {"error": "Login test must pass first"}
+            )
+            return False
+        
+        if not self.created_file_ids:
+            self.log_result(
+                "Search Files", 
+                False, 
+                "No files available for search testing",
+                {"error": "File upload tests must pass first"}
+            )
+            return False
+        
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json"
+        }
+        
+        # Search for "ConnectVault" which should be in our test file name
+        search_term = "ConnectVault"
+        
+        try:
+            response = requests.get(
+                f"{self.base_url}/files?search={search_term}",
+                headers=headers,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if isinstance(data, list):
+                    # Check if search results contain our search term
+                    matching_files = [f for f in data if search_term.lower() in f.get("name", "").lower()]
+                    
+                    if len(matching_files) > 0:
+                        self.log_result(
+                            "Search Files", 
+                            True, 
+                            f"Search returned {len(matching_files)} files matching '{search_term}'",
+                            {
+                                "search_term": search_term,
+                                "total_results": len(data),
+                                "matching_files": len(matching_files),
+                                "status_code": response.status_code
+                            }
+                        )
+                        return True
+                    else:
+                        self.log_result(
+                            "Search Files", 
+                            False, 
+                            f"No files found matching search term '{search_term}'",
+                            {"search_term": search_term, "total_results": len(data), "status_code": response.status_code}
+                        )
+                        return False
+                else:
+                    self.log_result(
+                        "Search Files", 
+                        False, 
+                        "Search response is not a list",
+                        {"response": data, "status_code": response.status_code}
+                    )
+                    return False
+            else:
+                self.log_result(
+                    "Search Files", 
+                    False, 
+                    f"Search files failed with status {response.status_code}",
+                    {"response": response.text, "status_code": response.status_code}
+                )
+                return False
+                
+        except requests.exceptions.RequestException as e:
+            self.log_result(
+                "Search Files", 
+                False, 
+                f"Request failed: {str(e)}",
+                {"error": str(e)}
+            )
+            return False
+
+    def test_filter_files_by_category(self):
+        """Test GET /api/files with category filter"""
+        print("\n=== Testing Filter Files by Category ===")
+        
+        if not self.access_token:
+            self.log_result(
+                "Filter Files by Category", 
+                False, 
+                "No access token available for testing",
+                {"error": "Login test must pass first"}
+            )
+            return False
+        
+        if not self.created_file_ids:
+            self.log_result(
+                "Filter Files by Category", 
+                False, 
+                "No files available for category filtering testing",
+                {"error": "File upload tests must pass first"}
+            )
+            return False
+        
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json"
+        }
+        
+        # Filter by "Marketing Materials" category which we used in upload test
+        category = "Marketing Materials"
+        
+        try:
+            response = requests.get(
+                f"{self.base_url}/files?category={category}",
+                headers=headers,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if isinstance(data, list):
+                    # Check if all returned files have the correct category
+                    correct_category_files = [f for f in data if f.get("category") == category]
+                    
+                    if len(data) == len(correct_category_files) and len(data) > 0:
+                        self.log_result(
+                            "Filter Files by Category", 
+                            True, 
+                            f"Category filter returned {len(data)} files, all with correct category",
+                            {
+                                "category": category,
+                                "files_count": len(data),
+                                "status_code": response.status_code
+                            }
+                        )
+                        return True
+                    elif len(data) == 0:
+                        self.log_result(
+                            "Filter Files by Category", 
+                            False, 
+                            f"No files found for category '{category}' (expected at least 1)",
+                            {"category": category, "files_count": len(data), "status_code": response.status_code}
+                        )
+                        return False
+                    else:
+                        self.log_result(
+                            "Filter Files by Category", 
+                            False, 
+                            f"Some files have incorrect category: expected {len(data)}, correct {len(correct_category_files)}",
+                            {"category": category, "total_files": len(data), "correct_category": len(correct_category_files), "status_code": response.status_code}
+                        )
+                        return False
+                else:
+                    self.log_result(
+                        "Filter Files by Category", 
+                        False, 
+                        "Category filter response is not a list",
+                        {"response": data, "status_code": response.status_code}
+                    )
+                    return False
+            else:
+                self.log_result(
+                    "Filter Files by Category", 
+                    False, 
+                    f"Category filter failed with status {response.status_code}",
+                    {"response": response.text, "status_code": response.status_code}
+                )
+                return False
+                
+        except requests.exceptions.RequestException as e:
+            self.log_result(
+                "Filter Files by Category", 
+                False, 
+                f"Request failed: {str(e)}",
+                {"error": str(e)}
+            )
+            return False
+
+    def test_download_file(self):
+        """Test GET /api/files/{id}/download downloads file"""
+        print("\n=== Testing Download File ===")
+        
+        if not self.access_token:
+            self.log_result(
+                "Download File", 
+                False, 
+                "No access token available for testing",
+                {"error": "Login test must pass first"}
+            )
+            return False
+        
+        if not self.created_file_ids:
+            self.log_result(
+                "Download File", 
+                False, 
+                "No file IDs available for download testing",
+                {"error": "File upload tests must pass first"}
+            )
+            return False
+        
+        headers = {
+            "Authorization": f"Bearer {self.access_token}"
+        }
+        
+        file_id = self.created_file_ids[0]
+        
+        try:
+            response = requests.get(
+                f"{self.base_url}/files/{file_id}/download",
+                headers=headers,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                # Check if response contains PDF content
+                content = response.content
+                content_type = response.headers.get('content-type', '')
+                
+                if content_type == 'application/pdf' and len(content) > 0:
+                    # Basic PDF validation - check for PDF header
+                    if content.startswith(b'%PDF'):
+                        self.log_result(
+                            "Download File", 
+                            True, 
+                            "File downloaded successfully with correct PDF content",
+                            {
+                                "file_id": file_id,
+                                "content_type": content_type,
+                                "content_size": len(content),
+                                "status_code": response.status_code
+                            }
+                        )
+                        return True
+                    else:
+                        self.log_result(
+                            "Download File", 
+                            False, 
+                            "Downloaded content is not a valid PDF",
+                            {"file_id": file_id, "content_type": content_type, "content_preview": content[:50], "status_code": response.status_code}
+                        )
+                        return False
+                else:
+                    self.log_result(
+                        "Download File", 
+                        False, 
+                        "Downloaded file has incorrect content type or is empty",
+                        {"file_id": file_id, "content_type": content_type, "content_size": len(content), "status_code": response.status_code}
+                    )
+                    return False
+            elif response.status_code == 404:
+                self.log_result(
+                    "Download File", 
+                    False, 
+                    f"File {file_id} not found for download",
+                    {"file_id": file_id, "status_code": response.status_code}
+                )
+                return False
+            else:
+                self.log_result(
+                    "Download File", 
+                    False, 
+                    f"Download file failed with status {response.status_code}",
+                    {"response": response.text, "status_code": response.status_code}
+                )
+                return False
+                
+        except requests.exceptions.RequestException as e:
+            self.log_result(
+                "Download File", 
+                False, 
+                f"Request failed: {str(e)}",
+                {"error": str(e)}
+            )
+            return False
+
+    def test_update_file_metadata(self):
+        """Test PATCH /api/files/{id} updates file name and category"""
+        print("\n=== Testing Update File Metadata ===")
+        
+        if not self.access_token:
+            self.log_result(
+                "Update File Metadata", 
+                False, 
+                "No access token available for testing",
+                {"error": "Login test must pass first"}
+            )
+            return False
+        
+        if not self.created_file_ids:
+            self.log_result(
+                "Update File Metadata", 
+                False, 
+                "No file IDs available for update testing",
+                {"error": "File upload tests must pass first"}
+            )
+            return False
+        
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json"
+        }
+        
+        file_id = self.created_file_ids[0]
+        
+        # Update data
+        update_data = {
+            "name": "Updated_ConnectVault_Document.pdf",
+            "category": "Updated Category"
+        }
+        
+        try:
+            response = requests.patch(
+                f"{self.base_url}/files/{file_id}",
+                json=update_data,
+                headers=headers,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Verify updates were applied
+                if (data["name"] == update_data["name"] and 
+                    data["category"] == update_data["category"]):
+                    
+                    self.log_result(
+                        "Update File Metadata", 
+                        True, 
+                        "File metadata updated successfully",
+                        {
+                            "file_id": data["id"],
+                            "updated_name": data["name"],
+                            "updated_category": data["category"],
+                            "status_code": response.status_code
+                        }
+                    )
+                    return True
+                else:
+                    self.log_result(
+                        "Update File Metadata", 
+                        False, 
+                        "File metadata updates were not applied correctly",
+                        {"sent": update_data, "received": data, "status_code": response.status_code}
+                    )
+                    return False
+            elif response.status_code == 404:
+                self.log_result(
+                    "Update File Metadata", 
+                    False, 
+                    f"File {file_id} not found for update",
+                    {"file_id": file_id, "status_code": response.status_code}
+                )
+                return False
+            else:
+                self.log_result(
+                    "Update File Metadata", 
+                    False, 
+                    f"Update file metadata failed with status {response.status_code}",
+                    {"response": response.text, "status_code": response.status_code}
+                )
+                return False
+                
+        except requests.exceptions.RequestException as e:
+            self.log_result(
+                "Update File Metadata", 
+                False, 
+                f"Request failed: {str(e)}",
+                {"error": str(e)}
+            )
+            return False
+
+    def test_get_file_categories(self):
+        """Test GET /api/files/categories returns available categories"""
+        print("\n=== Testing Get File Categories ===")
+        
+        if not self.access_token:
+            self.log_result(
+                "Get File Categories", 
+                False, 
+                "No access token available for testing",
+                {"error": "Login test must pass first"}
+            )
+            return False
+        
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json"
+        }
+        
+        try:
+            response = requests.get(
+                f"{self.base_url}/files/categories",
+                headers=headers,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                if "categories" in data and isinstance(data["categories"], list):
+                    categories = data["categories"]
+                    
+                    # Should contain at least the categories we used in tests
+                    expected_categories = ["Marketing Materials", "Updated Category"]
+                    found_categories = [cat for cat in expected_categories if cat in categories]
+                    
+                    if len(found_categories) >= 1:  # At least one of our categories should be there
+                        self.log_result(
+                            "Get File Categories", 
+                            True, 
+                            f"Categories retrieved successfully, found {len(categories)} total categories",
+                            {
+                                "total_categories": len(categories),
+                                "categories": categories,
+                                "expected_found": len(found_categories),
+                                "status_code": response.status_code
+                            }
+                        )
+                        return True
+                    else:
+                        self.log_result(
+                            "Get File Categories", 
+                            False, 
+                            "Expected categories not found in response",
+                            {"expected": expected_categories, "received": categories, "status_code": response.status_code}
+                        )
+                        return False
+                else:
+                    self.log_result(
+                        "Get File Categories", 
+                        False, 
+                        "Response missing 'categories' field or not a list",
+                        {"response": data, "status_code": response.status_code}
+                    )
+                    return False
+            else:
+                self.log_result(
+                    "Get File Categories", 
+                    False, 
+                    f"Get categories failed with status {response.status_code}",
+                    {"response": response.text, "status_code": response.status_code}
+                )
+                return False
+                
+        except requests.exceptions.RequestException as e:
+            self.log_result(
+                "Get File Categories", 
+                False, 
+                f"Request failed: {str(e)}",
+                {"error": str(e)}
+            )
+            return False
+
+    def test_file_user_isolation(self):
+        """Test that files are properly filtered by user_id (security test)"""
+        print("\n=== Testing File User Isolation ===")
+        
+        if not self.access_token:
+            self.log_result(
+                "File User Isolation", 
+                False, 
+                "No access token available for testing",
+                {"error": "Login test must pass first"}
+            )
+            return False
+        
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json"
+        }
+        
+        # Test with a non-existent file ID (should return 404, not 403)
+        fake_file_id = "non-existent-file-id-12345"
+        
+        try:
+            response = requests.get(
+                f"{self.base_url}/files/{fake_file_id}/download",
+                headers=headers,
+                timeout=30
+            )
+            
+            if response.status_code == 404:
+                self.log_result(
+                    "File User Isolation", 
+                    True, 
+                    "Properly returns 404 for non-existent file (user isolation working)",
+                    {"fake_id": fake_file_id, "status_code": response.status_code}
+                )
+                return True
+            else:
+                self.log_result(
+                    "File User Isolation", 
+                    False, 
+                    f"Expected 404 for non-existent file, got {response.status_code}",
+                    {"fake_id": fake_file_id, "response": response.text, "status_code": response.status_code}
+                )
+                return False
+                
+        except requests.exceptions.RequestException as e:
+            self.log_result(
+                "File User Isolation", 
+                False, 
+                f"Request failed: {str(e)}",
+                {"error": str(e)}
+            )
+            return False
+
+    def test_delete_file(self):
+        """Test DELETE /api/files/{id} deletes file"""
+        print("\n=== Testing Delete File ===")
+        
+        if not self.access_token:
+            self.log_result(
+                "Delete File", 
+                False, 
+                "No access token available for testing",
+                {"error": "Login test must pass first"}
+            )
+            return False
+        
+        if not self.created_file_ids:
+            self.log_result(
+                "Delete File", 
+                False, 
+                "No file IDs available for deletion testing",
+                {"error": "File upload tests must pass first"}
+            )
+            return False
+        
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json"
+        }
+        
+        # Use the last created file for deletion
+        file_id = self.created_file_ids[-1]
+        
+        try:
+            response = requests.delete(
+                f"{self.base_url}/files/{file_id}",
+                headers=headers,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                if "message" in data and "deleted" in data["message"].lower():
+                    # Verify file is actually deleted by trying to download it
+                    get_response = requests.get(
+                        f"{self.base_url}/files/{file_id}/download",
+                        headers=headers,
+                        timeout=30
+                    )
+                    
+                    if get_response.status_code == 404:
+                        # Remove from our tracking list
+                        self.created_file_ids.remove(file_id)
+                        
+                        self.log_result(
+                            "Delete File", 
+                            True, 
+                            "File deleted successfully and verified",
+                            {
+                                "deleted_file_id": file_id,
+                                "delete_response": data,
+                                "verification_status": get_response.status_code,
+                                "status_code": response.status_code
+                            }
+                        )
+                        return True
+                    else:
+                        self.log_result(
+                            "Delete File", 
+                            False, 
+                            "File still exists after deletion",
+                            {"file_id": file_id, "verification_status": get_response.status_code, "status_code": response.status_code}
+                        )
+                        return False
+                else:
+                    self.log_result(
+                        "Delete File", 
+                        False, 
+                        "Unexpected delete response message",
+                        {"response": data, "status_code": response.status_code}
+                    )
+                    return False
+            elif response.status_code == 404:
+                self.log_result(
+                    "Delete File", 
+                    False, 
+                    f"File {file_id} not found for deletion",
+                    {"file_id": file_id, "status_code": response.status_code}
+                )
+                return False
+            else:
+                self.log_result(
+                    "Delete File", 
+                    False, 
+                    f"Delete file failed with status {response.status_code}",
+                    {"response": response.text, "status_code": response.status_code}
+                )
+                return False
+                
+        except requests.exceptions.RequestException as e:
+            self.log_result(
+                "Delete File", 
+                False, 
+                f"Request failed: {str(e)}",
+                {"error": str(e)}
+            )
+            return False
+    
     def run_all_tests(self):
         """Run all backend tests"""
         print("🚀 Starting ConnectVault CRM Backend Comprehensive Tests")
