@@ -2943,6 +2943,26 @@ const MarketingVault = () => {
                 </div>
               </div>
             )}
+
+            {/* Files Tab Actions */}
+            {activeTab === 'files' && (
+              <div className="flex space-x-2">
+                <Button 
+                  onClick={() => setShowFileUpload(true)}
+                  className="btn-primary-navy"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload PDF
+                </Button>
+                <Button 
+                  onClick={() => setShowCategoryModal(true)}
+                  variant="outline"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Category
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Content */}
