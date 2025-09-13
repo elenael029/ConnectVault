@@ -696,11 +696,16 @@ async def upload_file(
     current_user: User = Depends(get_current_user)
 ):
     """Upload a PDF file"""
-    # Validate file type
-    if file.content_type != "application/pdf":
+    # Validate file type (PDF, DOCX, TXT)
+    allowed_types = [
+        "application/pdf",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",  # DOCX
+        "text/plain"  # TXT
+    ]
+    if file.content_type not in allowed_types:
         raise HTTPException(
             status_code=400,
-            detail="Only PDF files are allowed"
+            detail="Only PDF, DOCX, and TXT files are allowed"
         )
     
     # Check file size (10MB max)
