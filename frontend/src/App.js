@@ -582,7 +582,7 @@ const Dashboard = () => {
           <CardDescription className="text-text-secondary text-lg">Get started with your CRM tasks</CardDescription>
         </CardHeader>
         <CardContent className="px-8 pb-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
             <Button 
               className="dashboard-tile-navy"
               onClick={() => navigate('/contacts')}
@@ -614,6 +614,14 @@ const Dashboard = () => {
             >
               <Mail className="h-8 w-8 mb-3" />
               <span className="text-lg font-semibold">Marketing Vault</span>
+            </Button>
+            <Button 
+              className="dashboard-tile-navy"
+              onClick={() => navigate('/files')}
+              aria-label="Go to Files"
+            >
+              <FileText className="h-8 w-8 mb-3" />
+              <span className="text-lg font-semibold">Files</span>
             </Button>
           </div>
         </CardContent>
