@@ -2142,10 +2142,16 @@ const MarketingVault = () => {
     const file = event.target.files[0];
     if (!file) return;
 
-    if (file.type !== 'application/pdf') {
+    const allowedTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOCX
+      'text/plain' // TXT
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
       toast({
         title: "Invalid File Type",
-        description: "Only PDF files are allowed",
+        description: "Only PDF, DOCX, and TXT files are allowed",
         variant: "destructive",
       });
       return;
@@ -2162,7 +2168,7 @@ const MarketingVault = () => {
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('category', fileFormData.category);
+    formData.append('category', 'General'); // Default category
 
     try {
       await axios.post(`${API}/files`, formData, {
@@ -2176,10 +2182,8 @@ const MarketingVault = () => {
       
       setShowFileUpload(false);
       loadFiles();
-      loadCategories();
       
       // Reset form
-      setFileFormData({ name: '', category: 'General' });
       event.target.value = '';
     } catch (error) {
       console.error('Error uploading file:', error);
