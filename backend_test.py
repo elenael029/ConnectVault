@@ -27,6 +27,7 @@ class BackendTester:
         self.access_token = None
         self.test_results = []
         self.created_commission_ids = []  # Track created commissions for cleanup
+        self.created_file_ids = []  # Track created files for cleanup
         
     def log_result(self, test_name, success, message, details=None):
         """Log test result"""
