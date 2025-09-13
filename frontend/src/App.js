@@ -2077,6 +2077,13 @@ const MarketingVault = () => {
     loadMarketingVault();
   }, []);
 
+  useEffect(() => {
+    if (activeTab === 'files') {
+      loadFiles();
+      loadCategories();
+    }
+  }, [activeTab, searchQuery, selectedCategory]);
+
   const loadMarketingVault = async () => {
     try {
       // Check if we have content in localStorage
