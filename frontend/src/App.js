@@ -550,7 +550,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="premium-card cursor-pointer" onClick={() => navigate('/promo-links')}>
+        <Card className="premium-card cursor-pointer" onClick={() => navigate('/commissions')}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -561,6 +561,9 @@ const Dashboard = () => {
                   </p>
                   <p className="text-lg font-semibold text-red-600">
                     Unpaid: ${summary?.commission_summary?.total_unpaid?.toFixed(2) || '0.00'}
+                  </p>
+                  <p className="text-lg font-semibold text-gray-600">
+                    Pending: ${summary?.commission_summary?.total_pending?.toFixed(2) || '0.00'}
                   </p>
                 </div>
               </div>
