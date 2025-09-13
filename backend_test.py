@@ -1229,14 +1229,10 @@ class BackendTester:
             files = {
                 'file': ('large_test.pdf', large_content, 'application/pdf')
             }
-            data = {
-                'category': 'Documents'
-            }
             
             response = requests.post(
-                f"{self.base_url}/files",
+                f"{self.base_url}/files?category=Documents",
                 files=files,
-                data=data,
                 headers=headers,
                 timeout=60  # Longer timeout for large file
             )
