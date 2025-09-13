@@ -4127,6 +4127,11 @@ function App() {
                   <Commissions />
                 </ProtectedRoute>
               } />
+              <Route path="/files" element={
+                <ProtectedRoute>
+                  <Files />
+                </ProtectedRoute>
+              } />
               {/* Legacy route redirect */}
               <Route path="/offers" element={<Navigate to="/promo-links" />} />
             </Routes>
