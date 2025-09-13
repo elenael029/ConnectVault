@@ -1056,17 +1056,29 @@ const Settings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [brevoApiKey, setBrevoApiKey] = useState('');
+  const [systemeApiKey, setSystemeApiKey] = useState('');
+  const [emailProvider, setEmailProvider] = useState('brevo');
   const [loading, setLoading] = useState(false);
+  const [savedSysteme, setSavedSysteme] = useState(false);
 
   useEffect(() => {
-    // Load saved API key from localStorage
-    const saved = localStorage.getItem('brevo-api-key');
-    if (saved) {
-      setBrevoApiKey(saved);
+    // Load saved data from localStorage
+    const savedBrevo = localStorage.getItem('brevo-api-key');
+    const savedSystemeKey = localStorage.getItem('systeme-api-key');
+    const savedProvider = localStorage.getItem('email-provider');
+    
+    if (savedBrevo) {
+      setBrevoApiKey(savedBrevo);
+    }
+    if (savedSystemeKey) {
+      setSystemeApiKey(savedSystemeKey);
+    }
+    if (savedProvider) {
+      setEmailProvider(savedProvider);
     }
   }, []);
 
-  const handleSave = () => {
+  const handleBrevoSave = () => {
     if (!brevoApiKey.trim()) {
       toast({
         title: "Error",
@@ -1081,6 +1093,30 @@ const Settings = () => {
       title: "Success",
       description: "Brevo API key saved successfully",
     });
+  };
+
+  const handleSystemeSave = () => {
+    if (!systemeApiKey.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid Systeme.io API key",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    localStorage.setItem('systeme-api-key', systemeApiKey);
+    setSavedSysteme(true);
+    setTimeout(() => setSavedSysteme(false), 3000);
+    toast({
+      title: "Success",
+      description: "Systeme.io API key saved successfully",
+    });
+  };
+
+  const handleProviderChange = (provider) => {
+    setEmailProvider(provider);
+    localStorage.setItem('email-provider', provider);
   };
 
   return (
