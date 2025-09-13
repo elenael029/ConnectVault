@@ -2107,6 +2107,287 @@ const MarketingVault = () => {
     }
   };
 
+  // File management functions
+  const loadFiles = async () => {
+    setFilesLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (searchQuery) params.append('search', searchQuery);
+      if (selectedCategory) params.append('category', selectedCategory);
+      
+      const response = await axios.get(`${API}/files?${params.toString()}`);
+      setFiles(response.data);
+    } catch (error) {
+      console.error('Error loading files:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load files",
+        variant: "destructive",
+      });
+    } finally {
+      setFilesLoading(false);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      const response = await axios.get(`${API}/files/categories`);
+      setCategories(response.data.categories);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
+  };
+
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') {
+      toast({
+        title: "Invalid File Type",
+        description: "Only PDF files are allowed",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "File size must be less than 10MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('category', fileFormData.category);
+
+    try {
+      await axios.post(`${API}/files`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      toast({
+        title: "Success",
+        description: "File uploaded successfully",
+      });
+      
+      setShowFileUpload(false);
+      loadFiles();
+      loadCategories();
+      
+      // Reset form
+      setFileFormData({ name: '', category: 'General' });
+      event.target.value = '';
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast({
+        title: "Upload Failed",
+        description: error.response?.data?.detail || "Failed to upload file",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFileRename = async () => {
+    if (!selectedFile || !fileFormData.name.trim()) return;
+
+    try {
+      await axios.patch(`${API}/files/${selectedFile.id}`, {
+        name: fileFormData.name,
+        category: fileFormData.category
+      });
+      
+      toast({
+        title: "Success",
+        description: "File updated successfully",
+      });
+      
+      setShowFileRename(false);
+      setSelectedFile(null);
+      loadFiles();
+      loadCategories();
+    } catch (error) {
+      console.error('Error updating file:', error);
+      toast({
+        title: "Update Failed",
+        description: "Failed to update file",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFileDelete = async (file) => {
+    if (!window.confirm(`Are you sure you want to delete "${file.name}"?`)) return;
+
+    try {
+      await axios.delete(`${API}/files/${file.id}`);
+      
+      toast({
+        title: "Success",
+        description: "File deleted successfully",
+      });
+      
+      loadFiles();
+      loadCategories();
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      toast({
+        title: "Delete Failed",
+        description: "Failed to delete file",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFileDownload = async (file) => {
+    try {
+      const response = await axios.get(`${API}/files/${file.id}/download`, {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', file.name);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      toast({
+        title: "Download Failed",
+        description: "Failed to download file",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const renderFiles = () => {
+    return (
+      <div>
+        {/* Search and Filter */}
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <Input
+            placeholder="Search files..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="form-input flex-1"
+          />
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="form-input md:w-48"
+          >
+            <option value="">All Categories</option>
+            {categories.map(category => (
+              <option key={category} value={category}>{category}</option>
+            ))}
+          </select>
+        </div>
+
+        {filesLoading ? (
+          <div className="text-center py-8">Loading files...</div>
+        ) : files.length === 0 ? (
+          <Card className="premium-card text-center py-12">
+            <CardContent>
+              <FileText className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">No files yet</h3>
+              <p className="text-gray-500 mb-6">Click 'Upload PDF' to add your first document.</p>
+              <Button onClick={() => setShowFileUpload(true)} className="btn-primary-navy">
+                <Upload className="h-4 w-4 mr-2" />
+                Upload PDF
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="premium-card">
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="text-left py-3 px-4 font-semibold">File Name</th>
+                      <th className="text-left py-3 px-4 font-semibold">Category</th>
+                      <th className="text-left py-3 px-4 font-semibold">Size</th>
+                      <th className="text-left py-3 px-4 font-semibold">Uploaded</th>
+                      <th className="text-left py-3 px-4 font-semibold">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {files.map((file) => (
+                      <tr key={file.id} className="border-b hover:bg-gray-50">
+                        <td className="py-3 px-4">
+                          <div className="flex items-center">
+                            <FileText className="h-5 w-5 text-red-500 mr-2" />
+                            <span className="font-medium">{file.name}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <Badge variant="outline">{file.category}</Badge>
+                        </td>
+                        <td className="py-3 px-4 text-sm text-gray-600">
+                          {formatFileSize(file.size_bytes)}
+                        </td>
+                        <td className="py-3 px-4 text-sm text-gray-600">
+                          {new Date(file.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex space-x-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleFileDownload(file)}
+                              title="Download"
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedFile(file);
+                                setFileFormData({ name: file.name, category: file.category });
+                                setShowFileRename(true);
+                              }}
+                              title="Rename/Edit"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleFileDelete(file)}
+                              className="text-red-600 hover:text-red-700"
+                              title="Delete"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    );
+  };
+
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
       console.log('Copied to clipboard');
