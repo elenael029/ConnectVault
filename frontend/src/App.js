@@ -2111,11 +2111,7 @@ const MarketingVault = () => {
   const loadFiles = async () => {
     setFilesLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (searchQuery) params.append('search', searchQuery);
-      if (selectedCategory) params.append('category', selectedCategory);
-      
-      const response = await axios.get(`${API}/files?${params.toString()}`);
+      const response = await axios.get(`${API}/files`);
       setFiles(response.data);
     } catch (error) {
       console.error('Error loading files:', error);
