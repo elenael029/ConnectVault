@@ -3124,28 +3124,19 @@ const MarketingVault = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <Card className="w-full max-w-md premium-card">
             <CardHeader>
-              <CardTitle className="text-primary-navy">Upload PDF</CardTitle>
-              <CardDescription>Upload, organize, and download your PDFs.</CardDescription>
+              <CardTitle className="text-primary-navy">Upload File</CardTitle>
+              <CardDescription>Upload PDF, DOCX, or TXT files to your vault.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-text-primary mb-2">Category</label>
-                <Input
-                  value={fileFormData.category}
-                  onChange={(e) => setFileFormData({...fileFormData, category: e.target.value})}
-                  placeholder="Enter category (e.g., Presentations, Templates)"
-                  className="form-input"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-text-primary mb-2">Select PDF File</label>
+                <label className="block text-sm font-medium text-text-primary mb-2">Select File</label>
                 <input
                   type="file"
-                  accept=".pdf"
+                  accept=".pdf,.docx,.txt"
                   onChange={handleFileUpload}
                   className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                 />
-                <p className="text-xs text-gray-500 mt-1">PDF files only, max 10MB</p>
+                <p className="text-xs text-gray-500 mt-1">PDF, DOCX, and TXT files only, max 10MB</p>
               </div>
               <div className="flex justify-between">
                 <Button 
