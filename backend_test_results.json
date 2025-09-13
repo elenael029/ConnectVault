@@ -3,7 +3,7 @@
     "test": "Health Check",
     "success": true,
     "message": "Health check passed",
-    "timestamp": "2025-09-11T20:58:43.512278+00:00",
+    "timestamp": "2025-09-13T06:04:49.917630+00:00",
     "details": {
       "response": {
         "status": "ok"
@@ -12,93 +12,134 @@
     }
   },
   {
-    "test": "User Registration",
+    "test": "Existing User Login",
     "success": true,
-    "message": "User registered successfully",
-    "timestamp": "2025-09-11T20:58:43.815278+00:00",
+    "message": "Login successful with existing test user",
+    "timestamp": "2025-09-13T06:04:50.254825+00:00",
     "details": {
-      "response": {
-        "message": "Account created successfully. Please log in"
-      },
-      "status_code": 200
-    }
-  },
-  {
-    "test": "Duplicate Registration Prevention",
-    "success": true,
-    "message": "Correctly rejected duplicate registration",
-    "timestamp": "2025-09-11T20:58:43.874282+00:00",
-    "details": {
-      "response": {
-        "detail": "Username or email already exists"
-      },
-      "status_code": 400
-    }
-  },
-  {
-    "test": "User Login",
-    "success": true,
-    "message": "Login successful, JWT token received",
-    "timestamp": "2025-09-11T20:58:44.174237+00:00",
-    "details": {
+      "username": "frontendtest",
       "token_type": "bearer",
-      "token_length": 143,
+      "token_length": 133,
       "status_code": 200
     }
   },
   {
-    "test": "Invalid Login Prevention",
+    "test": "Dashboard Commission Summary",
     "success": true,
-    "message": "Correctly rejected invalid credentials",
-    "timestamp": "2025-09-11T20:58:44.466839+00:00",
+    "message": "Commission summary contains all required fields",
+    "timestamp": "2025-09-13T06:04:50.319826+00:00",
     "details": {
-      "response": {
-        "detail": "Invalid username or password"
+      "commission_summary": {
+        "total_paid": 0,
+        "total_unpaid": 0,
+        "total_pending": 0
       },
-      "status_code": 401
+      "status_code": 200
     }
   },
   {
-    "test": "Dashboard Summary",
+    "test": "Get Commissions Empty",
     "success": true,
-    "message": "Dashboard summary retrieved successfully",
-    "timestamp": "2025-09-11T20:58:44.529607+00:00",
+    "message": "Successfully retrieved commissions list (count: 0)",
+    "timestamp": "2025-09-13T06:04:50.458904+00:00",
     "details": {
-      "response": {
-        "total_contacts": 0,
-        "tasks_due_today": 0,
-        "active_promo_links": 0,
-        "commission_summary": {
-          "total_paid": 0,
-          "total_unpaid": 0
-        }
+      "commissions_count": 0,
+      "status_code": 200
+    }
+  },
+  {
+    "test": "Create Commission",
+    "success": true,
+    "message": "Commission created successfully with correct data",
+    "timestamp": "2025-09-13T06:04:50.534165+00:00",
+    "details": {
+      "commission_id": "d2283c65-9a10-41b5-a7f1-0f210e73bca1",
+      "program_name": "Amazon Associates",
+      "amount": 150.0,
+      "status": "pending",
+      "status_code": 200
+    }
+  },
+  {
+    "test": "Create Multiple Commissions",
+    "success": true,
+    "message": "Successfully created 2 commissions with different statuses",
+    "timestamp": "2025-09-13T06:04:50.650825+00:00",
+    "details": {
+      "created_count": 2,
+      "total_commissions": 3
+    }
+  },
+  {
+    "test": "Get Commissions With Data",
+    "success": true,
+    "message": "Successfully retrieved 3 commissions, all created commissions found",
+    "timestamp": "2025-09-13T06:04:50.704744+00:00",
+    "details": {
+      "commissions_count": 3,
+      "created_ids_found": 3,
+      "status_code": 200
+    }
+  },
+  {
+    "test": "Get Single Commission",
+    "success": true,
+    "message": "Successfully retrieved specific commission",
+    "timestamp": "2025-09-13T06:04:50.759679+00:00",
+    "details": {
+      "commission_id": "d2283c65-9a10-41b5-a7f1-0f210e73bca1",
+      "program_name": "Amazon Associates",
+      "amount": 150.0,
+      "status": "pending",
+      "status_code": 200
+    }
+  },
+  {
+    "test": "Update Commission",
+    "success": true,
+    "message": "Commission updated successfully",
+    "timestamp": "2025-09-13T06:04:50.818829+00:00",
+    "details": {
+      "commission_id": "d2283c65-9a10-41b5-a7f1-0f210e73bca1",
+      "updated_amount": 175.0,
+      "updated_status": "paid",
+      "updated_notes": "Updated commission - now paid",
+      "status_code": 200
+    }
+  },
+  {
+    "test": "Export Commissions CSV",
+    "success": true,
+    "message": "CSV export successful with 3 data rows",
+    "timestamp": "2025-09-13T06:04:50.869935+00:00",
+    "details": {
+      "csv_lines": 4,
+      "header": "Program Name,Amount,Status,Expected Date,Paid Date,Notes,Created At",
+      "status_code": 200
+    }
+  },
+  {
+    "test": "Commission Security",
+    "success": true,
+    "message": "Properly returns 404 for non-existent commission (user isolation working)",
+    "timestamp": "2025-09-13T06:04:50.925549+00:00",
+    "details": {
+      "fake_id": "non-existent-commission-id-12345",
+      "status_code": 404
+    }
+  },
+  {
+    "test": "Delete Commission",
+    "success": true,
+    "message": "Commission deleted successfully and verified",
+    "timestamp": "2025-09-13T06:04:51.031221+00:00",
+    "details": {
+      "deleted_commission_id": "441b1d70-cec7-4877-8f0a-c4966b4da71e",
+      "delete_response": {
+        "message": "Commission deleted successfully"
       },
-      "status_code": 200,
-      "fields_present": [
-        "total_contacts",
-        "tasks_due_today",
-        "active_promo_links",
-        "commission_summary"
-      ]
-    }
-  },
-  {
-    "test": "Dashboard Summary Without Token",
-    "success": false,
-    "message": "Should have failed with 401, got 403",
-    "timestamp": "2025-09-11T20:58:44.587719+00:00",
-    "details": {
-      "response": "{\"detail\":\"Not authenticated\"}",
-      "status_code": 403
-    }
-  },
-  {
-    "test": "Dashboard Summary With Invalid Token",
-    "success": true,
-    "message": "Correctly rejected request with invalid token",
-    "timestamp": "2025-09-11T20:58:44.642940+00:00",
-    "details": {
-      "status_code": 401
+      "verification_status": 404,
+      "status_code": 200
     }
   }
 ]
