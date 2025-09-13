@@ -2033,6 +2033,7 @@ const MarketingVault = () => {
   const [loading, setLoading] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showSystemeModal, setShowSystemeModal] = useState(false);
   const [editingSwipe, setEditingSwipe] = useState(null);
   const [uploadData, setUploadData] = useState({
     file: null,
