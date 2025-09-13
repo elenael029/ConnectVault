@@ -216,6 +216,21 @@ class SettingsUpdate(BaseModel):
     quick_access_links: Optional[Dict[str, str]] = None
     email_integration: Optional[Dict[str, str]] = None
 
+class FileRecord(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    name: str
+    category: str = "General"
+    size_bytes: int
+    mime_type: str
+    storage_path: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class FileUpdate(BaseModel):
+    name: Optional[str] = None
+    category: Optional[str] = None
+
 # Utility functions
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
