@@ -9,6 +9,20 @@ import { Badge } from './components/ui/badge';
 import { Textarea } from './components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
 import { 
+import { Tabs, TabContent, TabList, TabTrigger } from './components/ui/tabs';
+
+// Function to fetch updated summary counts
+export async function fetchSummary() {
+  try {
+    const response = await axios.get(`${API}/dashboard/summary`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching summary:", error);
+    return {};
+  }
+}
+
+
   Bell, 
   Users, 
   Calendar, 
@@ -320,17 +334,29 @@ const Layout = ({ children, title = "ConnectVault" }) => {
   ]);
 
   useEffect(() => {
-    fetchDashboardSummary();
+    fetchSummary();
   }, []);
+import { Tabs, TabContent, TabList, TabTrigger } from './components/ui/tabs';
 
-  const fetchDashboardSummary = async () => {
-    try {
-      const response = await axios.get(`${API}/dashboard/summary`);
-      setSummary(response.data);
-    } catch (error) {
-      console.error('Failed to fetch dashboard summary:', error);
-    }
-  };
+// Function to fetch updated summary counts
+export async function fetchSummary() {
+  try {
+    const response = await axios.get(`${API}/dashboard/summary`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching summary:", error);
+    return {};
+  }
+}
+
+  
+  
+    
+      
+    
+    
+    
+
 
   const markNotificationAsRead = (id) => {
     setNotifications(prev => 
