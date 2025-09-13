@@ -219,8 +219,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Frontend authentication flow"
-    - "Quick Access buttons new tab behavior"
+    - "Commissions API endpoints"
+    - "Commissions page and routing"
+    - "Dashboard Commission Summary card navigation"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
