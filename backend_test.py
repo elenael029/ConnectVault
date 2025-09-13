@@ -11,7 +11,7 @@ import os
 from datetime import datetime, timezone
 
 # Load environment variables
-BACKEND_URL = "https://marketvault-app.preview.emergentagent.com/api"
+BACKEND_URL = "https://connectvault-crm.preview.emergentagent.com/api"
 
 class BackendAuthTester:
     def __init__(self):
