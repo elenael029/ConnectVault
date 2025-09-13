@@ -341,7 +341,7 @@ import { Tabs, TabContent, TabList, TabTrigger } from './components/ui/tabs';
 // Function to fetch updated summary counts
 export async function fetchSummary() {
   try {
-    const response = await axios.get(`${API}/dashboard/summary`);
+    const response = await axios.get(`${API}summary`);
     return response.data;
   } catch (error) {
     console.error("Error fetching summary:", error);
