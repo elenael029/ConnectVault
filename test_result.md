@@ -157,6 +157,30 @@ frontend:
         agent: "testing"
         comment: "✅ COMPREHENSIVE AUTHENTICATION TESTING COMPLETED SUCCESSFULLY! All core authentication flows working perfectly: 1) Login with valid credentials (frontendtest/Test123!) successfully redirects to dashboard, 2) JWT token properly stored in localStorage, 3) Dashboard content loads correctly with ConnectVault branding, 4) User state persists on page refresh, 5) Logout functionality works and clears token, 6) Protected routes correctly redirect to login when not authenticated, 7) All protected routes (/contacts, /tasks, /promo-links, /settings) accessible when logged in, 8) Browser navigation (back/forward) works correctly, 9) Token validation with backend API successful (200 OK). The authentication fix using React Router navigate() instead of window.location.href is working perfectly. Minor: Settings page has Upload component error but doesn't affect authentication flow."
 
+  - task: "Commissions page and routing"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Created comprehensive Commissions component with Excel-like grid interface. Features: Add/Edit forms with Program Name, Amount, Status dropdown (Pending/Paid/Unpaid), Expected Date and Paid Date pickers, Notes textarea, Promo Link ID field. Summary cards showing totals by status. Table view with sortable columns, edit/delete actions. Export CSV functionality. Added /commissions route to React Router. Fixed Dashboard Commission Summary card to navigate to /commissions. Needs testing."
+
+  - task: "Dashboard Commission Summary card navigation"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Dashboard Commission Summary card was already set to navigate to /commissions but route didn't exist. Now /commissions route is implemented and should work. Card shows Paid/Unpaid/Pending totals from backend API. Needs testing to verify navigation and data display."
+
   - task: "ConnectVault logo display"
     implemented: true
     working: true
