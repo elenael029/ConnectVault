@@ -2818,6 +2818,40 @@ const MarketingVault = () => {
           </Card>
         </div>
       )}
+
+      {/* Systeme.io Modal */}
+      {showSystemeModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md premium-card">
+            <CardHeader>
+              <CardTitle className="text-primary-navy">Systeme.io Email</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-gray-600">
+                Sending via Systeme.io is managed in your Systeme.io account. Click 'Open Systeme.io' to send.
+              </p>
+              <div className="flex justify-between">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowSystemeModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => {
+                    window.open('https://systeme.io', '_blank');
+                    setShowSystemeModal(false);
+                  }}
+                  className="btn-primary-navy"
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Open Systeme.io
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </Layout>
   );
 };
