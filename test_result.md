@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Fix the critical authentication issue where users are redirected to login page despite successful backend API calls. Ensure ConnectVault logo displays correctly on login screen and dashboard header. Maintain cream/navy/gold theme consistency. Make sure ConnectVault name shows only once. Quick Access buttons should open in new tabs."
+user_problem_statement: "Implement a comprehensive Commissions module for ConnectVault CRM. Fix Dashboard Commission Summary card routing to /commissions. Create full Commissions page with table including Program Name, Amount, Status (Paid, Pending, Unpaid), Date with calendar picker. Add ability to manually add/edit commission entries (grid-like, similar to Excel). Keep existing features intact (Contacts, Promo Links, Marketing Vault, Settings)."
 
 backend:
   - task: "Authentication API endpoints"
