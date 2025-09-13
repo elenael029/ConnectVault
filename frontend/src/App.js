@@ -2349,16 +2349,13 @@ const MarketingVault = () => {
     setEditingSwipe(null);
   };
 
-  const handleDeleteSwipe = (swipe) => {
-    if (window.confirm(`Delete "${swipe.title}"? This cannot be undone.`)) {
-      const updatedContent = allContent.filter(item => item.id !== swipe.id);
-      setAllContent(updatedContent);
-      localStorage.setItem('marketing-vault', JSON.stringify(updatedContent));
-
-      toast({
-        title: "Deleted",
-        description: "Swipe deleted successfully",
-      });
+  const handleUseInEmail = () => {
+    const emailProvider = localStorage.getItem('email-provider') || 'brevo';
+    if (emailProvider === 'systeme') {
+      setShowSystemeModal(true);
+    } else {
+      // Navigate to email page for Brevo
+      navigate('/email');
     }
   };
 
