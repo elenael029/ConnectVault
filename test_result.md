@@ -239,6 +239,10 @@ test_plan:
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
+  completed_backend_tests:
+    - "Authentication API endpoints"
+    - "Commissions API endpoints" 
+    - "Files API endpoints for PDF management"
 
 agent_communication:
   - agent: "main"
