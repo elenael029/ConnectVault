@@ -685,6 +685,164 @@ async def export_commissions_csv(current_user: User = Depends(get_current_user))
     
     return {"csv_data": csv_data}
 
+# File management endpoints
+UPLOAD_DIR = ROOT_DIR / "uploads"
+UPLOAD_DIR.mkdir(exist_ok=True)
+
+@api_router.post("/files", response_model=FileRecord)
+async def upload_file(
+    file: UploadFile = File(...),
+    category: str = "General",
+    current_user: User = Depends(get_current_user)
+):
+    """Upload a PDF file"""
+    # Validate file type
+    if file.content_type != "application/pdf":
+        raise HTTPException(
+            status_code=400,
+            detail="Only PDF files are allowed"
+        )
+    
+    # Check file size (10MB max)
+    file_content = await file.read()
+    if len(file_content) > 10 * 1024 * 1024:  # 10MB
+        raise HTTPException(
+            status_code=400,
+            detail="File size must be less than 10MB"
+        )
+    
+    # Sanitize filename
+    safe_filename = "".join(c for c in file.filename if c.isalnum() or c in "._-").strip()
+    if not safe_filename:
+        safe_filename = f"file_{int(datetime.now(timezone.utc).timestamp())}.pdf"
+    
+    # Create unique filename
+    file_id = str(uuid.uuid4())
+    storage_filename = f"{file_id}_{safe_filename}"
+    storage_path = UPLOAD_DIR / storage_filename
+    
+    # Save file
+    async with aiofiles.open(storage_path, 'wb') as f:
+        await f.write(file_content)
+    
+    # Create file record
+    file_record = FileRecord(
+        user_id=current_user.id,
+        name=file.filename,
+        category=category,
+        size_bytes=len(file_content),
+        mime_type=file.content_type,
+        storage_path=str(storage_path)
+    )
+    
+    # Save to database
+    await db.files.insert_one(file_record.dict())
+    
+    return file_record
+
+@api_router.get("/files", response_model=List[FileRecord])
+async def get_files(
+    search: Optional[str] = None,
+    category: Optional[str] = None,
+    page: int = 1,
+    limit: int = 10,
+    current_user: User = Depends(get_current_user)
+):
+    """Get files for current user with search and filter"""
+    query = {"user_id": current_user.id}
+    
+    # Add search filter
+    if search:
+        query["name"] = {"$regex": search, "$options": "i"}
+    
+    # Add category filter
+    if category:
+        query["category"] = category
+    
+    # Calculate skip for pagination
+    skip = (page - 1) * limit
+    
+    # Get files
+    files = await db.files.find(query).skip(skip).limit(limit).sort("created_at", -1).to_list(length=None)
+    
+    return [FileRecord(**file) for file in files]
+
+@api_router.get("/files/{file_id}/download")
+async def download_file(
+    file_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Download a file"""
+    # Find file record
+    file_record = await db.files.find_one({"id": file_id, "user_id": current_user.id})
+    if not file_record:
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    # Check if file exists on disk
+    storage_path = Path(file_record["storage_path"])
+    if not storage_path.exists():
+        raise HTTPException(status_code=404, detail="File not found on disk")
+    
+    return FileResponse(
+        path=storage_path,
+        filename=file_record["name"],
+        media_type=file_record["mime_type"]
+    )
+
+@api_router.patch("/files/{file_id}", response_model=FileRecord)
+async def update_file(
+    file_id: str,
+    update_data: FileUpdate,
+    current_user: User = Depends(get_current_user)
+):
+    """Update file metadata (rename, change category)"""
+    # Check if file exists and belongs to user
+    existing = await db.files.find_one({"id": file_id, "user_id": current_user.id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    # Update only provided fields
+    update_dict = {k: v for k, v in update_data.dict().items() if v is not None}
+    update_dict["updated_at"] = datetime.now(timezone.utc)
+    
+    await db.files.update_one(
+        {"id": file_id, "user_id": current_user.id},
+        {"$set": update_dict}
+    )
+    
+    # Return updated file
+    updated = await db.files.find_one({"id": file_id, "user_id": current_user.id})
+    return FileRecord(**updated)
+
+@api_router.delete("/files/{file_id}")
+async def delete_file(
+    file_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Delete a file"""
+    # Find file record
+    file_record = await db.files.find_one({"id": file_id, "user_id": current_user.id})
+    if not file_record:
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    # Delete file from disk
+    storage_path = Path(file_record["storage_path"])
+    if storage_path.exists():
+        storage_path.unlink()
+    
+    # Delete from database
+    result = await db.files.delete_one({"id": file_id, "user_id": current_user.id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    return {"message": "File deleted successfully"}
+
+@api_router.get("/files/categories")
+async def get_file_categories(current_user: User = Depends(get_current_user)):
+    """Get all categories used by user"""
+    categories = await db.files.distinct("category", {"user_id": current_user.id})
+    return {"categories": categories}
+
 # Health check
 @api_router.get("/health")
 async def health_check():
