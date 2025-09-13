@@ -1132,32 +1132,111 @@ const Settings = () => {
         </div>
       </div>
 
-      <Card className="premium-card">
-        <CardHeader>
-          <CardTitle className="text-primary-navy">Email Integration (Brevo)</CardTitle>
-          <CardDescription>Configure your Brevo API key for email marketing</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-text-primary mb-2">
-              Brevo API Key
-            </label>
-            <Input
-              type="password"
-              value={brevoApiKey}
-              onChange={(e) => setBrevoApiKey(e.target.value)}
-              placeholder="Enter your Brevo API key"
-              className="form-input"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Get your API key from your Brevo dashboard under API & Integration section
-            </p>
-          </div>
-          <Button onClick={handleSave} className="btn-primary-navy" disabled={loading}>
-            {loading ? 'Saving...' : 'Save API Key'}
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="space-y-6">
+        {/* Email Provider Selection */}
+        <Card className="premium-card">
+          <CardHeader>
+            <CardTitle className="text-primary-navy">Default Email Provider</CardTitle>
+            <CardDescription>Choose your preferred email service provider</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="emailProvider"
+                  value="brevo"
+                  checked={emailProvider === 'brevo'}
+                  onChange={(e) => handleProviderChange(e.target.value)}
+                  className="form-radio"
+                />
+                <span>Brevo (default)</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="emailProvider"
+                  value="systeme"
+                  checked={emailProvider === 'systeme'}
+                  onChange={(e) => handleProviderChange(e.target.value)}
+                  className="form-radio"
+                />
+                <span>Systeme.io</span>
+              </label>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Brevo Configuration */}
+        {emailProvider === 'brevo' && (
+          <Card className="premium-card">
+            <CardHeader>
+              <CardTitle className="text-primary-navy">Email Integration (Brevo)</CardTitle>
+              <CardDescription>Configure your Brevo API key for email marketing</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">
+                  Brevo API Key
+                </label>
+                <Input
+                  type="password"
+                  value={brevoApiKey}
+                  onChange={(e) => setBrevoApiKey(e.target.value)}
+                  placeholder="Enter your Brevo API key"
+                  className="form-input"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Get your API key from your Brevo dashboard under API & Integration section
+                </p>
+              </div>
+              <Button onClick={handleBrevoSave} className="btn-primary-navy" disabled={loading}>
+                {loading ? 'Saving...' : 'Save API Key'}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Systeme.io Configuration */}
+        {emailProvider === 'systeme' && (
+          <Card className="premium-card">
+            <CardHeader>
+              <CardTitle className="text-primary-navy">Email Integration (Systeme.io)</CardTitle>
+              <CardDescription>Configure your Systeme.io API key</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">
+                  Systeme.io API Key
+                </label>
+                <Input
+                  type="password"
+                  value={systemeApiKey}
+                  onChange={(e) => setSystemeApiKey(e.target.value)}
+                  placeholder="Enter your Systeme.io API key"
+                  className="form-input"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Get your API key from your Systeme.io account settings
+                </p>
+              </div>
+              <div className="flex space-x-4">
+                <Button onClick={handleSystemeSave} className="btn-primary-navy">
+                  Save API Key {savedSysteme && '✓'}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => window.open('https://systeme.io', '_blank')}
+                  className="btn-outline-navy"
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Open Systeme.io
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </Layout>
   );
 };
