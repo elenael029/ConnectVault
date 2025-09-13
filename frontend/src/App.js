@@ -2080,9 +2080,8 @@ const MarketingVault = () => {
   useEffect(() => {
     if (activeTab === 'files') {
       loadFiles();
-      loadCategories();
     }
-  }, [activeTab, searchQuery, selectedCategory]);
+  }, [activeTab]);
 
   const loadMarketingVault = async () => {
     try {
