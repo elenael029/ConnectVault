@@ -2028,7 +2028,19 @@ class BackendTester:
             self.test_update_commission,
             self.test_export_commissions_csv,
             self.test_commission_security_user_isolation,
-            self.test_delete_commission
+            self.test_delete_commission,
+            # Files API tests
+            self.test_upload_pdf_file,
+            self.test_file_type_validation,
+            self.test_file_size_validation,
+            self.test_get_files_list,
+            self.test_search_files,
+            self.test_filter_files_by_category,
+            self.test_download_file,
+            self.test_update_file_metadata,
+            self.test_get_file_categories,
+            self.test_file_user_isolation,
+            self.test_delete_file
         ]
         
         passed = 0
@@ -2053,7 +2065,7 @@ class BackendTester:
         print(f"📊 Total: {passed + failed}")
         
         if failed == 0:
-            print("🎉 All tests passed! Commission module backend is working correctly.")
+            print("🎉 All tests passed! Commission module and Files API backend are working correctly.")
         else:
             print("⚠️  Some tests failed. Please review the issues above.")
         
