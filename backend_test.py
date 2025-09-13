@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """
 ConnectVault CRM Backend Comprehensive Testing
-Tests authentication endpoints and Commission module CRUD operations
+Tests authentication endpoints, Commission module CRUD operations, and Files API endpoints
 """
 
 import requests
 import json
 import time
 import os
+import io
 from datetime import datetime, timezone
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
 
 # Load environment variables
 BACKEND_URL = "https://connectvault-crm.preview.emergentagent.com/api"
