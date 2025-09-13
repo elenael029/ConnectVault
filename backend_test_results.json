@@ -3,7 +3,7 @@
     "test": "Health Check",
     "success": true,
     "message": "Health check passed",
-    "timestamp": "2025-09-13T07:25:06.992428+00:00",
+    "timestamp": "2025-09-13T07:25:52.511467+00:00",
     "details": {
       "response": {
         "status": "ok"
@@ -15,7 +15,7 @@
     "test": "Existing User Login",
     "success": true,
     "message": "Login successful with existing test user",
-    "timestamp": "2025-09-13T07:25:07.277692+00:00",
+    "timestamp": "2025-09-13T07:25:52.800939+00:00",
     "details": {
       "username": "frontendtest",
       "token_type": "bearer",
@@ -27,11 +27,11 @@
     "test": "Dashboard Commission Summary",
     "success": true,
     "message": "Commission summary contains all required fields",
-    "timestamp": "2025-09-13T07:25:07.341899+00:00",
+    "timestamp": "2025-09-13T07:25:52.861648+00:00",
     "details": {
       "commission_summary": {
         "_id": null,
-        "total_paid": 425.5,
+        "total_paid": 851.0,
         "total_unpaid": 0,
         "total_pending": 0
       },
@@ -41,10 +41,10 @@
   {
     "test": "Get Commissions Empty",
     "success": true,
-    "message": "Successfully retrieved commissions list (count: 2)",
-    "timestamp": "2025-09-13T07:25:07.399677+00:00",
+    "message": "Successfully retrieved commissions list (count: 4)",
+    "timestamp": "2025-09-13T07:25:52.921981+00:00",
     "details": {
-      "commissions_count": 2,
+      "commissions_count": 4,
       "status_code": 200
     }
   },
@@ -52,9 +52,9 @@
     "test": "Create Commission",
     "success": true,
     "message": "Commission created successfully with correct data",
-    "timestamp": "2025-09-13T07:25:07.452088+00:00",
+    "timestamp": "2025-09-13T07:25:52.972620+00:00",
     "details": {
-      "commission_id": "8332a72d-3d7d-43b4-9cee-aaeb67fbc00d",
+      "commission_id": "cbbe3b84-c22b-404f-b65a-cd1106a882f5",
       "program_name": "Amazon Associates",
       "amount": 150.0,
       "status": "pending",
@@ -65,7 +65,7 @@
     "test": "Create Multiple Commissions",
     "success": true,
     "message": "Successfully created 2 commissions with different statuses",
-    "timestamp": "2025-09-13T07:25:07.564493+00:00",
+    "timestamp": "2025-09-13T07:25:53.088158+00:00",
     "details": {
       "created_count": 2,
       "total_commissions": 3
@@ -74,10 +74,10 @@
   {
     "test": "Get Commissions With Data",
     "success": true,
-    "message": "Successfully retrieved 5 commissions, all created commissions found",
-    "timestamp": "2025-09-13T07:25:07.619276+00:00",
+    "message": "Successfully retrieved 7 commissions, all created commissions found",
+    "timestamp": "2025-09-13T07:25:53.143636+00:00",
     "details": {
-      "commissions_count": 5,
+      "commissions_count": 7,
       "created_ids_found": 3,
       "status_code": 200
     }
@@ -86,9 +86,9 @@
     "test": "Get Single Commission",
     "success": true,
     "message": "Successfully retrieved specific commission",
-    "timestamp": "2025-09-13T07:25:07.671093+00:00",
+    "timestamp": "2025-09-13T07:25:53.201869+00:00",
     "details": {
-      "commission_id": "8332a72d-3d7d-43b4-9cee-aaeb67fbc00d",
+      "commission_id": "cbbe3b84-c22b-404f-b65a-cd1106a882f5",
       "program_name": "Amazon Associates",
       "amount": 150.0,
       "status": "pending",
@@ -99,9 +99,9 @@
     "test": "Update Commission",
     "success": true,
     "message": "Commission updated successfully",
-    "timestamp": "2025-09-13T07:25:07.727427+00:00",
+    "timestamp": "2025-09-13T07:25:53.262241+00:00",
     "details": {
-      "commission_id": "8332a72d-3d7d-43b4-9cee-aaeb67fbc00d",
+      "commission_id": "cbbe3b84-c22b-404f-b65a-cd1106a882f5",
       "updated_amount": 175.0,
       "updated_status": "paid",
       "updated_notes": "Updated commission - now paid",
@@ -111,10 +111,10 @@
   {
     "test": "Export Commissions CSV",
     "success": true,
-    "message": "CSV export successful with 5 data rows",
-    "timestamp": "2025-09-13T07:25:07.780856+00:00",
+    "message": "CSV export successful with 7 data rows",
+    "timestamp": "2025-09-13T07:25:53.316527+00:00",
     "details": {
-      "csv_lines": 6,
+      "csv_lines": 8,
       "header": "Program Name,Amount,Status,Expected Date,Paid Date,Notes,Created At",
       "status_code": 200
     }
@@ -123,7 +123,7 @@
     "test": "Commission Security",
     "success": true,
     "message": "Properly returns 404 for non-existent commission (user isolation working)",
-    "timestamp": "2025-09-13T07:25:07.838333+00:00",
+    "timestamp": "2025-09-13T07:25:53.374269+00:00",
     "details": {
       "fake_id": "non-existent-commission-id-12345",
       "status_code": 404
@@ -133,9 +133,9 @@
     "test": "Delete Commission",
     "success": true,
     "message": "Commission deleted successfully and verified",
-    "timestamp": "2025-09-13T07:25:07.945733+00:00",
+    "timestamp": "2025-09-13T07:25:53.481073+00:00",
     "details": {
-      "deleted_commission_id": "c0be85a7-da57-4e38-9aec-8618aaac8c05",
+      "deleted_commission_id": "9ecd270d-8034-47fc-873a-df14cf49378d",
       "delete_response": {
         "message": "Commission deleted successfully"
       },
@@ -145,22 +145,15 @@
   },
   {
     "test": "Upload PDF File",
-    "success": false,
-    "message": "File metadata doesn't match expected values",
-    "timestamp": "2025-09-13T07:25:08.095073+00:00",
+    "success": true,
+    "message": "PDF file uploaded successfully with correct metadata",
+    "timestamp": "2025-09-13T07:25:53.539789+00:00",
     "details": {
-      "expected_name": "ConnectVault_Test_Document.pdf",
-      "received": {
-        "id": "af0b38ca-8612-4603-a57c-21db0df35952",
-        "user_id": "9c941da1-d49d-46d3-a6d1-fb2067ea6cb2",
-        "name": "ConnectVault_Test_Document.pdf",
-        "category": "General",
-        "size_bytes": 1482,
-        "mime_type": "application/pdf",
-        "storage_path": "/app/backend/uploads/c869ea45-f575-43e4-8475-dde5d3754d76_ConnectVault_Test_Document.pdf",
-        "created_at": "2025-09-13T07:25:08.004873Z",
-        "updated_at": "2025-09-13T07:25:08.004877Z"
-      },
+      "file_id": "0d813147-7cf4-41e7-8bdb-4e1eb4abcbf2",
+      "filename": "ConnectVault_Test_Document.pdf",
+      "category": "Marketing Materials",
+      "size_bytes": 1482,
+      "mime_type": "application/pdf",
       "status_code": 200
     }
   },
@@ -168,7 +161,7 @@
     "test": "File Type Validation",
     "success": true,
     "message": "Non-PDF file correctly rejected with 400 status",
-    "timestamp": "2025-09-13T07:25:08.148774+00:00",
+    "timestamp": "2025-09-13T07:25:53.592061+00:00",
     "details": {
       "error_message": "Only PDF files are allowed",
       "status_code": 400
@@ -178,7 +171,7 @@
     "test": "File Size Validation",
     "success": true,
     "message": "Large file correctly rejected with size limit error",
-    "timestamp": "2025-09-13T07:25:08.279772+00:00",
+    "timestamp": "2025-09-13T07:25:53.722964+00:00",
     "details": {
       "error_message": "File size must be less than 10MB",
       "file_size_mb": 11.00000286102295,
@@ -189,7 +182,7 @@
     "test": "Get Files List",
     "success": true,
     "message": "Successfully retrieved 1 files, all created files found",
-    "timestamp": "2025-09-13T07:25:08.340645+00:00",
+    "timestamp": "2025-09-13T07:25:53.779949+00:00",
     "details": {
       "files_count": 1,
       "created_ids_found": 1,
@@ -200,7 +193,7 @@
     "test": "Search Files",
     "success": true,
     "message": "Search returned 1 files matching 'ConnectVault'",
-    "timestamp": "2025-09-13T07:25:08.394193+00:00",
+    "timestamp": "2025-09-13T07:25:53.837298+00:00",
     "details": {
       "search_term": "ConnectVault",
       "total_results": 1,
@@ -210,12 +203,12 @@
   },
   {
     "test": "Filter Files by Category",
-    "success": false,
-    "message": "No files found for category 'Marketing Materials' (expected at least 1)",
-    "timestamp": "2025-09-13T07:25:08.447838+00:00",
+    "success": true,
+    "message": "Category filter returned 1 files, all with correct category",
+    "timestamp": "2025-09-13T07:25:53.893521+00:00",
     "details": {
       "category": "Marketing Materials",
-      "files_count": 0,
+      "files_count": 1,
       "status_code": 200
     }
   },
@@ -223,9 +216,9 @@
     "test": "Download File",
     "success": true,
     "message": "File downloaded successfully with correct PDF content",
-    "timestamp": "2025-09-13T07:25:08.501053+00:00",
+    "timestamp": "2025-09-13T07:25:53.949209+00:00",
     "details": {
-      "file_id": "af0b38ca-8612-4603-a57c-21db0df35952",
+      "file_id": "0d813147-7cf4-41e7-8bdb-4e1eb4abcbf2",
       "content_type": "application/pdf",
       "content_size": 1482,
       "status_code": 200
@@ -235,9 +228,9 @@
     "test": "Update File Metadata",
     "success": true,
     "message": "File metadata updated successfully",
-    "timestamp": "2025-09-13T07:25:08.558470+00:00",
+    "timestamp": "2025-09-13T07:25:54.009812+00:00",
     "details": {
-      "file_id": "af0b38ca-8612-4603-a57c-21db0df35952",
+      "file_id": "0d813147-7cf4-41e7-8bdb-4e1eb4abcbf2",
       "updated_name": "Updated_ConnectVault_Document.pdf",
       "updated_category": "Updated Category",
       "status_code": 200
@@ -247,7 +240,7 @@
     "test": "Get File Categories",
     "success": true,
     "message": "Categories retrieved successfully, found 1 total categories",
-    "timestamp": "2025-09-13T07:25:08.618079+00:00",
+    "timestamp": "2025-09-13T07:25:54.062944+00:00",
     "details": {
       "total_categories": 1,
       "categories": [
@@ -261,7 +254,7 @@
     "test": "File User Isolation",
     "success": true,
     "message": "Properly returns 404 for non-existent file (user isolation working)",
-    "timestamp": "2025-09-13T07:25:08.679300+00:00",
+    "timestamp": "2025-09-13T07:25:54.116587+00:00",
     "details": {
       "fake_id": "non-existent-file-id-12345",
       "status_code": 404
@@ -271,9 +264,9 @@
     "test": "Delete File",
     "success": true,
     "message": "File deleted successfully and verified",
-    "timestamp": "2025-09-13T07:25:08.790370+00:00",
+    "timestamp": "2025-09-13T07:25:54.222404+00:00",
     "details": {
-      "deleted_file_id": "af0b38ca-8612-4603-a57c-21db0df35952",
+      "deleted_file_id": "0d813147-7cf4-41e7-8bdb-4e1eb4abcbf2",
       "delete_response": {
         "message": "File deleted successfully"
       },
