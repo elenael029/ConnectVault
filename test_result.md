@@ -222,7 +222,6 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Commissions API endpoints"
     - "Commissions page and routing"
     - "Dashboard Commission Summary card navigation"
   stuck_tasks: []
